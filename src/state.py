@@ -2,7 +2,6 @@ from typing import Any, Optional, Literal
 from typing_extensions import Annotated
 from langgraph.graph import add_messages
 from langchain_core.messages import BaseMessage
-from langchain_openai import ChatOpenAI
 from pydantic import BaseModel, Field
 
 
@@ -83,28 +82,16 @@ class ClarifyState(BaseModel):
     """Graph state for clarify/execute agent with simulated user."""
 
     # 对话历史：真实/模拟用户 + agent 的所有对话
-    messages: Annotated[list[BaseMessage], add_messages] = Field(
-        default_factory=list,
-        description="当前为止的所有对话消息（用户、助手、工具等）",
-    )
+    messages: Annotated[list[BaseMessage], add_messages] = Field(default_factory=list)
 
     # router 决定的下一步决策
-    next_decision: Optional[DecisionType] = Field(
-        default=None,
-        description='顶层决策，只能是 "clarify" / "execute" 之一',
-    )
+    next_decision: Optional[DecisionType] = Field(default=None,)
 
-    # 如果 next_decision == "execute"，这里是 1~40 的编号
-    action_id: Optional[int] = Field(
-        default=None,
-        description="当 next_decision 为 execute 时，指定要执行的 1~40 中的一个动作 ID",
-    )
+    # 如果 next_decision == "execute"，这里是 1~40 的编号；否则就是null
+    action_id: Optional[int] = Field(default=None)
 
     # 外部环境信息（sample 里的 env），现在用不用都行，先留着
-    env: dict[str, Any] = Field(
-        default_factory=dict,
-        description="来自 sample 的环境信息，如房间里有哪些物品",
-    )
+    env: dict[str, Any] = Field(default_factory=dict)
 
     # 用户反馈（之后做 reflection 可以用，现在先不用）
     user_feedback: Optional[str] = Field(
@@ -124,14 +111,21 @@ class ClarifyState(BaseModel):
         description="用户最初的模糊请求文本",
     )
 
-    # 步数控制（防止死循环）
+    # 使用的 prompt 语言（ja / zh）
+    lang: str = Field(
+        default="zh",
+        description="当前对话使用的提示语言，例如 'ja' 或 'zh'",
+    )
+
+    # 步数
     step: int = Field(
         default=0,
         description="当前执行的 step 计数（从 0 开始）",
     )
 
+    # 最大步数
     max_steps: int = Field(
-        default=20,
+        default=1000,
         description="最大允许的 step 数，超过后应强制结束或执行",
     )
 

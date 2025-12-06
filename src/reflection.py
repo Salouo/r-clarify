@@ -12,15 +12,20 @@ from .utils import (
     format_single_trial_episode,
     format_multi_trial_episode,
 )
+from .prompts import reflection_system_prompt
 
 # 专门给 reflection 用的 LLM（和 router/clarify 用的可以是同一个模型）
-reflection_llm = ChatOpenAI(model="gpt-5.1")
+reflection_llm = ChatOpenAI(model="gpt-5-nano")
 
 
-def run_one_trial(sample: dict, reflections: Optional[str] = None) -> dict:
+def run_one_trial(
+    sample: dict,
+    reflections: Optional[str] = None,
+    lang: str = "zh",
+) -> dict:
     """在一个 sample 上跑一条完整的决策轨迹（一个 trial）"""
 
-    # 构建 system prompt：用户场景 + 可选反思
+    # 构建 system prompt：用户场景 + 可选反思；没有给下一轮的模型关于之前轮次的对话信息，仅仅提供反思内容。
     system_prompt = make_system_prompt_from_one_sample(sample)
     if reflections:
         system_prompt += "\n\n【過去の試行の振り返り】\n"
@@ -35,6 +40,7 @@ def run_one_trial(sample: dict, reflections: Optional[str] = None) -> dict:
         user_feedback=None,
         label_action_id=action_to_id[sample["reflective_action"]],
         original_utterance=sample["utterance"],
+        lang=lang,
     )
 
     # 跑一条轨迹
@@ -46,6 +52,7 @@ def update_reflections(
     prev_reflections: Optional[str],
     sample: dict,
     final_state: dict,
+    lang: str = "zh",
 ) -> str:
     """
     基于当前这个 trial 的 episode，总结「下次应该怎么做得更好」，
@@ -57,16 +64,7 @@ def update_reflections(
     # 当前 trial 的内部轨迹（只这一条）
     episode_text = format_single_trial_episode(final_state)
 
-    system_msg = SystemMessage(
-        content=(
-            "你是一个反思型的元认知助理。"
-            "你会阅读一轮机器人和用户的完整交互记录（episode），"
-            "总结出：这次决策中做得好的地方、犯的错误、以及下一次在相似情境下"
-            "应该遵守的 3~5 条简明『反思要点』。\n\n"
-            "输出要求：只输出这些『反思要点』，用日文或中文都可以，"
-            "但不要复述完整对话。"
-        )
-    )
+    system_msg = SystemMessage(content=reflection_system_prompt(lang))
 
     messages: List[Any] = [system_msg]
 
@@ -101,6 +99,7 @@ def run_trials_for_one_sample(
     sample: dict,
     max_trials: int = 3,
     use_reflection: bool = True,
+    lang: str = "zh",
 ) -> List[dict]:
     """
     在同一个 sample 上连续跑多条 trial。
@@ -126,7 +125,7 @@ def run_trials_for_one_sample(
         reflections_before = reflections
 
         # 跑一条 trial
-        final_state = run_one_trial(sample, reflections)
+        final_state = run_one_trial(sample, reflections, lang=lang)
         all_states.append(final_state)
 
         pred_action_id = final_state.get("action_id")
@@ -138,7 +137,7 @@ def run_trials_for_one_sample(
         # 这一轮结束后的 reflection（命中后就不反思）
         reflections_after: Optional[str] = None
         if use_reflection and not hit_target:
-            reflections_after = update_reflections(reflections, sample, final_state)
+            reflections_after = update_reflections(reflections, sample, final_state, lang=lang)
             reflections = reflections_after  # 用新的反思喂下一轮 trial
 
         # 把这一轮的信息记录下来，后面拼到「一个大的 episode」里

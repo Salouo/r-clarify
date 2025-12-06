@@ -1,15 +1,15 @@
 from dotenv import load_dotenv
-
 from langgraph.graph import StateGraph, END
 from langchain_core.messages import SystemMessage, AIMessage, HumanMessage
 from langchain_openai import ChatOpenAI
 
-from .state import ClarifyState, DecisionType, id_to_action, RouterOutput, RouterStep
+from .state import ClarifyState, id_to_action, RouterOutput, RouterStep
+from .prompts import router_system_prompt
 
 load_dotenv(".env", override=True)
 
 # Main agent (router / clarify / user_sim / execute)
-llm = ChatOpenAI(model="gpt-5.1")
+llm = ChatOpenAI(model="gpt-5-nano")
 
 # User simulator
 user_llm = ChatOpenAI(model="gpt-5.1")
@@ -38,78 +38,7 @@ def router(state: ClarifyState) -> ClarifyState:
             )]
         }
 
-    system_prompt = """
-    你是一个家庭 Agent ，能够基于用户的情况执行反思性行动，即使用户的指令不清楚也没关系。
-    反思性行动是指能够满足用户潜在需求而非明确要求的有益行为。
-    在下面40个可用行动中，恰好有一个反思性行动能够满足用户的潜在意图。请仔细考虑。
-
-    重要提示：你对最佳行动的判断可能与用户真正想要的不一致。在做决定前请仔细思考。
-    例如：如果用户饿了，他们可能需要零食，但实际上他们可能更想要饮料。你必须通过澄清来发现他们的真实意图，做出正确决定。
-
-    【過去の試行の振り返り】
-    - 在对话历史中，你可能会看到一段以「【過去の試行の振り返り】」开头的文本。
-    - 那是你在相似情境下多次尝试后的总结，里面包含了你今后应该遵守的经验/教训。
-    - 你在做 thought 和决策时，必须参考并尽量遵守这些反思要点。
-
-    你的目标是用最少的步数发现用户的潜在意图，然后执行那个反思性行动。
-
-    你有2个选项可以选择：
-
-    1. "clarify"（提出澄清问题）：
-    - 当你认为当前信息不足以确定应该执行哪个行动，直接执行可能出错时，提出1个澄清问题。
-    - 如果用户回答"我不知道怎么回答"，意味着你的问题没有帮助或帮助很小以至于无法揭示他们的意图。
-    - 你可以直接询问用户是否需要这个反思性行动。
-
-    2. "execute"（执行1-40中的一个特定行动）：
-
-    [1]バナナを持ってくる
-    [2]充電ケーブルを持ってくる
-    [3]コップを持ってくる
-    [4]ケチャップを持ってくる
-    [5]宅配便を持ってくる
-    [6]ペットボトルを持ってくる
-    [7]リモコンを持ってくる
-    [8]スマホを持ってくる
-    [9]お菓子を持ってくる
-    [10]ティッシュ箱を持ってくる
-    [11]充電ケーブルを片付ける
-    [12]コップを片付ける
-    [13]ケチャップを片付ける
-    [14]ミニカーを片付ける
-    [15]ペットボトルを片付ける
-    [16]リモコンを片付ける
-    [17]スマホを片付ける
-    [18]お菓子を片付ける
-    [19]ティッシュ箱を片付ける
-    [20]ゴミをゴミ箱に入れる
-    [21]缶切りを持ってくる
-    [22]クッキングシートを持ってくる
-    [23]グラスを持ってくる
-    [24]おろし器を持ってくる
-    [25]キッチンペーパーを持ってくる
-    [26]レモンを持ってくる
-    [27]オリーブオイルを持ってくる
-    [28]じゃがいもを持ってくる
-    [29]サランラップを持ってくる
-    [30]水筒を持ってくる
-    [31]缶切りを棚にしまう
-    [32]クッキングシートを棚にしまう
-    [33]グラスを棚にしまう
-    [34]おろし器を棚にしまう
-    [35]キッチンペーパーを棚にしまう
-    [36]ペットボトルを冷蔵庫にしまう
-    [37]サランラップを棚にしまう
-    [38]タッパーをレンジに入れる
-    [39]タッパーを冷蔵庫にしまう
-    [40]水筒を棚にしまう
-
-    仅输出以下格式的JSON对象（无需其他文本）：
-    {
-    "thought": "<你当前的推理，2-3句话>",
-    "next_decision": "clarify" 或 "execute",
-    "action_id": <当next_decision为"execute"时为1-40的整数，否则为null>
-    }
-    """
+    system_prompt = router_system_prompt(state.lang)
 
     messages = [SystemMessage(content=system_prompt), *state.messages]
     resp: RouterOutput = llm.with_structured_output(RouterOutput).invoke(messages)
