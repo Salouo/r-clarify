@@ -21,9 +21,8 @@ reflection_llm = ChatOpenAI(model="gpt-5-nano")
 def run_one_trial(
     sample: dict,
     reflections: Optional[str] = None,
-    lang: str = "zh",
+    lang: str = "ja",
 ) -> dict:
-    """在一个 sample 上跑一条完整的决策轨迹（一个 trial）"""
 
     # 构建 system prompt：用户场景 + 可选反思；没有给下一轮的模型关于之前轮次的对话信息，仅仅提供反思内容。
     system_prompt = make_system_prompt_from_one_sample(sample)
@@ -52,13 +51,9 @@ def update_reflections(
     prev_reflections: Optional[str],
     sample: dict,
     final_state: dict,
-    lang: str = "zh",
+    lang: str = "ja",
 ) -> str:
-    """
-    基于当前这个 trial 的 episode，总结「下次应该怎么做得更好」，
-    并和之前的 reflection 进行整合，产生新的 reflections 字符串。
-    """
-
+    
     # 用户场景（简要）
     user_context = make_system_prompt_from_one_sample(sample)
     # 当前 trial 的内部轨迹（只这一条）
@@ -72,19 +67,22 @@ def update_reflections(
         messages.append(
             HumanMessage(
                 content=(
-                    "以下是之前多轮 trial 的反思总结，请在此基础上更新（如果有必要）：\n"
+                    "以下は、これまでの複数回のトライアルから得られた反省のまとめです。"
+                    "必要だと判断した場合は、これを踏まえて内容を更新してください：\n"
                     f"{prev_reflections}"
                 )
             )
         )
 
+
     # 把「用户场景 + 当前 trial 的 episode」给反思模块
     messages.append(
         HumanMessage(
             content=(
-                "下面是当前样本的用户场景：\n"
+                "以下は現在のサンプルに関するユーザの状況です：\n"
                 f"{user_context}\n\n"
-                "下面是最新一轮 trial 的完整 episode，请基于它更新反思：\n"
+                "以下は最新のトライアルの完全なエピソードです。"
+                "このエピソードに基づいて、反省内容を更新してください：\n"
                 f"{episode_text}"
             )
         )
@@ -99,25 +97,16 @@ def run_trials_for_one_sample(
     sample: dict,
     max_trials: int = 3,
     use_reflection: bool = True,
-    lang: str = "zh",
+    lang: str = "ja",
 ) -> List[dict]:
-    """
-    在同一个 sample 上连续跑多条 trial。
-    - 如果 use_reflection=False：每一条 trial 都是独立的（对照组）
-    - 如果 use_reflection=True：每一条 trial 的结果会被 summarize 成 reflections，
-      并带入下一条 trial 的 system prompt 中
-
-    同时：
-    - 返回所有 trial 对应的最终 state
-    - 在 episodes/ 里写入「一个 episode 文件」，里面包含多个 trial
-      以及每个 trial 前后的 reflection。
-    """
-
+    
     reflections: Optional[str] = None
     all_states: List[dict] = []
     trials_for_episode: List[dict] = []  # 用来喂给 format_multi_trial_episode
 
-    episodes_dir = Path("episodes")
+    # episodes 目录下再按 baseline / reflect 分子目录保存
+    base_dir = Path("histories")
+    episodes_dir = base_dir / ("reflect" if use_reflection else "baseline")
     episodes_dir.mkdir(parents=True, exist_ok=True)
 
     for _ in range(max_trials):
@@ -156,8 +145,7 @@ def run_trials_for_one_sample(
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     episode_name = (
         f"sample{sample['index']}_"
-        f"{'reflect' if use_reflection else 'baseline'}_"
-        f"multi_trial_{timestamp}.txt"
+        f"{timestamp}.txt"
     )
     episode_text = format_multi_trial_episode(sample, trials_for_episode)
     (episodes_dir / episode_name).write_text(episode_text, encoding="utf-8")

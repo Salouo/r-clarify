@@ -37,8 +37,6 @@ def format_single_trial_episode(final_state: dict) -> str:
     pred_id = final_state.get("action_id")
     pred_desc = id_to_action[pred_id]
 
-    lines.append("-------- Episode (single trial) --------")
-
     # 跳过最开始的 system prompt, messages[0]
     msg_idx = 1
 
@@ -71,13 +69,13 @@ def format_single_trial_episode(final_state: dict) -> str:
 
             # execute_node 会追加一条 AIMessage 说明执行情况
             if msg_idx < len(messages) and isinstance(messages[msg_idx], AIMessage):
-                lines.append(f"\tAgent: {messages[msg_idx].content}")
+                lines.append(f"\t>> Agent は {messages[msg_idx].content}")
                 msg_idx += 1
 
         lines.append("")
 
-    # 单 trial 的结果
-    lines.append("---- Trial Result ----")
+    # 单 trial 的结果 ()
+    lines.append("================ 🚀 Trial Result ================")
     lines.append(f"Gold action: {label_action_id} {label_action_desc}")
     lines.append(f"Predicted action: {pred_id} {pred_desc}")
     if pred_id == label_action_id:
@@ -99,7 +97,7 @@ def format_multi_trial_episode(sample, trials: List[dict]) -> str:
     lines: List[str] = []
 
     # ===== 用户信息 / 场景描述（只写一次）=====
-    lines.append("======== User Context ========\n")
+    lines.append("================ 📖 User Context ================\n")
     lines.append(make_system_prompt_from_one_sample(sample=sample))
     lines.append("")
 
@@ -109,7 +107,7 @@ def format_multi_trial_episode(sample, trials: List[dict]) -> str:
         reflections_before = trial.get("reflections_before")
         reflections_after = trial.get("reflections_after")
 
-        lines.append(f"======== Trial {i} ========\n")
+        lines.append(f"---------------- ⚙️ Trial {i} ----------------\n")
 
         # trial 前的 reflection（如果有）
         if reflections_before:
