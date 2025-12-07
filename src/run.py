@@ -11,8 +11,8 @@ from .reflection import run_trials_for_one_sample
 def _run_for_one_sample(
     sample: dict,
     max_trials: int,
-    lang: str,
     use_reflection: bool,
+    mode: str,
 ) -> List[dict]:
     """
     在一个 sample 上跑指定模式（baseline / reflect）。
@@ -22,31 +22,46 @@ def _run_for_one_sample(
         sample,
         max_trials=max_trials,
         use_reflection=use_reflection,
-        lang=lang,
+        mode=mode,
     )
 
 
-def main(lang: str = "ja", mode: str = "baseline") -> None:
+def main(mode: str = "baseline") -> None:
     """
     按照不同 mode 跑数据集
-    - mode = "baseline"  -> use_reflection=False，结果写入 sample_metrics_baseline.json
-    - mode = "reflect"   -> use_reflection=True，结果写入 sample_metrics_reflect.json
+    - mode = "baseline"  -> ReAct，无 reflection
+    - mode = "reflect"   -> ReAct + reflection
+    - mode = "reflect_k" -> 类 Reflexion：最多利用前 k 条反思，不在每个 trial 上反复汇总
+    - mode = "cot"       -> 纯 CoT，一步到位（不走 clarify）
+    - mode = "direct"    -> 完全ダイレクト：thinking もほぼ書かず，即座に行動を選ぶ
     """
-    assert mode in {"baseline", "reflect"}, "mode 必须是 'baseline' 或 'reflect'"
-    use_reflection = mode == "reflect"
+    assert mode in {
+        "baseline",
+        "reflect",
+        "reflect_k",
+        "cot",
+        "direct",
+    }, "mode 必须是 'baseline' / 'reflect' / 'reflect_k' / 'cot' / 'direct'"
 
-    # 读取样本
+    # Select mode (baseline, reflect, reflect_k, cot, direct)
+    if mode in {"cot", "direct"}:
+        use_reflection = False
+    elif mode == "baseline":
+        use_reflection = False
+    elif mode in {"reflect", "reflect_k"}:
+        use_reflection = True
+
+    max_trials = 3
+
+    # Load sample
     data_path = Path("data/processed_data_expanded.json")
     with data_path.open("r", encoding="utf-8") as f:
         samples = json.load(f)["samples"]
 
-    # 每个样本最多跑 3 个 trials。
-    max_trials = 3
-
     # 结果日志文件（按 mode 分开保存，便于断点续跑和单独做评估）
     results_dir = Path("results")
     results_dir.mkdir(parents=True, exist_ok=True)
-    metrics_path = results_dir / f"sample_metrics_{mode}.json"
+    metrics_path = results_dir / f"{mode}.json"
 
     # 读取已经完成的样本结果（如果有）
     if metrics_path.exists():
@@ -66,7 +81,7 @@ def main(lang: str = "ja", mode: str = "baseline") -> None:
         f"[Progress] 模式: {mode}, 已完成样本数: {len(done_indices)}"
     )
 
-    # 过滤掉已经完成的样本，只对剩余样本继续跑
+    # 过滤掉已经完成的样本，只对剩余样本继续跑，而且还能补齐漏了的样本。
     remaining_samples = [s for s in samples if s.get("index") not in done_indices]
 
     if not remaining_samples:
@@ -82,8 +97,8 @@ def main(lang: str = "ja", mode: str = "baseline") -> None:
                 _run_for_one_sample,
                 sample,
                 max_trials,
-                lang,
                 use_reflection,
+                mode,
             ): sample
             for sample in remaining_samples
         }
@@ -118,7 +133,6 @@ def main(lang: str = "ja", mode: str = "baseline") -> None:
             records.append(
                 {
                     "sample_index": sample_index,
-                    "lang": lang,
                     "max_trials": max_trials,
                     "num_trials": num_trials,
                     "correct": correct,
@@ -157,6 +171,5 @@ def main(lang: str = "ja", mode: str = "baseline") -> None:
 
 
 if __name__ == "__main__":
-    # 这里可以切换 "ja" / "en"，以及 "baseline" / "reflect"
-    for mode in ["baseline", "reflect"]:
-        main(lang="ja", mode=mode)
+    # 这里可以切换 "baseline" / "reflect" / "reflect_k" / "cot" / "direct"
+    main(mode="reflect_k")

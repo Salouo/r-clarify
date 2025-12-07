@@ -216,3 +216,5 @@ Thumbs.db
 # Extra env files (do not upload secrets)
 .env.*
 *.env
+
+histories/

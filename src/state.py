@@ -58,14 +58,15 @@ action_to_id: dict[str, int] = {v: k for k, v in id_to_action.items()}
 # 每一步 agent 的输出
 class RouterStep(BaseModel):
     step: int                       # 第几步
-    thought: str                    # LLM 的思考（thinking）
+    thought: Optional[str] = None   # LLM 的思考（thinking），direct 模式下可以为 None
     next_decision: DecisionType     # clarify / execute
     action_id: Optional[int] = None # execute 时选的动作
 
 
 class RouterOutput(BaseModel):
-    thought: str = Field(
-        description="你对于当前局面，以及对于接下来应该如何决策的仔细思考"
+    thought: Optional[str] = Field(
+        default=None,
+        description="你对于当前局面，以及对于接下来应该如何决策的思考；direct 模式下可以为 null"
     )
     next_decision: DecisionType = Field(
         description="你接下来要执行的决策，只能是 clarify / execute 之一"
@@ -79,7 +80,6 @@ class RouterOutput(BaseModel):
 # ========== Graph State ==========
 
 class ClarifyState(BaseModel):
-    """Graph state for clarify/execute agent with simulated user."""
 
     # 对话历史：真实/模拟用户 + agent 的所有对话
     messages: Annotated[list[BaseMessage], add_messages] = Field(default_factory=list)
@@ -94,42 +94,25 @@ class ClarifyState(BaseModel):
     env: dict[str, Any] = Field(default_factory=dict)
 
     # 用户反馈（之后做 reflection 可以用，现在先不用）
-    user_feedback: Optional[str] = Field(
-        default=None,
-        description="用户对上一步行为的反馈，用于之后的 reflection",
-    )
+    user_feedback: Optional[str] = Field(default=None)
 
     # 这个 sample 的真实目标动作（label）
-    label_action_id: int = Field(
-        default=None,
-        description="sample 的标注动作 ID（reflective action），只给 user_sim 看",
-    )
+    label_action_id: int = Field(default=None)
 
     # 原始模糊 utterance（方便在 user_sim 里用）
-    original_utterance: str = Field(
-        default="",
-        description="用户最初的模糊请求文本",
-    )
+    original_utterance: str = Field(default="")
 
-    # 使用的 prompt 语言（ja / zh）
-    lang: str = Field(
-        default="zh",
-        description="当前对话使用的提示语言，例如 'ja' 或 'zh'",
+    # 当前运行模式（baseline / reflect / reflect_k / cot / direct）
+    mode: str = Field(
+        default="baseline",
+        description="当前样本使用的运行模式，例如 'baseline' / 'reflect' / 'reflect_k' / 'cot' / 'direct'",
     )
 
     # 步数
-    step: int = Field(
-        default=0,
-        description="当前执行的 step 计数（从 0 开始）",
-    )
+    step: int = Field(default=0, description="当前执行的 step 计数（从 0 开始）")
 
     # 最大步数
-    max_steps: int = Field(
-        default=1000,
-        description="最大允许的 step 数，超过后应强制结束或执行",
-    )
+    max_steps: int = Field(default=1000,description="最大允许的 step 数，超过后应强制结束或执行")
 
-    trace: list[RouterStep] = Field(
-        default_factory=list,
-        description="router 每一步的思考和决策轨迹"
-    )
+    # 每一个 trial 的轨迹
+    trace: list[RouterStep] = Field(default_factory=list, description="router 每一步的思考和决策轨迹")

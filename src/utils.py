@@ -33,7 +33,6 @@ def format_single_trial_episode(final_state: dict) -> str:
     messages = final_state["messages"]
     trace = final_state.get("trace", [])
     label_action_id = final_state.get("label_action_id")
-    label_action_desc = id_to_action[label_action_id]
     pred_id = final_state.get("action_id")
     pred_desc = id_to_action[pred_id]
 
@@ -49,7 +48,8 @@ def format_single_trial_episode(final_state: dict) -> str:
     # 遍历每一个 router step
     for t in trace:
         lines.append(f"【Step {t.step}】")
-        lines.append(f"\tAgent: <thinking> {t.thought} </thinking>")
+        if t.thought is not None:
+            lines.append(f"\tAgent: <thinking> {t.thought} </thinking>")
 
         if t.next_decision == "clarify":
             lines.append("\tAgent: [CLARIFY]")
@@ -76,8 +76,7 @@ def format_single_trial_episode(final_state: dict) -> str:
 
     # 单 trial 的结果 ()
     lines.append("================ 🚀 Trial Result ================")
-    lines.append(f"Gold action: {label_action_id} {label_action_desc}")
-    lines.append(f"Predicted action: {pred_id} {pred_desc}")
+    lines.append(f"Predicted action: {pred_desc}")
     if pred_id == label_action_id:
         lines.append("Match or not: True ✅")
     else:
@@ -96,6 +95,10 @@ def format_multi_trial_episode(sample, trials: List[dict]) -> str:
     """
     lines: List[str] = []
 
+    # Gold action（标签）从 sample 中恢复：
+    # 优先使用 sample["reflective_action"] 的描述，如果没有再退回到 id_to_action。
+    gold_desc = sample.get("reflective_action")
+
     # ===== 用户信息 / 场景描述（只写一次）=====
     lines.append("================ 📖 User Context ================\n")
     lines.append(make_system_prompt_from_one_sample(sample=sample))
@@ -111,7 +114,8 @@ def format_multi_trial_episode(sample, trials: List[dict]) -> str:
 
         # trial 前的 reflection（如果有）
         if reflections_before:
-            lines.append("[Reflections BEFORE this trial]")
+            # 现在由 reflections_before 自带标题（例如：
+            # [Reflection Before this trial 前 2 次]）
             lines.append(reflections_before)
             lines.append("")
 
@@ -126,5 +130,7 @@ def format_multi_trial_episode(sample, trials: List[dict]) -> str:
             lines.append("")
 
         lines.append("")  # trial 间空一行
+
+    lines.append(f"Gold action: {gold_desc}")
 
     return "\n".join(lines)
