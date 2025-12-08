@@ -51,7 +51,7 @@ def main(mode: str = "baseline") -> None:
     elif mode in {"reflect", "reflect_k"}:
         use_reflection = True
 
-    max_trials = 3
+    max_trials = 7
 
     # Load sample
     data_path = Path("data/processed_data_expanded.json")

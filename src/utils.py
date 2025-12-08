@@ -34,7 +34,7 @@ def format_single_trial_episode(final_state: dict) -> str:
     trace = final_state.get("trace", [])
     label_action_id = final_state.get("label_action_id")
     pred_id = final_state.get("action_id")
-    pred_desc = id_to_action[pred_id]
+    pred_desc = id_to_action.get(pred_id, f"Unknown action_id={pred_id}")
 
     # 跳过最开始的 system prompt, messages[0]
     msg_idx = 1
@@ -64,7 +64,7 @@ def format_single_trial_episode(final_state: dict) -> str:
                 msg_idx += 1
 
         else:  # execute
-            a_desc = id_to_action[t.action_id]
+            a_desc = id_to_action.get(t.action_id, f"Unknown action_id={t.action_id}")
             lines.append(f"\tAgent: [EXECUTE] {a_desc}")
 
             # execute_node 会追加一条 AIMessage 说明执行情况

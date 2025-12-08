@@ -3,33 +3,29 @@
   "results": [
     {
       "sample_index": 0,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
+      "num_trials": 2,
+      "correct": true,
       "steps_total": 3,
       "steps_per_trial": [
         1,
-        1,
-        1
+        2
       ]
     },
     {
       "sample_index": 1,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 3,
+      "steps_total": 8,
       "steps_per_trial": [
-        1,
-        1,
-        1
+        2,
+        2,
+        4
       ]
     },
     {
       "sample_index": 2,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -40,81 +36,74 @@
     },
     {
       "sample_index": 3,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
+      "num_trials": 1,
+      "correct": true,
       "steps_total": 3,
       "steps_per_trial": [
-        1,
-        1,
-        1
+        3
       ]
     },
     {
       "sample_index": 4,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 1,
-      "correct": true,
-      "steps_total": 1,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 4,
       "steps_per_trial": [
+        1,
+        2,
         1
       ]
     },
     {
       "sample_index": 5,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 3,
-      "steps_per_trial": [
-        1,
-        1,
-        1
-      ]
-    },
-    {
-      "sample_index": 6,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 3,
-      "steps_per_trial": [
-        1,
-        1,
-        1
-      ]
-    },
-    {
-      "sample_index": 7,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 1,
+      "num_trials": 2,
       "correct": true,
-      "steps_total": 2,
+      "steps_total": 3,
       "steps_per_trial": [
+        1,
         2
       ]
     },
     {
-      "sample_index": 8,
-      "lang": "ja",
+      "sample_index": 6,
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
+      "steps_total": 5,
+      "steps_per_trial": [
+        1,
+        2,
+        2
+      ]
+    },
+    {
+      "sample_index": 7,
+      "max_trials": 3,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 16,
+      "steps_per_trial": [
+        1,
+        4,
+        11
+      ]
+    },
+    {
+      "sample_index": 8,
+      "max_trials": 3,
+      "num_trials": 2,
+      "correct": true,
       "steps_total": 3,
       "steps_per_trial": [
         1,
-        1,
-        1
+        2
       ]
     },
     {
       "sample_index": 9,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -125,7 +114,6 @@
     },
     {
       "sample_index": 10,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -136,7 +124,16 @@
     },
     {
       "sample_index": 11,
-      "lang": "ja",
+      "max_trials": 3,
+      "num_trials": 1,
+      "correct": true,
+      "steps_total": 3,
+      "steps_per_trial": [
+        3
+      ]
+    },
+    {
+      "sample_index": 12,
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
@@ -148,21 +145,7 @@
       ]
     },
     {
-      "sample_index": 12,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 3,
-      "steps_per_trial": [
-        1,
-        1,
-        1
-      ]
-    },
-    {
       "sample_index": 13,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -173,7 +156,6 @@
     },
     {
       "sample_index": 14,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -184,33 +166,30 @@
     },
     {
       "sample_index": 15,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 3,
+      "steps_total": 5,
       "steps_per_trial": [
         1,
-        1,
-        1
+        2,
+        2
       ]
     },
     {
       "sample_index": 16,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 4,
+      "steps_total": 5,
       "steps_per_trial": [
         1,
         2,
-        1
+        2
       ]
     },
     {
       "sample_index": 17,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -221,7 +200,6 @@
     },
     {
       "sample_index": 18,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -232,33 +210,28 @@
     },
     {
       "sample_index": 19,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
+      "num_trials": 2,
+      "correct": true,
       "steps_total": 3,
       "steps_per_trial": [
         1,
-        1,
-        1
+        2
       ]
     },
     {
       "sample_index": 20,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 3,
+      "num_trials": 2,
+      "correct": true,
+      "steps_total": 5,
       "steps_per_trial": [
         1,
-        1,
-        1
+        4
       ]
     },
     {
       "sample_index": 21,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -269,7 +242,6 @@
     },
     {
       "sample_index": 22,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -280,7 +252,6 @@
     },
     {
       "sample_index": 23,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -291,7 +262,6 @@
     },
     {
       "sample_index": 24,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -302,7 +272,6 @@
     },
     {
       "sample_index": 25,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -313,46 +282,42 @@
     },
     {
       "sample_index": 26,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 3,
+      "steps_total": 5,
       "steps_per_trial": [
         1,
-        1,
+        3,
         1
       ]
     },
     {
       "sample_index": 27,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 3,
+      "steps_total": 23,
       "steps_per_trial": [
         1,
-        1,
-        1
+        19,
+        3
       ]
     },
     {
       "sample_index": 28,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 3,
+      "steps_total": 12,
       "steps_per_trial": [
         1,
-        1,
-        1
+        6,
+        5
       ]
     },
     {
       "sample_index": 29,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -363,19 +328,17 @@
     },
     {
       "sample_index": 30,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 2,
       "correct": true,
-      "steps_total": 2,
+      "steps_total": 3,
       "steps_per_trial": [
         1,
-        1
+        2
       ]
     },
     {
       "sample_index": 31,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -386,106 +349,96 @@
     },
     {
       "sample_index": 32,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
-      "steps_total": 2,
+      "steps_total": 1,
       "steps_per_trial": [
-        2
+        1
       ]
     },
     {
       "sample_index": 33,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
-      "correct": false,
-      "steps_total": 4,
+      "correct": true,
+      "steps_total": 7,
       "steps_per_trial": [
         1,
         2,
-        1
+        4
       ]
     },
     {
       "sample_index": 34,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
-      "correct": false,
-      "steps_total": 4,
+      "correct": true,
+      "steps_total": 15,
       "steps_per_trial": [
-        2,
         1,
-        1
+        2,
+        12
       ]
     },
     {
       "sample_index": 35,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 1,
-      "correct": true,
-      "steps_total": 2,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 5,
       "steps_per_trial": [
+        1,
+        2,
         2
       ]
     },
     {
       "sample_index": 36,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 3,
-      "steps_per_trial": [
-        1,
-        1,
-        1
-      ]
-    },
-    {
-      "sample_index": 37,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": true,
       "steps_total": 6,
       "steps_per_trial": [
-        1,
         2,
+        1,
         3
       ]
     },
     {
-      "sample_index": 38,
-      "lang": "ja",
+      "sample_index": 37,
       "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
+      "num_trials": 2,
+      "correct": true,
       "steps_total": 3,
       "steps_per_trial": [
         1,
+        2
+      ]
+    },
+    {
+      "sample_index": 38,
+      "max_trials": 3,
+      "num_trials": 2,
+      "correct": true,
+      "steps_total": 4,
+      "steps_per_trial": [
         1,
-        1
+        3
       ]
     },
     {
       "sample_index": 39,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 2,
+      "num_trials": 1,
       "correct": true,
-      "steps_total": 2,
+      "steps_total": 1,
       "steps_per_trial": [
-        1,
         1
       ]
     },
     {
       "sample_index": 40,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
@@ -498,19 +451,6 @@
     },
     {
       "sample_index": 41,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 2,
-      "correct": true,
-      "steps_total": 2,
-      "steps_per_trial": [
-        1,
-        1
-      ]
-    },
-    {
-      "sample_index": 42,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
@@ -522,46 +462,52 @@
       ]
     },
     {
-      "sample_index": 43,
-      "lang": "ja",
+      "sample_index": 42,
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 3,
+      "steps_total": 5,
       "steps_per_trial": [
-        1,
-        1,
-        1
-      ]
-    },
-    {
-      "sample_index": 44,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": true,
-      "steps_total": 4,
-      "steps_per_trial": [
-        1,
+        2,
         2,
         1
       ]
     },
     {
-      "sample_index": 45,
-      "lang": "ja",
+      "sample_index": 43,
       "max_trials": 3,
       "num_trials": 2,
       "correct": true,
-      "steps_total": 3,
+      "steps_total": 4,
       "steps_per_trial": [
         1,
+        3
+      ]
+    },
+    {
+      "sample_index": 44,
+      "max_trials": 3,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 6,
+      "steps_per_trial": [
+        2,
+        2,
         2
       ]
     },
     {
+      "sample_index": 45,
+      "max_trials": 3,
+      "num_trials": 1,
+      "correct": true,
+      "steps_total": 1,
+      "steps_per_trial": [
+        1
+      ]
+    },
+    {
       "sample_index": 46,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -572,7 +518,6 @@
     },
     {
       "sample_index": 47,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -583,19 +528,16 @@
     },
     {
       "sample_index": 48,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 2,
+      "num_trials": 1,
       "correct": true,
-      "steps_total": 2,
+      "steps_total": 1,
       "steps_per_trial": [
-        1,
         1
       ]
     },
     {
       "sample_index": 49,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -606,18 +548,16 @@
     },
     {
       "sample_index": 50,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
-      "steps_total": 1,
+      "steps_total": 2,
       "steps_per_trial": [
-        1
+        2
       ]
     },
     {
       "sample_index": 51,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -628,19 +568,16 @@
     },
     {
       "sample_index": 52,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 2,
+      "num_trials": 1,
       "correct": true,
-      "steps_total": 5,
+      "steps_total": 2,
       "steps_per_trial": [
-        3,
         2
       ]
     },
     {
       "sample_index": 53,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -651,7 +588,6 @@
     },
     {
       "sample_index": 54,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -662,226 +598,28 @@
     },
     {
       "sample_index": 55,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 1,
+      "num_trials": 2,
       "correct": true,
-      "steps_total": 2,
+      "steps_total": 4,
       "steps_per_trial": [
-        2
+        1,
+        3
       ]
     },
     {
       "sample_index": 56,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 2,
       "correct": true,
-      "steps_total": 2,
-      "steps_per_trial": [
-        1,
-        1
-      ]
-    },
-    {
-      "sample_index": 57,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
       "steps_total": 3,
       "steps_per_trial": [
         1,
-        1,
-        1
-      ]
-    },
-    {
-      "sample_index": 58,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 1,
-      "correct": true,
-      "steps_total": 5,
-      "steps_per_trial": [
-        5
-      ]
-    },
-    {
-      "sample_index": 59,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 1,
-      "correct": true,
-      "steps_total": 8,
-      "steps_per_trial": [
-        8
-      ]
-    },
-    {
-      "sample_index": 60,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": true,
-      "steps_total": 5,
-      "steps_per_trial": [
-        1,
-        1,
-        3
-      ]
-    },
-    {
-      "sample_index": 61,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 11,
-      "steps_per_trial": [
-        4,
-        4,
-        3
-      ]
-    },
-    {
-      "sample_index": 62,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 1,
-      "correct": true,
-      "steps_total": 1,
-      "steps_per_trial": [
-        1
-      ]
-    },
-    {
-      "sample_index": 63,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 14,
-      "steps_per_trial": [
-        3,
-        6,
-        5
-      ]
-    },
-    {
-      "sample_index": 64,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 3,
-      "steps_per_trial": [
-        1,
-        1,
-        1
-      ]
-    },
-    {
-      "sample_index": 65,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 3,
-      "steps_per_trial": [
-        1,
-        1,
-        1
-      ]
-    },
-    {
-      "sample_index": 66,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 3,
-      "steps_per_trial": [
-        1,
-        1,
-        1
-      ]
-    },
-    {
-      "sample_index": 67,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 3,
-      "steps_per_trial": [
-        1,
-        1,
-        1
-      ]
-    },
-    {
-      "sample_index": 68,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 1,
-      "correct": true,
-      "steps_total": 1,
-      "steps_per_trial": [
-        1
-      ]
-    },
-    {
-      "sample_index": 69,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 1,
-      "correct": true,
-      "steps_total": 2,
-      "steps_per_trial": [
         2
       ]
     },
     {
-      "sample_index": 70,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 3,
-      "steps_per_trial": [
-        1,
-        1,
-        1
-      ]
-    },
-    {
-      "sample_index": 71,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 3,
-      "steps_per_trial": [
-        1,
-        1,
-        1
-      ]
-    },
-    {
-      "sample_index": 72,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 1,
-      "correct": true,
-      "steps_total": 1,
-      "steps_per_trial": [
-        1
-      ]
-    },
-    {
-      "sample_index": 73,
-      "lang": "ja",
+      "sample_index": 57,
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
@@ -893,8 +631,208 @@
       ]
     },
     {
+      "sample_index": 58,
+      "max_trials": 3,
+      "num_trials": 1,
+      "correct": true,
+      "steps_total": 3,
+      "steps_per_trial": [
+        3
+      ]
+    },
+    {
+      "sample_index": 59,
+      "max_trials": 3,
+      "num_trials": 1,
+      "correct": true,
+      "steps_total": 6,
+      "steps_per_trial": [
+        6
+      ]
+    },
+    {
+      "sample_index": 60,
+      "max_trials": 3,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 14,
+      "steps_per_trial": [
+        7,
+        6,
+        1
+      ]
+    },
+    {
+      "sample_index": 61,
+      "max_trials": 3,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 8,
+      "steps_per_trial": [
+        3,
+        1,
+        4
+      ]
+    },
+    {
+      "sample_index": 62,
+      "max_trials": 3,
+      "num_trials": 1,
+      "correct": true,
+      "steps_total": 2,
+      "steps_per_trial": [
+        2
+      ]
+    },
+    {
+      "sample_index": 63,
+      "max_trials": 3,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 4,
+      "steps_per_trial": [
+        2,
+        1,
+        1
+      ]
+    },
+    {
+      "sample_index": 64,
+      "max_trials": 3,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 4,
+      "steps_per_trial": [
+        1,
+        2,
+        1
+      ]
+    },
+    {
+      "sample_index": 65,
+      "max_trials": 3,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 4,
+      "steps_per_trial": [
+        1,
+        2,
+        1
+      ]
+    },
+    {
+      "sample_index": 66,
+      "max_trials": 3,
+      "num_trials": 2,
+      "correct": true,
+      "steps_total": 4,
+      "steps_per_trial": [
+        1,
+        3
+      ]
+    },
+    {
+      "sample_index": 67,
+      "max_trials": 3,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 4,
+      "steps_per_trial": [
+        1,
+        2,
+        1
+      ]
+    },
+    {
+      "sample_index": 68,
+      "max_trials": 3,
+      "num_trials": 2,
+      "correct": true,
+      "steps_total": 3,
+      "steps_per_trial": [
+        1,
+        2
+      ]
+    },
+    {
+      "sample_index": 69,
+      "max_trials": 3,
+      "num_trials": 2,
+      "correct": true,
+      "steps_total": 2,
+      "steps_per_trial": [
+        1,
+        1
+      ]
+    },
+    {
+      "sample_index": 70,
+      "max_trials": 3,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 7,
+      "steps_per_trial": [
+        3,
+        2,
+        2
+      ]
+    },
+    {
+      "sample_index": 71,
+      "max_trials": 3,
+      "num_trials": 2,
+      "correct": true,
+      "steps_total": 6,
+      "steps_per_trial": [
+        1,
+        5
+      ]
+    },
+    {
+      "sample_index": 72,
+      "max_trials": 3,
+      "num_trials": 1,
+      "correct": true,
+      "steps_total": 3,
+      "steps_per_trial": [
+        3
+      ]
+    },
+    {
+      "sample_index": 73,
+      "max_trials": 3,
+      "num_trials": 2,
+      "correct": true,
+      "steps_total": 4,
+      "steps_per_trial": [
+        1,
+        3
+      ]
+    },
+    {
       "sample_index": 74,
-      "lang": "ja",
+      "max_trials": 3,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 4,
+      "steps_per_trial": [
+        1,
+        2,
+        1
+      ]
+    },
+    {
+      "sample_index": 75,
+      "max_trials": 3,
+      "num_trials": 1,
+      "correct": true,
+      "steps_total": 1,
+      "steps_per_trial": [
+        1
+      ]
+    },
+    {
+      "sample_index": 76,
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
@@ -906,8 +844,18 @@
       ]
     },
     {
-      "sample_index": 75,
-      "lang": "ja",
+      "sample_index": 77,
+      "max_trials": 3,
+      "num_trials": 2,
+      "correct": true,
+      "steps_total": 2,
+      "steps_per_trial": [
+        1,
+        1
+      ]
+    },
+    {
+      "sample_index": 78,
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -917,47 +865,7 @@
       ]
     },
     {
-      "sample_index": 76,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 4,
-      "steps_per_trial": [
-        1,
-        1,
-        2
-      ]
-    },
-    {
-      "sample_index": 77,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 3,
-      "steps_per_trial": [
-        1,
-        1,
-        1
-      ]
-    },
-    {
-      "sample_index": 78,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 3,
-      "steps_per_trial": [
-        1,
-        1,
-        1
-      ]
-    },
-    {
       "sample_index": 79,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -968,31 +876,27 @@
     },
     {
       "sample_index": 80,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 3,
+      "num_trials": 2,
+      "correct": true,
+      "steps_total": 6,
       "steps_per_trial": [
-        1,
-        1,
-        1
+        2,
+        4
       ]
     },
     {
       "sample_index": 81,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
-      "steps_total": 2,
+      "steps_total": 1,
       "steps_per_trial": [
-        2
+        1
       ]
     },
     {
       "sample_index": 82,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -1003,107 +907,97 @@
     },
     {
       "sample_index": 83,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 3,
+      "num_trials": 2,
       "correct": true,
       "steps_total": 3,
       "steps_per_trial": [
         1,
-        1,
-        1
-      ]
-    },
-    {
-      "sample_index": 84,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 2,
-      "correct": true,
-      "steps_total": 5,
-      "steps_per_trial": [
-        1,
-        4
-      ]
-    },
-    {
-      "sample_index": 85,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 2,
-      "correct": true,
-      "steps_total": 5,
-      "steps_per_trial": [
-        3,
         2
       ]
     },
     {
-      "sample_index": 86,
-      "lang": "ja",
+      "sample_index": 84,
       "max_trials": 3,
       "num_trials": 2,
       "correct": true,
-      "steps_total": 2,
+      "steps_total": 5,
+      "steps_per_trial": [
+        2,
+        3
+      ]
+    },
+    {
+      "sample_index": 85,
+      "max_trials": 3,
+      "num_trials": 2,
+      "correct": true,
+      "steps_total": 4,
       "steps_per_trial": [
         1,
-        1
+        3
+      ]
+    },
+    {
+      "sample_index": 86,
+      "max_trials": 3,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 6,
+      "steps_per_trial": [
+        1,
+        2,
+        3
       ]
     },
     {
       "sample_index": 87,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 3,
+      "steps_total": 4,
       "steps_per_trial": [
         1,
-        1,
+        2,
         1
       ]
     },
     {
       "sample_index": 88,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 2,
+      "num_trials": 1,
       "correct": true,
-      "steps_total": 2,
+      "steps_total": 1,
       "steps_per_trial": [
-        1,
         1
       ]
     },
     {
       "sample_index": 89,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
       "steps_total": 5,
       "steps_per_trial": [
-        3,
         1,
-        1
+        2,
+        2
       ]
     },
     {
       "sample_index": 90,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 3,
+      "steps_total": 12,
       "steps_per_trial": [
-        1,
-        1,
-        1
+        2,
+        8,
+        2
       ]
     },
     {
       "sample_index": 91,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -1114,44 +1008,42 @@
     },
     {
       "sample_index": 92,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 4,
+      "steps_total": 6,
       "steps_per_trial": [
-        1,
-        1,
+        2,
+        2,
         2
       ]
     },
     {
       "sample_index": 93,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 1,
-      "correct": true,
-      "steps_total": 1,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 5,
       "steps_per_trial": [
-        1
+        1,
+        2,
+        2
       ]
     },
     {
       "sample_index": 94,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 4,
+      "steps_total": 5,
       "steps_per_trial": [
         1,
         2,
-        1
+        2
       ]
     },
     {
       "sample_index": 95,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -1162,92 +1054,84 @@
     },
     {
       "sample_index": 96,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
-      "steps_total": 1,
+      "steps_total": 5,
       "steps_per_trial": [
-        1
+        5
       ]
     },
     {
       "sample_index": 97,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 1,
-      "correct": true,
-      "steps_total": 1,
-      "steps_per_trial": [
-        1
-      ]
-    },
-    {
-      "sample_index": 98,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 1,
-      "correct": true,
-      "steps_total": 2,
-      "steps_per_trial": [
-        2
-      ]
-    },
-    {
-      "sample_index": 99,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
+      "num_trials": 2,
       "correct": true,
       "steps_total": 4,
       "steps_per_trial": [
         1,
+        3
+      ]
+    },
+    {
+      "sample_index": 98,
+      "max_trials": 3,
+      "num_trials": 1,
+      "correct": true,
+      "steps_total": 3,
+      "steps_per_trial": [
+        3
+      ]
+    },
+    {
+      "sample_index": 99,
+      "max_trials": 3,
+      "num_trials": 2,
+      "correct": true,
+      "steps_total": 3,
+      "steps_per_trial": [
         1,
         2
       ]
     },
     {
       "sample_index": 100,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 3,
-      "steps_per_trial": [
-        1,
-        1,
-        1
-      ]
-    },
-    {
-      "sample_index": 101,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 3,
-      "steps_per_trial": [
-        1,
-        1,
-        1
-      ]
-    },
-    {
-      "sample_index": 102,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
       "steps_total": 4,
       "steps_per_trial": [
-        2,
         1,
+        2,
         1
       ]
     },
     {
+      "sample_index": 101,
+      "max_trials": 3,
+      "num_trials": 3,
+      "correct": true,
+      "steps_total": 7,
+      "steps_per_trial": [
+        1,
+        3,
+        3
+      ]
+    },
+    {
+      "sample_index": 102,
+      "max_trials": 3,
+      "num_trials": 3,
+      "correct": true,
+      "steps_total": 6,
+      "steps_per_trial": [
+        1,
+        2,
+        3
+      ]
+    },
+    {
       "sample_index": 103,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -1258,7 +1142,6 @@
     },
     {
       "sample_index": 104,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -1269,31 +1152,28 @@
     },
     {
       "sample_index": 105,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
-      "steps_total": 1,
+      "steps_total": 2,
       "steps_per_trial": [
-        1
+        2
       ]
     },
     {
       "sample_index": 106,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 3,
+      "steps_total": 8,
       "steps_per_trial": [
-        1,
-        1,
+        2,
+        5,
         1
       ]
     },
     {
       "sample_index": 107,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -1304,7 +1184,6 @@
     },
     {
       "sample_index": 108,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -1315,7 +1194,6 @@
     },
     {
       "sample_index": 109,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -1326,18 +1204,17 @@
     },
     {
       "sample_index": 110,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 1,
+      "num_trials": 2,
       "correct": true,
-      "steps_total": 1,
+      "steps_total": 5,
       "steps_per_trial": [
-        1
+        2,
+        3
       ]
     },
     {
       "sample_index": 111,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -1348,19 +1225,16 @@
     },
     {
       "sample_index": 112,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 2,
+      "num_trials": 1,
       "correct": true,
-      "steps_total": 4,
+      "steps_total": 2,
       "steps_per_trial": [
-        2,
         2
       ]
     },
     {
       "sample_index": 113,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -1371,20 +1245,17 @@
     },
     {
       "sample_index": 114,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
+      "num_trials": 2,
+      "correct": true,
       "steps_total": 3,
       "steps_per_trial": [
         1,
-        1,
-        1
+        2
       ]
     },
     {
       "sample_index": 115,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -1395,7 +1266,6 @@
     },
     {
       "sample_index": 116,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
@@ -1408,7 +1278,6 @@
     },
     {
       "sample_index": 117,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -1419,33 +1288,30 @@
     },
     {
       "sample_index": 118,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 3,
+      "steps_total": 9,
       "steps_per_trial": [
-        1,
-        1,
-        1
+        2,
+        3,
+        4
       ]
     },
     {
       "sample_index": 119,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 5,
+      "steps_total": 9,
       "steps_per_trial": [
         1,
-        2,
-        2
+        5,
+        3
       ]
     },
     {
       "sample_index": 120,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -1456,20 +1322,18 @@
     },
     {
       "sample_index": 121,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 3,
+      "steps_total": 4,
       "steps_per_trial": [
         1,
-        1,
+        2,
         1
       ]
     },
     {
       "sample_index": 122,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -1480,7 +1344,6 @@
     },
     {
       "sample_index": 123,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
@@ -1493,57 +1356,52 @@
     },
     {
       "sample_index": 124,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 3,
+      "steps_total": 5,
       "steps_per_trial": [
         1,
-        1,
-        1
-      ]
-    },
-    {
-      "sample_index": 125,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 3,
-      "steps_per_trial": [
-        1,
-        1,
-        1
-      ]
-    },
-    {
-      "sample_index": 126,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 1,
-      "correct": true,
-      "steps_total": 2,
-      "steps_per_trial": [
+        2,
         2
       ]
     },
     {
-      "sample_index": 127,
-      "lang": "ja",
+      "sample_index": 125,
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 3,
+      "steps_total": 8,
       "steps_per_trial": [
         1,
-        1,
+        3,
+        4
+      ]
+    },
+    {
+      "sample_index": 126,
+      "max_trials": 3,
+      "num_trials": 1,
+      "correct": true,
+      "steps_total": 1,
+      "steps_per_trial": [
         1
       ]
     },
     {
+      "sample_index": 127,
+      "max_trials": 3,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 5,
+      "steps_per_trial": [
+        1,
+        2,
+        2
+      ]
+    },
+    {
       "sample_index": 128,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
@@ -1556,20 +1414,18 @@
     },
     {
       "sample_index": 129,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
-      "correct": false,
-      "steps_total": 3,
+      "correct": true,
+      "steps_total": 7,
       "steps_per_trial": [
         1,
-        1,
-        1
+        2,
+        4
       ]
     },
     {
       "sample_index": 130,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -1580,7 +1436,6 @@
     },
     {
       "sample_index": 131,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -1591,44 +1446,41 @@
     },
     {
       "sample_index": 132,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 3,
+      "steps_total": 5,
       "steps_per_trial": [
         1,
-        1,
-        1
+        2,
+        2
       ]
     },
     {
       "sample_index": 133,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 1,
+      "num_trials": 2,
       "correct": true,
-      "steps_total": 1,
+      "steps_total": 2,
       "steps_per_trial": [
+        1,
         1
       ]
     },
     {
       "sample_index": 134,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 3,
+      "steps_total": 5,
       "steps_per_trial": [
         1,
         1,
-        1
+        3
       ]
     },
     {
       "sample_index": 135,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -1639,7 +1491,6 @@
     },
     {
       "sample_index": 136,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
@@ -1652,7 +1503,6 @@
     },
     {
       "sample_index": 137,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -1663,7 +1513,6 @@
     },
     {
       "sample_index": 138,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -1674,20 +1523,18 @@
     },
     {
       "sample_index": 139,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 4,
+      "steps_total": 5,
       "steps_per_trial": [
         1,
-        1,
+        2,
         2
       ]
     },
     {
       "sample_index": 140,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
@@ -1700,70 +1547,59 @@
     },
     {
       "sample_index": 141,
-      "lang": "ja",
+      "max_trials": 3,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 8,
+      "steps_per_trial": [
+        1,
+        1,
+        6
+      ]
+    },
+    {
+      "sample_index": 142,
       "max_trials": 3,
       "num_trials": 2,
       "correct": true,
       "steps_total": 3,
       "steps_per_trial": [
-        2,
-        1
-      ]
-    },
-    {
-      "sample_index": 142,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 7,
-      "steps_per_trial": [
         1,
-        2,
-        4
+        2
       ]
     },
     {
       "sample_index": 143,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
+      "num_trials": 1,
+      "correct": true,
       "steps_total": 3,
       "steps_per_trial": [
-        1,
-        1,
-        1
+        3
       ]
     },
     {
       "sample_index": 144,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 3,
+      "num_trials": 1,
       "correct": true,
-      "steps_total": 3,
+      "steps_total": 1,
       "steps_per_trial": [
-        1,
-        1,
         1
       ]
     },
     {
       "sample_index": 145,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 2,
+      "num_trials": 1,
       "correct": true,
-      "steps_total": 2,
+      "steps_total": 1,
       "steps_per_trial": [
-        1,
         1
       ]
     },
     {
       "sample_index": 146,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -1774,85 +1610,77 @@
     },
     {
       "sample_index": 147,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 3,
+      "steps_total": 6,
       "steps_per_trial": [
-        1,
-        1,
+        2,
+        3,
         1
       ]
     },
     {
       "sample_index": 148,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
-      "correct": false,
-      "steps_total": 3,
+      "correct": true,
+      "steps_total": 6,
       "steps_per_trial": [
         1,
-        1,
-        1
+        2,
+        3
       ]
     },
     {
       "sample_index": 149,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
       "steps_total": 4,
       "steps_per_trial": [
-        2,
         1,
+        2,
         1
       ]
     },
     {
       "sample_index": 150,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 3,
+      "num_trials": 2,
+      "correct": true,
+      "steps_total": 4,
       "steps_per_trial": [
         1,
-        1,
-        1
+        3
       ]
     },
     {
       "sample_index": 151,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 3,
+      "steps_total": 6,
       "steps_per_trial": [
         1,
-        1,
-        1
+        3,
+        2
       ]
     },
     {
       "sample_index": 152,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 4,
+      "steps_total": 5,
       "steps_per_trial": [
         2,
-        1,
+        2,
         1
       ]
     },
     {
       "sample_index": 153,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -1863,78 +1691,18 @@
     },
     {
       "sample_index": 154,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 1,
+      "num_trials": 3,
       "correct": true,
-      "steps_total": 1,
+      "steps_total": 13,
       "steps_per_trial": [
-        1
+        2,
+        8,
+        3
       ]
     },
     {
       "sample_index": 155,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 5,
-      "steps_per_trial": [
-        2,
-        1,
-        2
-      ]
-    },
-    {
-      "sample_index": 156,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 5,
-      "steps_per_trial": [
-        1,
-        2,
-        2
-      ]
-    },
-    {
-      "sample_index": 157,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 1,
-      "correct": true,
-      "steps_total": 2,
-      "steps_per_trial": [
-        2
-      ]
-    },
-    {
-      "sample_index": 158,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 1,
-      "correct": true,
-      "steps_total": 1,
-      "steps_per_trial": [
-        1
-      ]
-    },
-    {
-      "sample_index": 159,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 2,
-      "correct": true,
-      "steps_total": 3,
-      "steps_per_trial": [
-        1,
-        2
-      ]
-    },
-    {
-      "sample_index": 160,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
@@ -1946,8 +1714,19 @@
       ]
     },
     {
-      "sample_index": 161,
-      "lang": "ja",
+      "sample_index": 156,
+      "max_trials": 3,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 6,
+      "steps_per_trial": [
+        2,
+        2,
+        2
+      ]
+    },
+    {
+      "sample_index": 157,
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -1957,8 +1736,54 @@
       ]
     },
     {
+      "sample_index": 158,
+      "max_trials": 3,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 20,
+      "steps_per_trial": [
+        7,
+        3,
+        10
+      ]
+    },
+    {
+      "sample_index": 159,
+      "max_trials": 3,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 6,
+      "steps_per_trial": [
+        2,
+        2,
+        2
+      ]
+    },
+    {
+      "sample_index": 160,
+      "max_trials": 3,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 15,
+      "steps_per_trial": [
+        1,
+        2,
+        12
+      ]
+    },
+    {
+      "sample_index": 161,
+      "max_trials": 3,
+      "num_trials": 2,
+      "correct": true,
+      "steps_total": 4,
+      "steps_per_trial": [
+        3,
+        1
+      ]
+    },
+    {
       "sample_index": 162,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -1969,20 +1794,18 @@
     },
     {
       "sample_index": 163,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
-      "correct": false,
-      "steps_total": 8,
+      "correct": true,
+      "steps_total": 10,
       "steps_per_trial": [
+        1,
         4,
-        2,
-        2
+        5
       ]
     },
     {
       "sample_index": 164,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -1993,7 +1816,6 @@
     },
     {
       "sample_index": 165,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -2004,7 +1826,6 @@
     },
     {
       "sample_index": 166,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -2015,7 +1836,6 @@
     },
     {
       "sample_index": 167,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
@@ -2028,31 +1848,28 @@
     },
     {
       "sample_index": 168,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 3,
+      "steps_total": 9,
       "steps_per_trial": [
         1,
-        1,
-        1
+        2,
+        6
       ]
     },
     {
       "sample_index": 169,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
-      "steps_total": 2,
+      "steps_total": 1,
       "steps_per_trial": [
-        2
+        1
       ]
     },
     {
       "sample_index": 170,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -2063,44 +1880,40 @@
     },
     {
       "sample_index": 171,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 5,
+      "steps_total": 12,
       "steps_per_trial": [
-        3,
         1,
-        1
+        8,
+        3
       ]
     },
     {
       "sample_index": 172,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 1,
+      "num_trials": 2,
       "correct": true,
-      "steps_total": 2,
+      "steps_total": 3,
       "steps_per_trial": [
+        1,
         2
       ]
     },
     {
       "sample_index": 173,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
+      "num_trials": 2,
+      "correct": true,
       "steps_total": 3,
       "steps_per_trial": [
         1,
-        1,
-        1
+        2
       ]
     },
     {
       "sample_index": 174,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -2111,7 +1924,6 @@
     },
     {
       "sample_index": 175,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
@@ -2124,20 +1936,17 @@
     },
     {
       "sample_index": 176,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 3,
+      "num_trials": 2,
+      "correct": true,
+      "steps_total": 4,
       "steps_per_trial": [
         1,
-        1,
-        1
+        3
       ]
     },
     {
       "sample_index": 177,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
@@ -2150,33 +1959,28 @@
     },
     {
       "sample_index": 178,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 3,
+      "num_trials": 1,
+      "correct": true,
+      "steps_total": 2,
       "steps_per_trial": [
-        1,
-        1,
-        1
+        2
       ]
     },
     {
       "sample_index": 179,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 3,
+      "steps_total": 5,
       "steps_per_trial": [
         1,
-        1,
-        1
+        2,
+        2
       ]
     },
     {
       "sample_index": 180,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -2187,7 +1991,6 @@
     },
     {
       "sample_index": 181,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
@@ -2200,44 +2003,27 @@
     },
     {
       "sample_index": 182,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 1,
+      "num_trials": 2,
       "correct": true,
-      "steps_total": 2,
+      "steps_total": 6,
       "steps_per_trial": [
+        4,
         2
       ]
     },
     {
       "sample_index": 183,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
+      "num_trials": 1,
+      "correct": true,
       "steps_total": 3,
       "steps_per_trial": [
-        1,
-        1,
-        1
+        3
       ]
     },
     {
       "sample_index": 184,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 3,
-      "steps_per_trial": [
-        1,
-        1,
-        1
-      ]
-    },
-    {
-      "sample_index": 185,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
@@ -2249,79 +2035,90 @@
       ]
     },
     {
-      "sample_index": 186,
-      "lang": "ja",
+      "sample_index": 185,
       "max_trials": 3,
-      "num_trials": 1,
-      "correct": true,
-      "steps_total": 1,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 6,
       "steps_per_trial": [
+        1,
+        4,
+        1
+      ]
+    },
+    {
+      "sample_index": 186,
+      "max_trials": 3,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 5,
+      "steps_per_trial": [
+        1,
+        3,
         1
       ]
     },
     {
       "sample_index": 187,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
+      "num_trials": 2,
+      "correct": true,
       "steps_total": 3,
       "steps_per_trial": [
         1,
+        2
+      ]
+    },
+    {
+      "sample_index": 188,
+      "max_trials": 3,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 4,
+      "steps_per_trial": [
+        2,
         1,
         1
       ]
     },
     {
-      "sample_index": 188,
-      "lang": "ja",
+      "sample_index": 189,
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 9,
+      "steps_total": 5,
       "steps_per_trial": [
-        4,
+        1,
         2,
-        3
-      ]
-    },
-    {
-      "sample_index": 189,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 1,
-      "correct": true,
-      "steps_total": 2,
-      "steps_per_trial": [
         2
       ]
     },
     {
       "sample_index": 190,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 2,
-      "correct": true,
-      "steps_total": 2,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 4,
       "steps_per_trial": [
         1,
-        1
+        1,
+        2
       ]
     },
     {
       "sample_index": 191,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 1,
-      "correct": true,
-      "steps_total": 2,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 6,
       "steps_per_trial": [
+        2,
+        2,
         2
       ]
     },
     {
       "sample_index": 192,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
@@ -2334,7 +2131,6 @@
     },
     {
       "sample_index": 193,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -2345,7 +2141,6 @@
     },
     {
       "sample_index": 194,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -2356,7 +2151,6 @@
     },
     {
       "sample_index": 195,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
@@ -2369,7 +2163,6 @@
     },
     {
       "sample_index": 196,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -2380,20 +2173,18 @@
     },
     {
       "sample_index": 197,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 3,
+      "steps_total": 5,
       "steps_per_trial": [
         1,
-        1,
-        1
+        2,
+        2
       ]
     },
     {
       "sample_index": 198,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -2404,20 +2195,17 @@
     },
     {
       "sample_index": 199,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 5,
+      "num_trials": 2,
+      "correct": true,
+      "steps_total": 3,
       "steps_per_trial": [
-        2,
         1,
         2
       ]
     },
     {
       "sample_index": 200,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -2428,7 +2216,6 @@
     },
     {
       "sample_index": 201,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -2439,20 +2226,6 @@
     },
     {
       "sample_index": 202,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": true,
-      "steps_total": 3,
-      "steps_per_trial": [
-        1,
-        1,
-        1
-      ]
-    },
-    {
-      "sample_index": 203,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": true,
@@ -2464,8 +2237,19 @@
       ]
     },
     {
+      "sample_index": 203,
+      "max_trials": 3,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 4,
+      "steps_per_trial": [
+        1,
+        1,
+        2
+      ]
+    },
+    {
       "sample_index": 204,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -2476,20 +2260,18 @@
     },
     {
       "sample_index": 205,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 4,
+      "steps_total": 5,
       "steps_per_trial": [
-        2,
         1,
-        1
+        2,
+        2
       ]
     },
     {
       "sample_index": 206,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -2500,20 +2282,18 @@
     },
     {
       "sample_index": 207,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 3,
+      "steps_total": 4,
       "steps_per_trial": [
         1,
-        1,
+        2,
         1
       ]
     },
     {
       "sample_index": 208,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -2524,7 +2304,6 @@
     },
     {
       "sample_index": 209,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
@@ -2537,79 +2316,73 @@
     },
     {
       "sample_index": 210,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 1,
+      "num_trials": 2,
       "correct": true,
-      "steps_total": 1,
+      "steps_total": 2,
       "steps_per_trial": [
+        1,
         1
       ]
     },
     {
       "sample_index": 211,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 2,
-      "correct": true,
-      "steps_total": 3,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 4,
       "steps_per_trial": [
+        1,
         1,
         2
       ]
     },
     {
       "sample_index": 212,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 2,
+      "num_trials": 1,
       "correct": true,
-      "steps_total": 3,
+      "steps_total": 2,
       "steps_per_trial": [
-        2,
-        1
+        2
       ]
     },
     {
       "sample_index": 213,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
-      "steps_total": 1,
+      "steps_total": 2,
       "steps_per_trial": [
-        1
+        2
       ]
     },
     {
       "sample_index": 214,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
-      "correct": true,
+      "correct": false,
       "steps_total": 5,
       "steps_per_trial": [
+        2,
         1,
-        1,
-        3
+        2
       ]
     },
     {
       "sample_index": 215,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 3,
+      "steps_total": 4,
       "steps_per_trial": [
         1,
         1,
-        1
+        2
       ]
     },
     {
       "sample_index": 216,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -2620,83 +2393,17 @@
     },
     {
       "sample_index": 217,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
+      "num_trials": 2,
+      "correct": true,
       "steps_total": 3,
       "steps_per_trial": [
-        1,
-        1,
+        2,
         1
       ]
     },
     {
       "sample_index": 218,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 6,
-      "steps_per_trial": [
-        2,
-        1,
-        3
-      ]
-    },
-    {
-      "sample_index": 219,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 1,
-      "correct": true,
-      "steps_total": 4,
-      "steps_per_trial": [
-        4
-      ]
-    },
-    {
-      "sample_index": 220,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 3,
-      "steps_per_trial": [
-        1,
-        1,
-        1
-      ]
-    },
-    {
-      "sample_index": 221,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 3,
-      "steps_per_trial": [
-        1,
-        1,
-        1
-      ]
-    },
-    {
-      "sample_index": 222,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 3,
-      "steps_per_trial": [
-        1,
-        1,
-        1
-      ]
-    },
-    {
-      "sample_index": 223,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 2,
       "correct": true,
@@ -2707,21 +2414,52 @@
       ]
     },
     {
-      "sample_index": 224,
-      "lang": "ja",
+      "sample_index": 219,
       "max_trials": 3,
       "num_trials": 3,
-      "correct": false,
-      "steps_total": 3,
+      "correct": true,
+      "steps_total": 5,
       "steps_per_trial": [
         1,
-        1,
-        1
+        2,
+        2
       ]
     },
     {
-      "sample_index": 225,
-      "lang": "ja",
+      "sample_index": 220,
+      "max_trials": 3,
+      "num_trials": 1,
+      "correct": true,
+      "steps_total": 2,
+      "steps_per_trial": [
+        2
+      ]
+    },
+    {
+      "sample_index": 221,
+      "max_trials": 3,
+      "num_trials": 2,
+      "correct": true,
+      "steps_total": 3,
+      "steps_per_trial": [
+        1,
+        2
+      ]
+    },
+    {
+      "sample_index": 222,
+      "max_trials": 3,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 9,
+      "steps_per_trial": [
+        1,
+        5,
+        3
+      ]
+    },
+    {
+      "sample_index": 223,
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -2731,8 +2469,30 @@
       ]
     },
     {
+      "sample_index": 224,
+      "max_trials": 3,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 5,
+      "steps_per_trial": [
+        1,
+        2,
+        2
+      ]
+    },
+    {
+      "sample_index": 225,
+      "max_trials": 3,
+      "num_trials": 2,
+      "correct": true,
+      "steps_total": 3,
+      "steps_per_trial": [
+        1,
+        2
+      ]
+    },
+    {
       "sample_index": 226,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -2743,31 +2503,29 @@
     },
     {
       "sample_index": 227,
-      "lang": "ja",
+      "max_trials": 3,
+      "num_trials": 2,
+      "correct": true,
+      "steps_total": 7,
+      "steps_per_trial": [
+        1,
+        6
+      ]
+    },
+    {
+      "sample_index": 228,
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
       "steps_total": 5,
       "steps_per_trial": [
-        1,
         2,
-        2
-      ]
-    },
-    {
-      "sample_index": 228,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 1,
-      "correct": true,
-      "steps_total": 3,
-      "steps_per_trial": [
-        3
+        2,
+        1
       ]
     },
     {
       "sample_index": 229,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -2778,98 +2536,111 @@
     },
     {
       "sample_index": 230,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
-      "correct": false,
-      "steps_total": 3,
+      "correct": true,
+      "steps_total": 5,
       "steps_per_trial": [
         1,
-        1,
-        1
+        2,
+        2
       ]
     },
     {
       "sample_index": 231,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 3,
+      "num_trials": 1,
+      "correct": true,
+      "steps_total": 2,
       "steps_per_trial": [
-        1,
-        1,
-        1
+        2
       ]
     },
     {
       "sample_index": 232,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 3,
+      "steps_total": 5,
       "steps_per_trial": [
         1,
-        1,
-        1
+        2,
+        2
       ]
     },
     {
       "sample_index": 233,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 3,
-      "steps_per_trial": [
-        1,
-        1,
-        1
-      ]
-    },
-    {
-      "sample_index": 234,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
       "steps_total": 6,
       "steps_per_trial": [
+        1,
         2,
+        3
+      ]
+    },
+    {
+      "sample_index": 234,
+      "max_trials": 3,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 6,
+      "steps_per_trial": [
+        1,
         3,
-        1
+        2
       ]
     },
     {
       "sample_index": 235,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
-      "correct": false,
-      "steps_total": 3,
+      "correct": true,
+      "steps_total": 6,
       "steps_per_trial": [
-        1,
-        1,
-        1
+        2,
+        2,
+        2
       ]
     },
     {
       "sample_index": 236,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
+      "num_trials": 2,
+      "correct": true,
       "steps_total": 3,
       "steps_per_trial": [
         1,
-        1,
-        1
+        2
       ]
     },
     {
       "sample_index": 237,
-      "lang": "ja",
+      "max_trials": 3,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 5,
+      "steps_per_trial": [
+        1,
+        2,
+        2
+      ]
+    },
+    {
+      "sample_index": 238,
+      "max_trials": 3,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 6,
+      "steps_per_trial": [
+        1,
+        3,
+        2
+      ]
+    },
+    {
+      "sample_index": 239,
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -2879,33 +2650,7 @@
       ]
     },
     {
-      "sample_index": 238,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 3,
-      "steps_per_trial": [
-        1,
-        1,
-        1
-      ]
-    },
-    {
-      "sample_index": 239,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 2,
-      "correct": true,
-      "steps_total": 2,
-      "steps_per_trial": [
-        1,
-        1
-      ]
-    },
-    {
       "sample_index": 240,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -2916,7 +2661,6 @@
     },
     {
       "sample_index": 241,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -2927,20 +2671,18 @@
     },
     {
       "sample_index": 242,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 5,
+      "steps_total": 4,
       "steps_per_trial": [
         1,
-        2,
+        1,
         2
       ]
     },
     {
       "sample_index": 243,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -2951,59 +2693,54 @@
     },
     {
       "sample_index": 244,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 5,
+      "steps_total": 6,
       "steps_per_trial": [
-        2,
-        2,
-        1
+        1,
+        3,
+        2
       ]
     },
     {
       "sample_index": 245,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 5,
+      "steps_total": 7,
       "steps_per_trial": [
         1,
-        2,
+        4,
         2
       ]
     },
     {
       "sample_index": 246,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 4,
+      "steps_total": 18,
       "steps_per_trial": [
         1,
-        2,
-        1
+        15,
+        2
       ]
     },
     {
       "sample_index": 247,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
-      "correct": false,
-      "steps_total": 3,
+      "correct": true,
+      "steps_total": 6,
       "steps_per_trial": [
-        1,
-        1,
-        1
+        2,
+        2,
+        2
       ]
     },
     {
       "sample_index": 248,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -3014,33 +2751,30 @@
     },
     {
       "sample_index": 249,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
-      "correct": false,
-      "steps_total": 11,
+      "correct": true,
+      "steps_total": 7,
       "steps_per_trial": [
         1,
-        8,
-        2
+        1,
+        5
       ]
     },
     {
       "sample_index": 250,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 3,
+      "steps_total": 6,
       "steps_per_trial": [
         1,
-        1,
+        4,
         1
       ]
     },
     {
       "sample_index": 251,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
@@ -3053,58 +2787,52 @@
     },
     {
       "sample_index": 252,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 3,
+      "steps_total": 7,
       "steps_per_trial": [
         1,
-        1,
-        1
+        4,
+        2
       ]
     },
     {
       "sample_index": 253,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 3,
+      "steps_total": 5,
       "steps_per_trial": [
         1,
-        1,
-        1
+        2,
+        2
       ]
     },
     {
       "sample_index": 254,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 2,
+      "num_trials": 1,
       "correct": true,
-      "steps_total": 2,
+      "steps_total": 1,
       "steps_per_trial": [
-        1,
         1
       ]
     },
     {
       "sample_index": 255,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
-      "correct": false,
-      "steps_total": 3,
+      "correct": true,
+      "steps_total": 6,
       "steps_per_trial": [
         1,
-        1,
-        1
+        2,
+        3
       ]
     },
     {
       "sample_index": 256,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -3115,7 +2843,6 @@
     },
     {
       "sample_index": 257,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -3126,84 +2853,78 @@
     },
     {
       "sample_index": 258,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 3,
+      "steps_total": 4,
       "steps_per_trial": [
         1,
         1,
-        1
+        2
       ]
     },
     {
       "sample_index": 259,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 3,
+      "steps_total": 5,
       "steps_per_trial": [
         1,
-        1,
-        1
+        2,
+        2
       ]
     },
     {
       "sample_index": 260,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 3,
+      "steps_total": 6,
       "steps_per_trial": [
         1,
-        1,
-        1
+        2,
+        3
       ]
     },
     {
       "sample_index": 261,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
-      "correct": false,
-      "steps_total": 3,
+      "correct": true,
+      "steps_total": 6,
       "steps_per_trial": [
         1,
-        1,
-        1
+        2,
+        3
       ]
     },
     {
       "sample_index": 262,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 3,
+      "steps_total": 5,
       "steps_per_trial": [
         1,
-        1,
-        1
+        2,
+        2
       ]
     },
     {
       "sample_index": 263,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 2,
+      "num_trials": 3,
       "correct": true,
-      "steps_total": 2,
+      "steps_total": 5,
       "steps_per_trial": [
         1,
-        1
+        2,
+        2
       ]
     },
     {
       "sample_index": 264,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -3214,71 +2935,64 @@
     },
     {
       "sample_index": 265,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 2,
+      "num_trials": 1,
       "correct": true,
-      "steps_total": 3,
+      "steps_total": 1,
       "steps_per_trial": [
-        1,
-        2
+        1
       ]
     },
     {
       "sample_index": 266,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 4,
+      "steps_total": 5,
       "steps_per_trial": [
         1,
         2,
-        1
+        2
       ]
     },
     {
       "sample_index": 267,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 3,
+      "steps_total": 5,
       "steps_per_trial": [
         1,
-        1,
-        1
+        2,
+        2
       ]
     },
     {
       "sample_index": 268,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 3,
+      "steps_total": 5,
       "steps_per_trial": [
         1,
-        1,
-        1
+        2,
+        2
       ]
     },
     {
       "sample_index": 269,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 3,
+      "steps_total": 6,
       "steps_per_trial": [
-        1,
-        1,
+        2,
+        3,
         1
       ]
     },
     {
       "sample_index": 270,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -3289,33 +3003,29 @@
     },
     {
       "sample_index": 271,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 4,
+      "steps_total": 5,
       "steps_per_trial": [
         1,
         2,
-        1
+        2
       ]
     },
     {
       "sample_index": 272,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
+      "num_trials": 2,
+      "correct": true,
       "steps_total": 3,
       "steps_per_trial": [
         1,
-        1,
-        1
+        2
       ]
     },
     {
       "sample_index": 273,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -3326,18 +3036,17 @@
     },
     {
       "sample_index": 274,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 1,
+      "num_trials": 2,
       "correct": true,
-      "steps_total": 1,
+      "steps_total": 3,
       "steps_per_trial": [
-        1
+        1,
+        2
       ]
     },
     {
       "sample_index": 275,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -3348,72 +3057,65 @@
     },
     {
       "sample_index": 276,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 4,
+      "steps_total": 6,
       "steps_per_trial": [
         2,
-        1,
-        1
+        2,
+        2
       ]
     },
     {
       "sample_index": 277,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
+      "num_trials": 2,
+      "correct": true,
       "steps_total": 3,
       "steps_per_trial": [
         1,
-        1,
-        1
+        2
       ]
     },
     {
       "sample_index": 278,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
       "steps_total": 4,
       "steps_per_trial": [
-        2,
         1,
-        1
+        1,
+        2
       ]
     },
     {
       "sample_index": 279,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 3,
+      "steps_total": 5,
       "steps_per_trial": [
         1,
-        1,
-        1
+        2,
+        2
       ]
     },
     {
       "sample_index": 280,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 3,
+      "steps_total": 4,
       "steps_per_trial": [
         1,
         1,
-        1
+        2
       ]
     },
     {
       "sample_index": 281,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -3424,33 +3126,30 @@
     },
     {
       "sample_index": 282,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 3,
+      "steps_total": 5,
       "steps_per_trial": [
         1,
         1,
-        1
+        3
       ]
     },
     {
       "sample_index": 283,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 3,
+      "steps_total": 7,
       "steps_per_trial": [
         1,
-        1,
-        1
+        4,
+        2
       ]
     },
     {
       "sample_index": 284,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -3461,7 +3160,6 @@
     },
     {
       "sample_index": 285,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -3472,68 +3170,65 @@
     },
     {
       "sample_index": 286,
-      "lang": "ja",
+      "max_trials": 3,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 5,
+      "steps_per_trial": [
+        1,
+        2,
+        2
+      ]
+    },
+    {
+      "sample_index": 287,
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
       "steps_total": 4,
       "steps_per_trial": [
-        2,
         1,
+        2,
         1
       ]
     },
     {
-      "sample_index": 287,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 7,
-      "steps_per_trial": [
-        1,
-        3,
-        3
-      ]
-    },
-    {
       "sample_index": 288,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 3,
+      "steps_total": 8,
       "steps_per_trial": [
         1,
-        1,
+        6,
         1
       ]
     },
     {
       "sample_index": 289,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 1,
+      "num_trials": 3,
       "correct": true,
-      "steps_total": 1,
+      "steps_total": 6,
       "steps_per_trial": [
-        1
+        1,
+        2,
+        3
       ]
     },
     {
       "sample_index": 290,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 1,
+      "num_trials": 2,
       "correct": true,
-      "steps_total": 2,
+      "steps_total": 3,
       "steps_per_trial": [
+        1,
         2
       ]
     },
     {
       "sample_index": 291,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
@@ -3546,7 +3241,6 @@
     },
     {
       "sample_index": 292,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
@@ -3559,7 +3253,6 @@
     },
     {
       "sample_index": 293,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -3570,20 +3263,18 @@
     },
     {
       "sample_index": 294,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 3,
+      "steps_total": 10,
       "steps_per_trial": [
         1,
-        1,
-        1
+        5,
+        4
       ]
     },
     {
       "sample_index": 295,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
@@ -3596,46 +3287,6 @@
     },
     {
       "sample_index": 296,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 3,
-      "steps_per_trial": [
-        1,
-        1,
-        1
-      ]
-    },
-    {
-      "sample_index": 297,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 3,
-      "steps_per_trial": [
-        1,
-        1,
-        1
-      ]
-    },
-    {
-      "sample_index": 298,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 4,
-      "steps_per_trial": [
-        1,
-        1,
-        2
-      ]
-    },
-    {
-      "sample_index": 299,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
@@ -3647,8 +3298,43 @@
       ]
     },
     {
+      "sample_index": 297,
+      "max_trials": 3,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 7,
+      "steps_per_trial": [
+        1,
+        2,
+        4
+      ]
+    },
+    {
+      "sample_index": 298,
+      "max_trials": 3,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 5,
+      "steps_per_trial": [
+        1,
+        2,
+        2
+      ]
+    },
+    {
+      "sample_index": 299,
+      "max_trials": 3,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 5,
+      "steps_per_trial": [
+        1,
+        1,
+        3
+      ]
+    },
+    {
       "sample_index": 300,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -3659,7 +3345,6 @@
     },
     {
       "sample_index": 301,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
@@ -3672,31 +3357,28 @@
     },
     {
       "sample_index": 302,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 3,
+      "steps_total": 4,
       "steps_per_trial": [
         1,
-        1,
+        2,
         1
       ]
     },
     {
       "sample_index": 303,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
-      "steps_total": 3,
+      "steps_total": 2,
       "steps_per_trial": [
-        3
+        2
       ]
     },
     {
       "sample_index": 304,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -3707,7 +3389,6 @@
     },
     {
       "sample_index": 305,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -3718,7 +3399,6 @@
     },
     {
       "sample_index": 306,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
@@ -3731,7 +3411,6 @@
     },
     {
       "sample_index": 307,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -3742,7 +3421,6 @@
     },
     {
       "sample_index": 308,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
@@ -3755,33 +3433,30 @@
     },
     {
       "sample_index": 309,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 3,
+      "steps_total": 7,
       "steps_per_trial": [
         1,
-        1,
-        1
+        3,
+        3
       ]
     },
     {
       "sample_index": 310,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 3,
+      "steps_total": 4,
       "steps_per_trial": [
         1,
-        1,
+        2,
         1
       ]
     },
     {
       "sample_index": 311,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -3792,20 +3467,18 @@
     },
     {
       "sample_index": 312,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 3,
+      "steps_total": 4,
       "steps_per_trial": [
         1,
-        1,
+        2,
         1
       ]
     },
     {
       "sample_index": 313,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -3816,7 +3489,6 @@
     },
     {
       "sample_index": 314,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -3827,7 +3499,6 @@
     },
     {
       "sample_index": 315,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -3838,7 +3509,6 @@
     },
     {
       "sample_index": 316,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -3849,18 +3519,16 @@
     },
     {
       "sample_index": 317,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
-      "steps_total": 3,
+      "steps_total": 2,
       "steps_per_trial": [
-        3
+        2
       ]
     },
     {
       "sample_index": 318,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -3871,7 +3539,6 @@
     },
     {
       "sample_index": 319,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -3882,7 +3549,6 @@
     },
     {
       "sample_index": 320,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -3893,40 +3559,6 @@
     },
     {
       "sample_index": 321,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 1,
-      "correct": true,
-      "steps_total": 1,
-      "steps_per_trial": [
-        1
-      ]
-    },
-    {
-      "sample_index": 322,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 1,
-      "correct": true,
-      "steps_total": 1,
-      "steps_per_trial": [
-        1
-      ]
-    },
-    {
-      "sample_index": 323,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 1,
-      "correct": true,
-      "steps_total": 1,
-      "steps_per_trial": [
-        1
-      ]
-    },
-    {
-      "sample_index": 324,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -3936,31 +3568,57 @@
       ]
     },
     {
-      "sample_index": 325,
-      "lang": "ja",
+      "sample_index": 322,
       "max_trials": 3,
-      "num_trials": 2,
+      "num_trials": 1,
       "correct": true,
-      "steps_total": 4,
+      "steps_total": 2,
       "steps_per_trial": [
-        2,
+        2
+      ]
+    },
+    {
+      "sample_index": 323,
+      "max_trials": 3,
+      "num_trials": 1,
+      "correct": true,
+      "steps_total": 2,
+      "steps_per_trial": [
+        2
+      ]
+    },
+    {
+      "sample_index": 324,
+      "max_trials": 3,
+      "num_trials": 1,
+      "correct": true,
+      "steps_total": 1,
+      "steps_per_trial": [
+        1
+      ]
+    },
+    {
+      "sample_index": 325,
+      "max_trials": 3,
+      "num_trials": 1,
+      "correct": true,
+      "steps_total": 2,
+      "steps_per_trial": [
         2
       ]
     },
     {
       "sample_index": 326,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
-      "steps_total": 3,
+      "steps_total": 1,
       "steps_per_trial": [
-        3
+        1
       ]
     },
     {
       "sample_index": 327,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -3971,29 +3629,27 @@
     },
     {
       "sample_index": 328,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
-      "steps_total": 2,
+      "steps_total": 1,
       "steps_per_trial": [
-        2
+        1
       ]
     },
     {
       "sample_index": 329,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 1,
+      "num_trials": 2,
       "correct": true,
-      "steps_total": 3,
+      "steps_total": 5,
       "steps_per_trial": [
+        2,
         3
       ]
     },
     {
       "sample_index": 330,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -4004,20 +3660,18 @@
     },
     {
       "sample_index": 331,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 4,
+      "steps_total": 8,
       "steps_per_trial": [
         2,
-        1,
-        1
+        3,
+        3
       ]
     },
     {
       "sample_index": 332,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -4028,7 +3682,6 @@
     },
     {
       "sample_index": 333,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -4039,7 +3692,6 @@
     },
     {
       "sample_index": 334,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -4050,20 +3702,17 @@
     },
     {
       "sample_index": 335,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
+      "num_trials": 2,
+      "correct": true,
       "steps_total": 3,
       "steps_per_trial": [
         1,
-        1,
-        1
+        2
       ]
     },
     {
       "sample_index": 336,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
@@ -4076,7 +3725,6 @@
     },
     {
       "sample_index": 337,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -4087,7 +3735,6 @@
     },
     {
       "sample_index": 338,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -4098,90 +3745,41 @@
     },
     {
       "sample_index": 339,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 5,
+      "steps_total": 4,
       "steps_per_trial": [
-        2,
-        2,
-        1
+        1,
+        1,
+        2
       ]
     },
     {
       "sample_index": 340,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 1,
+      "num_trials": 2,
       "correct": true,
-      "steps_total": 1,
+      "steps_total": 3,
       "steps_per_trial": [
+        2,
         1
       ]
     },
     {
       "sample_index": 341,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 1,
+      "num_trials": 3,
       "correct": true,
-      "steps_total": 2,
+      "steps_total": 6,
       "steps_per_trial": [
-        2
+        1,
+        2,
+        3
       ]
     },
     {
       "sample_index": 342,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 2,
-      "correct": true,
-      "steps_total": 3,
-      "steps_per_trial": [
-        2,
-        1
-      ]
-    },
-    {
-      "sample_index": 343,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 1,
-      "correct": true,
-      "steps_total": 1,
-      "steps_per_trial": [
-        1
-      ]
-    },
-    {
-      "sample_index": 344,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 2,
-      "correct": true,
-      "steps_total": 2,
-      "steps_per_trial": [
-        1,
-        1
-      ]
-    },
-    {
-      "sample_index": 345,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 3,
-      "steps_per_trial": [
-        1,
-        1,
-        1
-      ]
-    },
-    {
-      "sample_index": 346,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
@@ -4193,8 +3791,50 @@
       ]
     },
     {
+      "sample_index": 343,
+      "max_trials": 3,
+      "num_trials": 1,
+      "correct": true,
+      "steps_total": 2,
+      "steps_per_trial": [
+        2
+      ]
+    },
+    {
+      "sample_index": 344,
+      "max_trials": 3,
+      "num_trials": 1,
+      "correct": true,
+      "steps_total": 1,
+      "steps_per_trial": [
+        1
+      ]
+    },
+    {
+      "sample_index": 345,
+      "max_trials": 3,
+      "num_trials": 2,
+      "correct": true,
+      "steps_total": 3,
+      "steps_per_trial": [
+        1,
+        2
+      ]
+    },
+    {
+      "sample_index": 346,
+      "max_trials": 3,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 5,
+      "steps_per_trial": [
+        1,
+        2,
+        2
+      ]
+    },
+    {
       "sample_index": 347,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -4205,7 +3845,6 @@
     },
     {
       "sample_index": 348,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -4216,7 +3855,6 @@
     },
     {
       "sample_index": 349,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -4227,7 +3865,6 @@
     },
     {
       "sample_index": 350,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -4238,7 +3875,6 @@
     },
     {
       "sample_index": 351,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -4249,7 +3885,6 @@
     },
     {
       "sample_index": 352,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -4260,7 +3895,6 @@
     },
     {
       "sample_index": 353,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -4271,18 +3905,16 @@
     },
     {
       "sample_index": 354,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
-      "steps_total": 2,
+      "steps_total": 1,
       "steps_per_trial": [
-        2
+        1
       ]
     },
     {
       "sample_index": 355,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -4293,31 +3925,28 @@
     },
     {
       "sample_index": 356,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
-      "steps_total": 2,
+      "steps_total": 1,
       "steps_per_trial": [
-        2
-      ]
-    },
-    {
-      "sample_index": 357,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 3,
-      "steps_per_trial": [
-        1,
-        1,
         1
       ]
     },
     {
+      "sample_index": 357,
+      "max_trials": 3,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 4,
+      "steps_per_trial": [
+        1,
+        1,
+        2
+      ]
+    },
+    {
       "sample_index": 358,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
@@ -4330,7 +3959,6 @@
     },
     {
       "sample_index": 359,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -4341,7 +3969,6 @@
     },
     {
       "sample_index": 360,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -4352,7 +3979,6 @@
     },
     {
       "sample_index": 361,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -4363,7 +3989,18 @@
     },
     {
       "sample_index": 362,
-      "lang": "ja",
+      "max_trials": 3,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 4,
+      "steps_per_trial": [
+        1,
+        2,
+        1
+      ]
+    },
+    {
+      "sample_index": 363,
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -4373,32 +4010,19 @@
       ]
     },
     {
-      "sample_index": 363,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 1,
-      "correct": true,
-      "steps_total": 1,
-      "steps_per_trial": [
-        1
-      ]
-    },
-    {
       "sample_index": 364,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 4,
+      "steps_total": 6,
       "steps_per_trial": [
-        2,
         1,
-        1
+        3,
+        2
       ]
     },
     {
       "sample_index": 365,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -4409,7 +4033,6 @@
     },
     {
       "sample_index": 366,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -4420,20 +4043,6 @@
     },
     {
       "sample_index": 367,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": true,
-      "steps_total": 3,
-      "steps_per_trial": [
-        1,
-        1,
-        1
-      ]
-    },
-    {
-      "sample_index": 368,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -4443,8 +4052,17 @@
       ]
     },
     {
+      "sample_index": 368,
+      "max_trials": 3,
+      "num_trials": 1,
+      "correct": true,
+      "steps_total": 2,
+      "steps_per_trial": [
+        2
+      ]
+    },
+    {
       "sample_index": 369,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -4455,7 +4073,6 @@
     },
     {
       "sample_index": 370,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -4466,19 +4083,16 @@
     },
     {
       "sample_index": 371,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 2,
+      "num_trials": 1,
       "correct": true,
-      "steps_total": 5,
+      "steps_total": 1,
       "steps_per_trial": [
-        4,
         1
       ]
     },
     {
       "sample_index": 372,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -4489,7 +4103,6 @@
     },
     {
       "sample_index": 373,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -4500,7 +4113,6 @@
     },
     {
       "sample_index": 374,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
@@ -4513,7 +4125,6 @@
     },
     {
       "sample_index": 375,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
@@ -4526,7 +4137,6 @@
     },
     {
       "sample_index": 376,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
@@ -4539,7 +4149,6 @@
     },
     {
       "sample_index": 377,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
@@ -4552,18 +4161,26 @@
     },
     {
       "sample_index": 378,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
-      "steps_total": 1,
+      "steps_total": 2,
       "steps_per_trial": [
-        1
+        2
       ]
     },
     {
       "sample_index": 379,
-      "lang": "ja",
+      "max_trials": 3,
+      "num_trials": 1,
+      "correct": true,
+      "steps_total": 11,
+      "steps_per_trial": [
+        11
+      ]
+    },
+    {
+      "sample_index": 380,
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -4573,57 +4190,39 @@
       ]
     },
     {
-      "sample_index": 380,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": true,
-      "steps_total": 7,
-      "steps_per_trial": [
-        2,
-        2,
-        3
-      ]
-    },
-    {
       "sample_index": 381,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
-      "steps_total": 4,
+      "steps_total": 7,
       "steps_per_trial": [
-        4
+        7
       ]
     },
     {
       "sample_index": 382,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 2,
+      "num_trials": 1,
       "correct": true,
-      "steps_total": 7,
+      "steps_total": 1,
       "steps_per_trial": [
-        6,
         1
       ]
     },
     {
       "sample_index": 383,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 3,
+      "steps_total": 5,
       "steps_per_trial": [
         1,
-        1,
+        3,
         1
       ]
     },
     {
       "sample_index": 384,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -4634,7 +4233,6 @@
     },
     {
       "sample_index": 385,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -4645,19 +4243,17 @@
     },
     {
       "sample_index": 386,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 2,
       "correct": true,
-      "steps_total": 3,
+      "steps_total": 7,
       "steps_per_trial": [
-        1,
-        2
+        4,
+        3
       ]
     },
     {
       "sample_index": 387,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -4668,7 +4264,6 @@
     },
     {
       "sample_index": 388,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -4679,7 +4274,6 @@
     },
     {
       "sample_index": 389,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -4690,7 +4284,6 @@
     },
     {
       "sample_index": 390,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -4701,7 +4294,6 @@
     },
     {
       "sample_index": 391,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -4712,7 +4304,6 @@
     },
     {
       "sample_index": 392,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -4723,33 +4314,27 @@
     },
     {
       "sample_index": 393,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 3,
-      "steps_per_trial": [
-        1,
-        1,
-        1
-      ]
-    },
-    {
-      "sample_index": 394,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
+      "num_trials": 2,
       "correct": true,
       "steps_total": 3,
       "steps_per_trial": [
         1,
-        1,
+        2
+      ]
+    },
+    {
+      "sample_index": 394,
+      "max_trials": 3,
+      "num_trials": 1,
+      "correct": true,
+      "steps_total": 1,
+      "steps_per_trial": [
         1
       ]
     },
     {
       "sample_index": 395,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -4760,7 +4345,6 @@
     },
     {
       "sample_index": 396,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -4771,7 +4355,6 @@
     },
     {
       "sample_index": 397,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -4782,7 +4365,6 @@
     },
     {
       "sample_index": 398,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -4793,55 +4375,51 @@
     },
     {
       "sample_index": 399,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
-      "correct": false,
-      "steps_total": 8,
+      "correct": true,
+      "steps_total": 7,
       "steps_per_trial": [
-        4,
         2,
-        2
-      ]
-    },
-    {
-      "sample_index": 400,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": true,
-      "steps_total": 4,
-      "steps_per_trial": [
-        1,
-        1,
-        2
-      ]
-    },
-    {
-      "sample_index": 401,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 1,
-      "correct": true,
-      "steps_total": 2,
-      "steps_per_trial": [
-        2
-      ]
-    },
-    {
-      "sample_index": 402,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 1,
-      "correct": true,
-      "steps_total": 3,
-      "steps_per_trial": [
+        2,
         3
       ]
     },
     {
+      "sample_index": 400,
+      "max_trials": 3,
+      "num_trials": 2,
+      "correct": true,
+      "steps_total": 10,
+      "steps_per_trial": [
+        1,
+        9
+      ]
+    },
+    {
+      "sample_index": 401,
+      "max_trials": 3,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 30,
+      "steps_per_trial": [
+        3,
+        22,
+        5
+      ]
+    },
+    {
+      "sample_index": 402,
+      "max_trials": 3,
+      "num_trials": 1,
+      "correct": true,
+      "steps_total": 1,
+      "steps_per_trial": [
+        1
+      ]
+    },
+    {
       "sample_index": 403,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -4852,7 +4430,6 @@
     },
     {
       "sample_index": 404,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -4863,7 +4440,6 @@
     },
     {
       "sample_index": 405,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -4874,7 +4450,6 @@
     },
     {
       "sample_index": 406,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -4885,7 +4460,6 @@
     },
     {
       "sample_index": 407,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -4896,7 +4470,6 @@
     },
     {
       "sample_index": 408,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -4907,7 +4480,6 @@
     },
     {
       "sample_index": 409,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -4918,7 +4490,6 @@
     },
     {
       "sample_index": 410,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -4929,51 +4500,48 @@
     },
     {
       "sample_index": 411,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
-      "steps_total": 5,
+      "steps_total": 3,
       "steps_per_trial": [
-        5
+        3
       ]
     },
     {
       "sample_index": 412,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
-      "steps_total": 2,
+      "steps_total": 1,
       "steps_per_trial": [
-        2
+        1
       ]
     },
     {
       "sample_index": 413,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
-      "steps_total": 2,
+      "steps_total": 1,
       "steps_per_trial": [
-        2
+        1
       ]
     },
     {
       "sample_index": 414,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 1,
+      "num_trials": 3,
       "correct": true,
-      "steps_total": 2,
+      "steps_total": 9,
       "steps_per_trial": [
+        2,
+        5,
         2
       ]
     },
     {
       "sample_index": 415,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -4984,31 +4552,6 @@
     },
     {
       "sample_index": 416,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 2,
-      "correct": true,
-      "steps_total": 2,
-      "steps_per_trial": [
-        1,
-        1
-      ]
-    },
-    {
-      "sample_index": 417,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 2,
-      "correct": true,
-      "steps_total": 2,
-      "steps_per_trial": [
-        1,
-        1
-      ]
-    },
-    {
-      "sample_index": 418,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -5018,8 +4561,29 @@
       ]
     },
     {
+      "sample_index": 417,
+      "max_trials": 3,
+      "num_trials": 2,
+      "correct": true,
+      "steps_total": 5,
+      "steps_per_trial": [
+        2,
+        3
+      ]
+    },
+    {
+      "sample_index": 418,
+      "max_trials": 3,
+      "num_trials": 2,
+      "correct": true,
+      "steps_total": 5,
+      "steps_per_trial": [
+        2,
+        3
+      ]
+    },
+    {
       "sample_index": 419,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -5030,7 +4594,6 @@
     },
     {
       "sample_index": 420,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -5041,7 +4604,6 @@
     },
     {
       "sample_index": 421,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -5052,7 +4614,6 @@
     },
     {
       "sample_index": 422,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -5063,20 +4624,16 @@
     },
     {
       "sample_index": 423,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 4,
+      "num_trials": 1,
+      "correct": true,
+      "steps_total": 1,
       "steps_per_trial": [
-        1,
-        2,
         1
       ]
     },
     {
       "sample_index": 424,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -5087,7 +4644,6 @@
     },
     {
       "sample_index": 425,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -5098,58 +4654,30 @@
     },
     {
       "sample_index": 426,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
-      "correct": true,
-      "steps_total": 4,
+      "correct": false,
+      "steps_total": 6,
       "steps_per_trial": [
         1,
-        1,
-        2
+        2,
+        3
       ]
     },
     {
       "sample_index": 427,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
       "steps_total": 5,
       "steps_per_trial": [
-        2,
         1,
+        2,
         2
       ]
     },
     {
       "sample_index": 428,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 2,
-      "correct": true,
-      "steps_total": 3,
-      "steps_per_trial": [
-        2,
-        1
-      ]
-    },
-    {
-      "sample_index": 429,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": true,
-      "steps_total": 5,
-      "steps_per_trial": [
-        2,
-        1,
-        2
-      ]
-    },
-    {
-      "sample_index": 430,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -5159,8 +4687,29 @@
       ]
     },
     {
+      "sample_index": 429,
+      "max_trials": 3,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 7,
+      "steps_per_trial": [
+        1,
+        4,
+        2
+      ]
+    },
+    {
+      "sample_index": 430,
+      "max_trials": 3,
+      "num_trials": 1,
+      "correct": true,
+      "steps_total": 2,
+      "steps_per_trial": [
+        2
+      ]
+    },
+    {
       "sample_index": 431,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -5171,20 +4720,18 @@
     },
     {
       "sample_index": 432,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 3,
+      "steps_total": 6,
       "steps_per_trial": [
         1,
-        1,
+        4,
         1
       ]
     },
     {
       "sample_index": 433,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -5195,20 +4742,18 @@
     },
     {
       "sample_index": 434,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 4,
+      "steps_total": 3,
       "steps_per_trial": [
-        2,
+        1,
         1,
         1
       ]
     },
     {
       "sample_index": 435,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -5219,43 +4764,18 @@
     },
     {
       "sample_index": 436,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 2,
-      "correct": true,
-      "steps_total": 4,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 6,
       "steps_per_trial": [
+        2,
         2,
         2
       ]
     },
     {
       "sample_index": 437,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 1,
-      "correct": true,
-      "steps_total": 1,
-      "steps_per_trial": [
-        1
-      ]
-    },
-    {
-      "sample_index": 438,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 9,
-      "steps_per_trial": [
-        2,
-        3,
-        4
-      ]
-    },
-    {
-      "sample_index": 439,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -5265,8 +4785,30 @@
       ]
     },
     {
+      "sample_index": 438,
+      "max_trials": 3,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 7,
+      "steps_per_trial": [
+        3,
+        2,
+        2
+      ]
+    },
+    {
+      "sample_index": 439,
+      "max_trials": 3,
+      "num_trials": 2,
+      "correct": true,
+      "steps_total": 3,
+      "steps_per_trial": [
+        1,
+        2
+      ]
+    },
+    {
       "sample_index": 440,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -5277,31 +4819,30 @@
     },
     {
       "sample_index": 441,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
-      "correct": true,
-      "steps_total": 4,
+      "correct": false,
+      "steps_total": 5,
       "steps_per_trial": [
         1,
         2,
-        1
+        2
       ]
     },
     {
       "sample_index": 442,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 1,
-      "correct": true,
-      "steps_total": 2,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 5,
       "steps_per_trial": [
+        1,
+        2,
         2
       ]
     },
     {
       "sample_index": 443,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -5312,46 +4853,52 @@
     },
     {
       "sample_index": 444,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 3,
+      "num_trials": 1,
+      "correct": true,
+      "steps_total": 1,
       "steps_per_trial": [
-        1,
-        1,
         1
       ]
     },
     {
       "sample_index": 445,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
       "steps_total": 4,
       "steps_per_trial": [
         1,
-        2,
-        1
+        1,
+        2
       ]
     },
     {
       "sample_index": 446,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 3,
+      "steps_total": 5,
       "steps_per_trial": [
         1,
-        1,
-        1
+        2,
+        2
       ]
     },
     {
       "sample_index": 447,
-      "lang": "ja",
+      "max_trials": 3,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 5,
+      "steps_per_trial": [
+        2,
+        1,
+        2
+      ]
+    },
+    {
+      "sample_index": 448,
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
@@ -5359,38 +4906,23 @@
       "steps_per_trial": [
         1,
         2,
-        1
-      ]
-    },
-    {
-      "sample_index": 448,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 3,
-      "steps_per_trial": [
-        1,
-        1,
         1
       ]
     },
     {
       "sample_index": 449,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 3,
+      "steps_total": 5,
       "steps_per_trial": [
         1,
-        1,
-        1
+        2,
+        2
       ]
     },
     {
       "sample_index": 450,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -5401,18 +4933,17 @@
     },
     {
       "sample_index": 451,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 1,
+      "num_trials": 2,
       "correct": true,
-      "steps_total": 2,
+      "steps_total": 4,
       "steps_per_trial": [
+        2,
         2
       ]
     },
     {
       "sample_index": 452,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -5423,44 +4954,30 @@
     },
     {
       "sample_index": 453,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 1,
-      "correct": true,
-      "steps_total": 1,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 8,
       "steps_per_trial": [
-        1
+        2,
+        3,
+        3
       ]
     },
     {
       "sample_index": 454,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 4,
+      "steps_total": 5,
       "steps_per_trial": [
         1,
-        1,
+        2,
         2
       ]
     },
     {
       "sample_index": 455,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": true,
-      "steps_total": 6,
-      "steps_per_trial": [
-        1,
-        1,
-        4
-      ]
-    },
-    {
-      "sample_index": 456,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -5470,8 +4987,19 @@
       ]
     },
     {
+      "sample_index": 456,
+      "max_trials": 3,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 3,
+      "steps_per_trial": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
       "sample_index": 457,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -5482,70 +5010,64 @@
     },
     {
       "sample_index": 458,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
-      "steps_total": 2,
+      "steps_total": 3,
       "steps_per_trial": [
-        2
+        3
       ]
     },
     {
       "sample_index": 459,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 4,
-      "steps_per_trial": [
-        1,
-        1,
-        2
-      ]
-    },
-    {
-      "sample_index": 460,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 4,
-      "steps_per_trial": [
-        1,
-        1,
-        2
-      ]
-    },
-    {
-      "sample_index": 461,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 3,
-      "steps_per_trial": [
-        1,
-        1,
-        1
-      ]
-    },
-    {
-      "sample_index": 462,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
       "steps_total": 5,
       "steps_per_trial": [
-        2,
         1,
+        2,
         2
       ]
     },
     {
+      "sample_index": 460,
+      "max_trials": 3,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 7,
+      "steps_per_trial": [
+        1,
+        3,
+        3
+      ]
+    },
+    {
+      "sample_index": 461,
+      "max_trials": 3,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 4,
+      "steps_per_trial": [
+        1,
+        2,
+        1
+      ]
+    },
+    {
+      "sample_index": 462,
+      "max_trials": 3,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 6,
+      "steps_per_trial": [
+        1,
+        2,
+        3
+      ]
+    },
+    {
       "sample_index": 463,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -5556,33 +5078,28 @@
     },
     {
       "sample_index": 464,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 5,
+      "steps_total": 6,
       "steps_per_trial": [
-        1,
+        2,
         2,
         2
       ]
     },
     {
       "sample_index": 465,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 19,
+      "num_trials": 1,
+      "correct": true,
+      "steps_total": 3,
       "steps_per_trial": [
-        8,
-        6,
-        5
+        3
       ]
     },
     {
       "sample_index": 466,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -5593,45 +5110,41 @@
     },
     {
       "sample_index": 467,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 3,
+      "steps_total": 7,
       "steps_per_trial": [
         1,
-        1,
-        1
+        3,
+        3
       ]
     },
     {
       "sample_index": 468,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 3,
+      "steps_total": 4,
       "steps_per_trial": [
         1,
-        1,
+        2,
         1
       ]
     },
     {
       "sample_index": 469,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 2,
       "correct": true,
-      "steps_total": 2,
+      "steps_total": 3,
       "steps_per_trial": [
         1,
-        1
+        2
       ]
     },
     {
       "sample_index": 470,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -5642,53 +5155,50 @@
     },
     {
       "sample_index": 471,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 1,
+      "num_trials": 2,
       "correct": true,
-      "steps_total": 1,
+      "steps_total": 2,
       "steps_per_trial": [
+        1,
         1
       ]
     },
     {
       "sample_index": 472,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 1,
+      "num_trials": 2,
       "correct": true,
-      "steps_total": 1,
+      "steps_total": 5,
       "steps_per_trial": [
-        1
+        2,
+        3
       ]
     },
     {
       "sample_index": 473,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
+      "num_trials": 2,
+      "correct": true,
       "steps_total": 3,
       "steps_per_trial": [
         1,
-        1,
-        1
+        2
       ]
     },
     {
       "sample_index": 474,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 1,
+      "num_trials": 2,
       "correct": true,
-      "steps_total": 1,
+      "steps_total": 2,
       "steps_per_trial": [
+        1,
         1
       ]
     },
     {
       "sample_index": 475,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
@@ -5701,31 +5211,28 @@
     },
     {
       "sample_index": 476,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
-      "steps_total": 2,
+      "steps_total": 1,
       "steps_per_trial": [
-        2
-      ]
-    },
-    {
-      "sample_index": 477,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 3,
-      "steps_per_trial": [
-        1,
-        1,
         1
       ]
     },
     {
+      "sample_index": 477,
+      "max_trials": 3,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 5,
+      "steps_per_trial": [
+        1,
+        2,
+        2
+      ]
+    },
+    {
       "sample_index": 478,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -5736,7 +5243,26 @@
     },
     {
       "sample_index": 479,
-      "lang": "ja",
+      "max_trials": 3,
+      "num_trials": 1,
+      "correct": true,
+      "steps_total": 2,
+      "steps_per_trial": [
+        2
+      ]
+    },
+    {
+      "sample_index": 480,
+      "max_trials": 3,
+      "num_trials": 1,
+      "correct": true,
+      "steps_total": 1,
+      "steps_per_trial": [
+        1
+      ]
+    },
+    {
+      "sample_index": 481,
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -5746,32 +5272,7 @@
       ]
     },
     {
-      "sample_index": 480,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": true,
-      "steps_total": 4,
-      "steps_per_trial": [
-        1,
-        1,
-        2
-      ]
-    },
-    {
-      "sample_index": 481,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 1,
-      "correct": true,
-      "steps_total": 5,
-      "steps_per_trial": [
-        5
-      ]
-    },
-    {
       "sample_index": 482,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -5782,7 +5283,6 @@
     },
     {
       "sample_index": 483,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -5793,18 +5293,16 @@
     },
     {
       "sample_index": 484,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
-      "steps_total": 2,
+      "steps_total": 1,
       "steps_per_trial": [
-        2
+        1
       ]
     },
     {
       "sample_index": 485,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
@@ -5817,7 +5315,6 @@
     },
     {
       "sample_index": 486,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -5828,7 +5325,29 @@
     },
     {
       "sample_index": 487,
-      "lang": "ja",
+      "max_trials": 3,
+      "num_trials": 2,
+      "correct": true,
+      "steps_total": 3,
+      "steps_per_trial": [
+        1,
+        2
+      ]
+    },
+    {
+      "sample_index": 488,
+      "max_trials": 3,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 16,
+      "steps_per_trial": [
+        2,
+        9,
+        5
+      ]
+    },
+    {
+      "sample_index": 489,
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -5838,32 +5357,7 @@
       ]
     },
     {
-      "sample_index": 488,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 3,
-      "steps_per_trial": [
-        1,
-        1,
-        1
-      ]
-    },
-    {
-      "sample_index": 489,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 1,
-      "correct": true,
-      "steps_total": 2,
-      "steps_per_trial": [
-        2
-      ]
-    },
-    {
       "sample_index": 490,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -5874,18 +5368,17 @@
     },
     {
       "sample_index": 491,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 1,
+      "num_trials": 2,
       "correct": true,
-      "steps_total": 1,
+      "steps_total": 4,
       "steps_per_trial": [
-        1
+        2,
+        2
       ]
     },
     {
       "sample_index": 492,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
@@ -5898,7 +5391,86 @@
     },
     {
       "sample_index": 493,
-      "lang": "ja",
+      "max_trials": 3,
+      "num_trials": 3,
+      "correct": true,
+      "steps_total": 6,
+      "steps_per_trial": [
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "sample_index": 494,
+      "max_trials": 3,
+      "num_trials": 2,
+      "correct": true,
+      "steps_total": 3,
+      "steps_per_trial": [
+        1,
+        2
+      ]
+    },
+    {
+      "sample_index": 495,
+      "max_trials": 3,
+      "num_trials": 2,
+      "correct": true,
+      "steps_total": 3,
+      "steps_per_trial": [
+        1,
+        2
+      ]
+    },
+    {
+      "sample_index": 496,
+      "max_trials": 3,
+      "num_trials": 1,
+      "correct": true,
+      "steps_total": 1,
+      "steps_per_trial": [
+        1
+      ]
+    },
+    {
+      "sample_index": 497,
+      "max_trials": 3,
+      "num_trials": 3,
+      "correct": true,
+      "steps_total": 6,
+      "steps_per_trial": [
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "sample_index": 498,
+      "max_trials": 3,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 12,
+      "steps_per_trial": [
+        2,
+        6,
+        4
+      ]
+    },
+    {
+      "sample_index": 499,
+      "max_trials": 3,
+      "num_trials": 3,
+      "correct": true,
+      "steps_total": 7,
+      "steps_per_trial": [
+        1,
+        2,
+        4
+      ]
+    },
+    {
+      "sample_index": 500,
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
@@ -5910,110 +5482,17 @@
       ]
     },
     {
-      "sample_index": 494,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 3,
-      "steps_per_trial": [
-        1,
-        1,
-        1
-      ]
-    },
-    {
-      "sample_index": 495,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 4,
-      "steps_per_trial": [
-        2,
-        1,
-        1
-      ]
-    },
-    {
-      "sample_index": 496,
-      "lang": "ja",
+      "sample_index": 501,
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
-      "steps_total": 1,
-      "steps_per_trial": [
-        1
-      ]
-    },
-    {
-      "sample_index": 497,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 4,
-      "steps_per_trial": [
-        1,
-        1,
-        2
-      ]
-    },
-    {
-      "sample_index": 498,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 3,
-      "steps_per_trial": [
-        1,
-        1,
-        1
-      ]
-    },
-    {
-      "sample_index": 499,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 3,
-      "steps_per_trial": [
-        1,
-        1,
-        1
-      ]
-    },
-    {
-      "sample_index": 500,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 3,
-      "steps_per_trial": [
-        1,
-        1,
-        1
-      ]
-    },
-    {
-      "sample_index": 501,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
       "steps_total": 9,
       "steps_per_trial": [
-        3,
-        3,
-        3
+        9
       ]
     },
     {
       "sample_index": 502,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -6024,7 +5503,6 @@
     },
     {
       "sample_index": 503,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
@@ -6037,20 +5515,18 @@
     },
     {
       "sample_index": 504,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 6,
+      "steps_total": 7,
       "steps_per_trial": [
-        2,
+        3,
         2,
         2
       ]
     },
     {
       "sample_index": 505,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -6061,19 +5537,16 @@
     },
     {
       "sample_index": 506,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 2,
+      "num_trials": 1,
       "correct": true,
-      "steps_total": 3,
+      "steps_total": 1,
       "steps_per_trial": [
-        2,
         1
       ]
     },
     {
       "sample_index": 507,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -6084,20 +5557,18 @@
     },
     {
       "sample_index": 508,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 3,
+      "steps_total": 4,
       "steps_per_trial": [
         1,
-        1,
+        2,
         1
       ]
     },
     {
       "sample_index": 509,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -6108,7 +5579,6 @@
     },
     {
       "sample_index": 510,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -6119,7 +5589,6 @@
     },
     {
       "sample_index": 511,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -6130,20 +5599,18 @@
     },
     {
       "sample_index": 512,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 3,
+      "steps_total": 8,
       "steps_per_trial": [
         1,
-        1,
-        1
+        2,
+        5
       ]
     },
     {
       "sample_index": 513,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -6154,20 +5621,18 @@
     },
     {
       "sample_index": 514,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 4,
+      "steps_total": 6,
       "steps_per_trial": [
-        2,
         1,
-        1
+        2,
+        3
       ]
     },
     {
       "sample_index": 515,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -6178,7 +5643,6 @@
     },
     {
       "sample_index": 516,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -6189,7 +5653,6 @@
     },
     {
       "sample_index": 517,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -6200,7 +5663,6 @@
     },
     {
       "sample_index": 518,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -6211,7 +5673,6 @@
     },
     {
       "sample_index": 519,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -6222,33 +5683,161 @@
     },
     {
       "sample_index": 520,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 3,
+      "steps_total": 6,
       "steps_per_trial": [
         1,
-        1,
-        1
+        2,
+        3
       ]
     },
     {
       "sample_index": 521,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
-      "steps_total": 3,
+      "steps_total": 5,
       "steps_per_trial": [
         1,
-        1,
-        1
+        2,
+        2
       ]
     },
     {
       "sample_index": 522,
-      "lang": "ja",
+      "max_trials": 3,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 11,
+      "steps_per_trial": [
+        1,
+        3,
+        7
+      ]
+    },
+    {
+      "sample_index": 523,
+      "max_trials": 3,
+      "num_trials": 1,
+      "correct": true,
+      "steps_total": 2,
+      "steps_per_trial": [
+        2
+      ]
+    },
+    {
+      "sample_index": 524,
+      "max_trials": 3,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 7,
+      "steps_per_trial": [
+        1,
+        2,
+        4
+      ]
+    },
+    {
+      "sample_index": 525,
+      "max_trials": 3,
+      "num_trials": 1,
+      "correct": true,
+      "steps_total": 2,
+      "steps_per_trial": [
+        2
+      ]
+    },
+    {
+      "sample_index": 526,
+      "max_trials": 3,
+      "num_trials": 1,
+      "correct": true,
+      "steps_total": 1,
+      "steps_per_trial": [
+        1
+      ]
+    },
+    {
+      "sample_index": 527,
+      "max_trials": 3,
+      "num_trials": 1,
+      "correct": true,
+      "steps_total": 1,
+      "steps_per_trial": [
+        1
+      ]
+    },
+    {
+      "sample_index": 528,
+      "max_trials": 3,
+      "num_trials": 2,
+      "correct": true,
+      "steps_total": 11,
+      "steps_per_trial": [
+        1,
+        10
+      ]
+    },
+    {
+      "sample_index": 529,
+      "max_trials": 3,
+      "num_trials": 1,
+      "correct": true,
+      "steps_total": 1,
+      "steps_per_trial": [
+        1
+      ]
+    },
+    {
+      "sample_index": 530,
+      "max_trials": 3,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 5,
+      "steps_per_trial": [
+        1,
+        2,
+        2
+      ]
+    },
+    {
+      "sample_index": 531,
+      "max_trials": 3,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 6,
+      "steps_per_trial": [
+        1,
+        4,
+        1
+      ]
+    },
+    {
+      "sample_index": 532,
+      "max_trials": 3,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 5,
+      "steps_per_trial": [
+        1,
+        3,
+        1
+      ]
+    },
+    {
+      "sample_index": 533,
+      "max_trials": 3,
+      "num_trials": 1,
+      "correct": true,
+      "steps_total": 1,
+      "steps_per_trial": [
+        1
+      ]
+    },
+    {
+      "sample_index": 534,
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
@@ -6260,163 +5849,17 @@
       ]
     },
     {
-      "sample_index": 523,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 1,
-      "correct": true,
-      "steps_total": 1,
-      "steps_per_trial": [
-        1
-      ]
-    },
-    {
-      "sample_index": 524,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 3,
-      "steps_per_trial": [
-        1,
-        1,
-        1
-      ]
-    },
-    {
-      "sample_index": 525,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 1,
-      "correct": true,
-      "steps_total": 1,
-      "steps_per_trial": [
-        1
-      ]
-    },
-    {
-      "sample_index": 526,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 1,
-      "correct": true,
-      "steps_total": 1,
-      "steps_per_trial": [
-        1
-      ]
-    },
-    {
-      "sample_index": 527,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 1,
-      "correct": true,
-      "steps_total": 1,
-      "steps_per_trial": [
-        1
-      ]
-    },
-    {
-      "sample_index": 528,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 3,
-      "steps_per_trial": [
-        1,
-        1,
-        1
-      ]
-    },
-    {
-      "sample_index": 529,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 1,
-      "correct": true,
-      "steps_total": 1,
-      "steps_per_trial": [
-        1
-      ]
-    },
-    {
-      "sample_index": 530,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 3,
-      "steps_per_trial": [
-        1,
-        1,
-        1
-      ]
-    },
-    {
-      "sample_index": 531,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 3,
-      "steps_per_trial": [
-        1,
-        1,
-        1
-      ]
-    },
-    {
-      "sample_index": 532,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 3,
-      "steps_per_trial": [
-        1,
-        1,
-        1
-      ]
-    },
-    {
-      "sample_index": 533,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 1,
-      "correct": true,
-      "steps_total": 1,
-      "steps_per_trial": [
-        1
-      ]
-    },
-    {
-      "sample_index": 534,
-      "lang": "ja",
-      "max_trials": 3,
-      "num_trials": 3,
-      "correct": false,
-      "steps_total": 5,
-      "steps_per_trial": [
-        2,
-        2,
-        1
-      ]
-    },
-    {
       "sample_index": 535,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
-      "steps_total": 1,
+      "steps_total": 2,
       "steps_per_trial": [
-        1
+        2
       ]
     },
     {
       "sample_index": 536,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -6427,7 +5870,6 @@
     },
     {
       "sample_index": 537,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -6438,7 +5880,6 @@
     },
     {
       "sample_index": 538,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -6449,31 +5890,30 @@
     },
     {
       "sample_index": 539,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
       "steps_total": 5,
       "steps_per_trial": [
-        2,
         1,
+        2,
         2
       ]
     },
     {
       "sample_index": 540,
-      "lang": "ja",
       "max_trials": 3,
-      "num_trials": 1,
-      "correct": true,
-      "steps_total": 1,
+      "num_trials": 3,
+      "correct": false,
+      "steps_total": 5,
       "steps_per_trial": [
-        1
+        1,
+        2,
+        2
       ]
     },
     {
       "sample_index": 541,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
@@ -6484,7 +5924,6 @@
     },
     {
       "sample_index": 542,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 3,
       "correct": false,
@@ -6497,18 +5936,16 @@
     },
     {
       "sample_index": 543,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,
-      "steps_total": 2,
+      "steps_total": 3,
       "steps_per_trial": [
-        2
+        3
       ]
     },
     {
       "sample_index": 544,
-      "lang": "ja",
       "max_trials": 3,
       "num_trials": 1,
       "correct": true,

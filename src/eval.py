@@ -25,14 +25,14 @@ def calculate_average_steps_per_sample(data: dict) -> float:
 
 
 def main():
-    with open("results/cot.json", "r", encoding="utf-8") as f:
+    with open("results/reflect.json", "r", encoding="utf-8") as f:
         data = json.load(f)
 
     acc = calculate_accuracy(data=data)
     avg_steps = calculate_average_steps_per_sample(data=data)
 
-    print(f"Accuracy: {acc:.5f}")
-    print(f"Steps per sample: {avg_steps:.5f}")
+    print(f"Accuracy: {acc:.4f}")
+    print(f"Steps per sample: {avg_steps:.4f}")
 
 
 if __name__ == "__main__":

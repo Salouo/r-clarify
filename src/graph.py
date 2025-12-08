@@ -27,7 +27,7 @@ def router(state: ClarifyState) -> ClarifyState:
             "step": state.step + 1,
             "trace": state.trace + [RouterStep(
                 step=state.step,
-                thought="最大ステップ数を超過したため、失敗アクション -1 を強制実行します。",
+                thought="最大ステップ数を超過したため、失敗を判定します。",
                 next_decision="execute",
                 action_id=-1,
             )]
@@ -39,9 +39,12 @@ def router(state: ClarifyState) -> ClarifyState:
     messages = [SystemMessage(content=system_prompt), *state.messages]
     resp: RouterOutput = llm.with_structured_output(RouterOutput).invoke(messages)
 
-    # 如果模型没有给出合法的 action_id（比如 direct 模式下偶尔输出 null），
+    # 如果模型没有给出合法的 action_id（例如为 null 或不在 1〜40 范围内），
     # 就回退到失败动作 -1，避免后续节点报错。
-    action_id = resp.action_id if isinstance(resp.action_id, int) else -1
+    if isinstance(resp.action_id, int) and 1 <= resp.action_id <= 40:
+        action_id = resp.action_id
+    else:
+        action_id = -1
 
     # 根据当前 mode 决定是否允许 clarify：
     # - baseline / reflect / reflect_k: 使用模型预测的 clarify / execute
@@ -88,7 +91,7 @@ def clarify_node(state: ClarifyState) -> ClarifyState:
 def user_sim_node(state: ClarifyState) -> ClarifyState:
 
     action_id = state.label_action_id
-    action_desc = id_to_action.get(action_id, f"アクション {action_id}")
+    action_desc = id_to_action[action_id]
 
     # Find the last AIMessage as the "clarification question"
     last_ai_msg = None

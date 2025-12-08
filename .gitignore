@@ -217,4 +217,6 @@ Thumbs.db
 .env.*
 *.env
 
+# Local files
 histories/
+results/
