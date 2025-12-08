@@ -100,6 +100,7 @@ def run_trials_for_one_sample(
     max_trials: int = 3,
     use_reflection: bool = True,
     mode: str = "baseline",
+    run_id: str | None = None,
 ) -> List[dict]:
     
     # 对于 reflect：使用一个不断更新的 summary（字符串）
@@ -109,9 +110,12 @@ def run_trials_for_one_sample(
     all_states: List[dict] = []
     trials_for_episode: List[dict] = []  # 用来喂给 format_multi_trial_episode
 
-    # episodes 目录下再按 baseline / reflect 分子目录保存
+    # episodes 目录：histories/<mode> 或 histories/<mode>_<run_id>
     base_dir = Path("histories")
-    episodes_dir = base_dir / mode
+    if run_id:
+        episodes_dir = base_dir / f"{mode}_{run_id}"
+    else:
+        episodes_dir = base_dir / mode
     episodes_dir.mkdir(parents=True, exist_ok=True)
 
     for trial_idx in range(max_trials):
@@ -175,11 +179,7 @@ def run_trials_for_one_sample(
             break
 
     # ===== 所有 trial 跑完之后，生成一个「多 trial 的大 episode」文件 =====
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    episode_name = (
-        f"sample{sample['index']}_"
-        f"{timestamp}.txt"
-    )
+    episode_name = f"sample{sample['index']}.txt"
     episode_text = format_multi_trial_episode(sample, trials_for_episode)
     (episodes_dir / episode_name).write_text(episode_text, encoding="utf-8")
 

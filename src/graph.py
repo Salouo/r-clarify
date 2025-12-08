@@ -123,7 +123,7 @@ def user_sim_node(state: ClarifyState) -> ClarifyState:
 
 def execute_node(state: ClarifyState) -> ClarifyState:
 
-    # 如果 action_id 异常（None 等），回退到失败动作 -1，避免崩溃
+    # 如果 action_id 异常（None 等），回退到失败动作 -1
     action_id = state.action_id if state.action_id in id_to_action else -1
     desc = id_to_action[action_id]
     result_text = f"{desc}を执行しました。"
