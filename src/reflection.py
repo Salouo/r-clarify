@@ -7,6 +7,7 @@ from langchain_openai import ChatOpenAI
 
 from .state import ClarifyState, action_to_id
 from .graph import graph
+from .retry_utils import invoke_with_retry
 from .utils import (
     make_system_prompt_from_one_sample,
     format_single_trial_episode,
@@ -16,7 +17,10 @@ from .prompts import reflection_system_prompt
 from .token_usage import token_usage_callback
 
 # 专门给 reflection 用的 LLM（和 router/clarify 用的可以是同一个模型）
-reflection_llm = ChatOpenAI(model="gpt-5-nano", callbacks=[token_usage_callback])
+reflection_llm = ChatOpenAI(
+    model="gpt-4o-mini",
+    callbacks=[token_usage_callback]
+)
 
 
 def run_one_trial(
@@ -71,7 +75,8 @@ def update_reflections(
             HumanMessage(
                 content=(
                     "以下は、これまでの複数回のトライアルから得られた反省のまとめです。"
-                    "必要だと判断した場合は、これを踏まえて内容を更新してください：\n"
+                    "必要だと判断した場合は、これを踏まえて内容を更新してください。"
+                    "回答する前に、これらの反省点をよく検討し、慎重に推論してください：\n"
                     f"{prev_reflections}"
                 )
             )
@@ -84,13 +89,14 @@ def update_reflections(
                 "以下は現在のサンプルに関するユーザの状況です：\n"
                 f"{user_context}\n\n"
                 "以下は最新のトライアルの完全なエピソードです。"
-                "このエピソードに基づいて、反省内容を更新してください：\n"
+                "このエピソードに基づいて、反省内容を更新してください。"
+                "最終的な出力を行う前に、十分に時間をかけて慎重に考えてください：\n"
                 f"{episode_text}"
             )
         )
     )
 
-    resp = reflection_llm.invoke(messages)
+    resp = invoke_with_retry(reflection_llm, messages)
     # 直接使用模型输出作为新的 reflections
     return resp.content
 

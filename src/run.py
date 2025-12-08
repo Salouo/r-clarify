@@ -98,7 +98,7 @@ def main(mode: str = "baseline") -> None:
     run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
 
     # 使用线程池并行处理不同的 sample（简单并行版）
-    with ThreadPoolExecutor(max_workers=10) as executor:
+    with ThreadPoolExecutor(max_workers=2) as executor:
         future_to_sample = {
             executor.submit(
                 _run_for_one_sample,
@@ -180,14 +180,35 @@ def main(mode: str = "baseline") -> None:
     # 额外写一份本次运行的 token 使用统计
     tokens_path = results_dir / f"tokens_{mode}.json"
     tokens_payload = {
+        "run_id": run_id,
+        "timestamp": datetime.now().isoformat(timespec="seconds"),
+        "mode": mode,
         "input_tokens": global_token_stats.input_tokens,
         "output_tokens": global_token_stats.output_tokens,
         "total_tokens": global_token_stats.total_tokens,
     }
-    with tokens_path.open("a", encoding="utf-8") as f:
-        json.dump(tokens_payload, f, ensure_ascii=False, indent=2)
+
+    # 追加写：历史记录存在则加载为列表，没有则创建新的列表
+    tokens_records = []
+    if tokens_path.exists():
+        try:
+            existing = json.loads(tokens_path.read_text(encoding="utf-8"))
+            if isinstance(existing, list):
+                tokens_records = existing
+            elif isinstance(existing, dict):
+                # 兼容旧格式的单条记录
+                tokens_records = [existing]
+        except Exception:
+            # 如果旧文件损坏或格式异常，保留原文件同时重新开始记录
+            tokens_records = []
+
+    tokens_records.append(tokens_payload)
+    tokens_path.write_text(
+        json.dumps(tokens_records, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
 
 
 if __name__ == "__main__":
     # 这里可以切换 "baseline" / "reflect" / "reflect_k" / "cot" / "direct"
-    main(mode="reflect")
+    main(mode="cot")

@@ -4,16 +4,23 @@ from langchain_core.messages import SystemMessage, AIMessage, HumanMessage
 from langchain_openai import ChatOpenAI
 
 from .state import ClarifyState, id_to_action, RouterOutput, RouterStep
+from .retry_utils import invoke_with_retry
 from .token_usage import token_usage_callback
 from .prompts import router_system_prompt, clarify_system_prompt, user_sim_system_prompt
 
 load_dotenv(".env", override=True)
 
 # Main agent (router / clarify / user_sim / execute)
-llm = ChatOpenAI(model="gpt-5-nano", callbacks=[token_usage_callback])
+llm = ChatOpenAI(
+    model="gpt-4o-mini",
+    callbacks=[token_usage_callback],
+)
 
 # User simulator
-user_llm = ChatOpenAI(model="gpt-5.1", callbacks=[token_usage_callback])
+user_llm = ChatOpenAI(
+    model="gpt-5.1",
+    callbacks=[token_usage_callback]
+)
 
 
 # ========== Router Node ==========
@@ -38,7 +45,10 @@ def router(state: ClarifyState) -> ClarifyState:
     system_prompt = router_system_prompt(state.mode)
 
     messages = [SystemMessage(content=system_prompt), *state.messages]
-    resp: RouterOutput = llm.with_structured_output(RouterOutput).invoke(messages)
+    resp: RouterOutput = invoke_with_retry(
+        llm.with_structured_output(RouterOutput),
+        messages,
+    )
 
     # 如果模型没有给出合法的 action_id（例如为 null 或不在 1〜40 范围内），
     # 就回退到失败动作 -1，避免后续节点报错。
@@ -78,7 +88,7 @@ def clarify_node(state: ClarifyState) -> ClarifyState:
     system_prompt = clarify_system_prompt()
 
     messages = [SystemMessage(content=system_prompt), *state.messages]
-    resp = llm.invoke(messages)
+    resp = invoke_with_retry(llm, messages)
 
     return {
         "messages": state.messages + [AIMessage(content=resp.content)],
@@ -112,7 +122,7 @@ def user_sim_node(state: ClarifyState) -> ClarifyState:
         HumanMessage(content=last_ai_msg.content),
     ]
 
-    resp = user_llm.invoke(messages)
+    resp = invoke_with_retry(user_llm, messages)
 
     return {
         "messages": state.messages + [HumanMessage(content=resp.content)],

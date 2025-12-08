@@ -36,11 +36,11 @@ def calculate_average_steps_per_sample_by_trial(data: dict, trial: int) -> float
 
 
 def main():
-    with open("results/reflect_k_2.json", "r", encoding="utf-8") as f:
+    with open("results/direct.json", "r", encoding="utf-8") as f:
         data = json.load(f)
 
-    acc = calculate_accuracy_by_trial(data=data, trial=2)
-    avg_steps = calculate_average_steps_per_sample_by_trial(data=data, trial=2)
+    acc = calculate_accuracy_by_trial(data=data, trial=3)
+    avg_steps = calculate_average_steps_per_sample_by_trial(data=data, trial=3)
 
     print(f"Accuracy: {acc:.4f}")
     print(f"Steps per sample: {avg_steps:.4f}")
