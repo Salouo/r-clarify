@@ -6,6 +6,7 @@ from typing import List
 from tqdm import tqdm
 
 from .reflection import run_trials_for_one_sample
+from .token_usage import global_token_stats
 
 
 def _run_for_one_sample(
@@ -168,6 +169,16 @@ def main(mode: str = "baseline") -> None:
     }
     with metrics_path.open("w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, indent=2)
+
+    # 额外写一份本次运行的 token 使用统计
+    tokens_path = results_dir / f"tokens_{mode}.json"
+    tokens_payload = {
+        "input_tokens": global_token_stats.input_tokens,
+        "output_tokens": global_token_stats.output_tokens,
+        "total_tokens": global_token_stats.total_tokens,
+    }
+    with tokens_path.open("w", encoding="utf-8") as f:
+        json.dump(tokens_payload, f, ensure_ascii=False, indent=2)
 
 
 if __name__ == "__main__":

@@ -4,15 +4,16 @@ from langchain_core.messages import SystemMessage, AIMessage, HumanMessage
 from langchain_openai import ChatOpenAI
 
 from .state import ClarifyState, id_to_action, RouterOutput, RouterStep
+from .token_usage import token_usage_callback
 from .prompts import router_system_prompt, clarify_system_prompt, user_sim_system_prompt
 
 load_dotenv(".env", override=True)
 
 # Main agent (router / clarify / user_sim / execute)
-llm = ChatOpenAI(model="gpt-5-nano")
+llm = ChatOpenAI(model="gpt-5-nano", callbacks=[token_usage_callback])
 
 # User simulator
-user_llm = ChatOpenAI(model="gpt-5.1")
+user_llm = ChatOpenAI(model="gpt-5.1", callbacks=[token_usage_callback])
 
 
 # ========== Router Node ==========

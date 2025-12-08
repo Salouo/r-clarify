@@ -13,9 +13,10 @@ from .utils import (
     format_multi_trial_episode,
 )
 from .prompts import reflection_system_prompt
+from .token_usage import token_usage_callback
 
 # 专门给 reflection 用的 LLM（和 router/clarify 用的可以是同一个模型）
-reflection_llm = ChatOpenAI(model="gpt-5-nano")
+reflection_llm = ChatOpenAI(model="gpt-5-nano", callbacks=[token_usage_callback])
 
 
 def run_one_trial(
