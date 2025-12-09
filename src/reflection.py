@@ -1,17 +1,18 @@
 from pathlib import Path
 from datetime import datetime
-from typing import List, Any, Optional
+from typing import List, Any, Optional, Sequence, Tuple
 
 from langchain_core.messages import SystemMessage, HumanMessage
 from langchain_openai import ChatOpenAI
 
-from .state import ClarifyState, action_to_id
+from .state import ClarifyState, action_to_id, id_to_action
 from .graph import graph
 from .retry_utils import invoke_with_retry
 from .utils import (
     make_system_prompt_from_one_sample,
     format_single_trial_episode,
     format_multi_trial_episode,
+    format_wrong_actions_block,
 )
 from .prompts import reflection_system_prompt
 from .token_usage import token_usage_callback
@@ -22,11 +23,16 @@ reflection_llm = ChatOpenAI(
     callbacks=[token_usage_callback]
 )
 
+def _format_wrong_actions_block(wrong_actions: Sequence[Tuple[int, str]]) -> str:
+    """Format the list of known-wrong actions to feed into reflection/agent."""
+    return format_wrong_actions_block(wrong_actions)
+
 
 def run_one_trial(
     sample: dict,
     reflections: Optional[str] = None,
     mode: str = "baseline",
+    wrong_actions: Optional[Sequence[Tuple[int, str]]] = None,
 ) -> dict:
 
     # 构建 system prompt：用户场景 + 可选反思；没有给下一轮的模型关于之前轮次的对话信息，仅仅提供反思内容。
@@ -34,6 +40,10 @@ def run_one_trial(
     if reflections:
         system_prompt += "\n\n【過去の試行の振り返り】\n"
         system_prompt += reflections
+    if wrong_actions:
+        block = _format_wrong_actions_block(wrong_actions)
+        if block:
+            system_prompt += "\n\n" + block
 
     # initial_state：第一条 message 是 SystemMessage
     initial_state = ClarifyState(
@@ -59,6 +69,7 @@ def update_reflections(
     prev_reflections: Optional[str],
     sample: dict,
     final_state: dict,
+    wrong_actions: Optional[Sequence[Tuple[int, str]]] = None,
 ) -> str:
     
     # 用户场景（简要）
@@ -91,7 +102,8 @@ def update_reflections(
                 "以下は最新のトライアルの完全なエピソードです。"
                 "このエピソードに基づいて、反省内容を更新してください。"
                 "最終的な出力を行う前に、十分に時間をかけて慎重に考えてください：\n"
-                f"{episode_text}"
+                f"{episode_text}\n\n"
+                f"{_format_wrong_actions_block(wrong_actions or [])}"
             )
         )
     )
@@ -115,6 +127,8 @@ def run_trials_for_one_sample(
     reflections_list: List[tuple[int, str]] = []
     all_states: List[dict] = []
     trials_for_episode: List[dict] = []  # 用来喂给 format_multi_trial_episode
+    # 累积的错误动作列表（id, 描述），作为“避开列表”提供给 agent 和 reflection
+    wrong_actions: List[tuple[int, str]] = []
 
     # episodes 目录：histories/<mode> 或 histories/<mode>_<run_id>
     base_dir = Path("histories")
@@ -150,6 +164,7 @@ def run_trials_for_one_sample(
             sample,
             reflections_before,
             mode=mode,
+            wrong_actions=wrong_actions,
         )
         all_states.append(final_state)
 
@@ -158,6 +173,10 @@ def run_trials_for_one_sample(
         if label_action_id is None:
             label_action_id = action_to_id[sample["reflective_action"]]
         hit_target = pred_action_id == label_action_id
+        # 如果这次预测是错的，把错误动作加入“避开列表”
+        if (pred_action_id is not None) and (pred_action_id != label_action_id):
+            desc = id_to_action.get(pred_action_id, f"Unknown action_id={pred_action_id}")
+            wrong_actions.append((pred_action_id, desc))
 
         # 这一轮结束后的 reflection
         # 命中后不反思；即使没命中，如果已经是最后一个 trial，也不再反思（因为不会再有下一轮）
@@ -165,11 +184,21 @@ def run_trials_for_one_sample(
         if use_reflection and (not hit_target) and (trial_idx < max_trials - 1):
             if mode == "reflect_k":
                 # 每个 trial 独立产生一条反思，不再反复覆盖、汇总
-                reflections_after = update_reflections(None, sample, final_state)
+                reflections_after = update_reflections(
+                    None,
+                    sample,
+                    final_state,
+                    wrong_actions=wrong_actions,
+                )
                 reflections_list.append((trial_idx, reflections_after))
             elif mode == "reflect":
                 # 旧的 reflect 模式：不断更新同一个 summary
-                reflections_after = update_reflections(reflections, sample, final_state)
+                reflections_after = update_reflections(
+                    reflections,
+                    sample,
+                    final_state,
+                    wrong_actions=wrong_actions,
+                )
                 reflections = reflections_after  # 用新的反思喂下一轮 trial
 
         # 把这一轮的信息记录下来，后面拼到「一个大的 episode」里
@@ -178,6 +207,7 @@ def run_trials_for_one_sample(
                 "final_state": final_state,
                 "reflections_before": reflections_before,
                 "reflections_after": reflections_after,
+                "wrong_actions": list(wrong_actions),
             }
         )
 

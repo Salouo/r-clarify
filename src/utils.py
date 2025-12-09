@@ -26,6 +26,16 @@ def make_system_prompt_from_one_sample(sample) -> str:
     return user_prompt
 
 
+def format_wrong_actions_block(wrong_actions) -> str:
+    """Render a bullet list of known-wrong actions (id, desc)."""
+    if not wrong_actions:
+        return ""
+    lines: List[str] = ["【これまでに誤って選んだ行動（避けるべき）】"]
+    for aid, desc in wrong_actions:
+        lines.append(f"- {desc}")
+    return "\n".join(lines)
+
+
 def format_single_trial_episode(final_state: dict) -> str:
     """只描述『一个 trial』发生了什么，用于 reflection / 在大 episode 里嵌入。"""
     lines: List[str] = []
@@ -76,11 +86,11 @@ def format_single_trial_episode(final_state: dict) -> str:
 
     # 单 trial 的结果 ()
     lines.append("================ 🚀 Trial Result ================")
-    lines.append(f"Predicted action: {pred_desc}")
+    lines.append(f"Predicted action ({pred_desc}")
     if pred_id == label_action_id:
-        lines.append("Match or not: True ✅")
+        lines.append("Outcome: Correct ✅")
     else:
-        lines.append("Match or not: False ❌")
+        lines.append("Outcome: Incorrect ❌（この選択を次回は避ける／改善する）")
 
     return "\n".join(lines)
 
@@ -109,8 +119,15 @@ def format_multi_trial_episode(sample, trials: List[dict]) -> str:
         final_state = trial["final_state"]
         reflections_before = trial.get("reflections_before")
         reflections_after = trial.get("reflections_after")
+        wrong_actions = trial.get("wrong_actions")
 
         lines.append(f"---------------- ⚙️ Trial {i} ----------------\n")
+
+        # 累积的错误动作列表（用于提醒下一轮需要避开什么）
+        wrong_block = format_wrong_actions_block(wrong_actions)
+        if wrong_block:
+            lines.append(wrong_block)
+            lines.append("")
 
         # trial 前的 reflection（如果有）
         if reflections_before:

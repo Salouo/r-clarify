@@ -7,7 +7,6 @@ from tqdm import tqdm
 
 from .reflection import run_trials_for_one_sample
 from .token_usage import global_token_stats
-from datetime import datetime
 
 
 def _run_for_one_sample(
@@ -15,7 +14,7 @@ def _run_for_one_sample(
     max_trials: int,
     use_reflection: bool,
     mode: str,
-    run_id: str,
+    run_id: str | None,
 ) -> List[dict]:
     """
     在一个 sample 上跑指定模式（baseline / reflect）。
@@ -60,7 +59,7 @@ def main(mode: str = "baseline") -> None:
     # Load sample
     data_path = Path("data/processed_data_expanded.json")
     with data_path.open("r", encoding="utf-8") as f:
-        samples = json.load(f)["samples"]
+        samples = json.load(f)["samples"][:10]
 
     # 结果日志文件（按 mode 分开保存，便于断点续跑和单独做评估）
     results_dir = Path("results")
@@ -94,8 +93,8 @@ def main(mode: str = "baseline") -> None:
 
     print(f"[Progress] 本次运行将处理样本数: {len(remaining_samples)}")
 
-    # 本次运行的时间戳，用于 histories 目录名（例如 histories/reflect_k_20251207_223603）
-    run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
+    # 不使用时间戳/运行 ID，histories 直接落在 histories/<mode>
+    run_id = None
 
     # 使用线程池并行处理不同的 sample（简单并行版）
     with ThreadPoolExecutor(max_workers=2) as executor:
@@ -181,7 +180,6 @@ def main(mode: str = "baseline") -> None:
     tokens_path = results_dir / f"tokens_{mode}.json"
     tokens_payload = {
         "run_id": run_id,
-        "timestamp": datetime.now().isoformat(timespec="seconds"),
         "mode": mode,
         "input_tokens": global_token_stats.input_tokens,
         "output_tokens": global_token_stats.output_tokens,
@@ -211,4 +209,4 @@ def main(mode: str = "baseline") -> None:
 
 if __name__ == "__main__":
     # 这里可以切换 "baseline" / "reflect" / "reflect_k" / "cot" / "direct"
-    main(mode="cot")
+    main(mode="reflect")

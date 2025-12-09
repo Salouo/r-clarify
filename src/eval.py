@@ -36,7 +36,7 @@ def calculate_average_steps_per_sample_by_trial(data: dict, trial: int) -> float
 
 
 def main():
-    with open("results/direct.json", "r", encoding="utf-8") as f:
+    with open("results/gpt-4o-mini/baseline.json", "r", encoding="utf-8") as f:
         data = json.load(f)
 
     acc = calculate_accuracy_by_trial(data=data, trial=3)

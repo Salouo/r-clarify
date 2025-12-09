@@ -19,7 +19,9 @@ llm = ChatOpenAI(
 # User simulator
 user_llm = ChatOpenAI(
     model="gpt-5.1",
-    callbacks=[token_usage_callback]
+    temperature=0,
+    model_kwargs={"reasoning_effort": "none"},
+    callbacks=[token_usage_callback],
 )
 
 
