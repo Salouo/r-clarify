@@ -114,7 +114,9 @@ def router_system_prompt(mode: str) -> str:
         "\n"
         f"{actions_text}\n"
         "\n"
-        "出力は、必ず次の形式の JSON オブジェクトのみとしてください（余分なテキストは不要です）：\n"
+        "出力は、必ず次の形式の JSON オブジェクトのみとしてください。"
+        "JSON ブロックの前後に余分な文章や説明を一切書いてはいけません。"
+        "コードフェンス（```）も使用禁止です。必ず JSON のみを返答してください。\n"
         "{\n"
         '  "thought": "<現在の状況についての推論>",\n'
         '  "next_decision": "clarify" または "execute",\n'

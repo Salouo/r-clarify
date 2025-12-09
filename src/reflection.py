@@ -3,7 +3,6 @@ from datetime import datetime
 from typing import List, Any, Optional, Sequence, Tuple
 
 from langchain_core.messages import SystemMessage, HumanMessage
-from langchain_openai import ChatOpenAI
 
 from .state import ClarifyState, action_to_id, id_to_action
 from .graph import graph
@@ -15,13 +14,10 @@ from .utils import (
     format_wrong_actions_block,
 )
 from .prompts import reflection_system_prompt
-from .token_usage import token_usage_callback
+from .llm_factory import get_primary_llm
 
 # 专门给 reflection 用的 LLM（和 router/clarify 用的可以是同一个模型）
-reflection_llm = ChatOpenAI(
-    model="gpt-4o-mini",
-    callbacks=[token_usage_callback]
-)
+reflection_llm = get_primary_llm()
 
 def _format_wrong_actions_block(wrong_actions: Sequence[Tuple[int, str]]) -> str:
     """Format the list of known-wrong actions to feed into reflection/agent."""
@@ -131,7 +127,7 @@ def run_trials_for_one_sample(
     wrong_actions: List[tuple[int, str]] = []
 
     # episodes 目录：histories/<mode> 或 histories/<mode>_<run_id>
-    base_dir = Path("histories")
+    base_dir = Path("outputs/histories")
     if run_id:
         episodes_dir = base_dir / f"{mode}_{run_id}"
     else:

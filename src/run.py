@@ -62,7 +62,7 @@ def main(mode: str = "baseline") -> None:
         samples = json.load(f)["samples"][:10]
 
     # 结果日志文件（按 mode 分开保存，便于断点续跑和单独做评估）
-    results_dir = Path("results")
+    results_dir = Path("outputs/results")
     results_dir.mkdir(parents=True, exist_ok=True)
     metrics_path = results_dir / f"{mode}.json"
 

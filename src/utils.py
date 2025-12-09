@@ -3,6 +3,7 @@ from langchain_core.messages import HumanMessage, AIMessage
 from .state import id_to_action
 
 
+
 def make_system_prompt_from_one_sample(sample) -> str:
     has = sample['annotations']['has']
     near_items = sample['annotations']['near_items']

@@ -1,28 +1,43 @@
+import json
+
 from dotenv import load_dotenv
 from langgraph.graph import StateGraph, END
 from langchain_core.messages import SystemMessage, AIMessage, HumanMessage
-from langchain_openai import ChatOpenAI
+from pydantic import ValidationError
 
 from .state import ClarifyState, id_to_action, RouterOutput, RouterStep
 from .retry_utils import invoke_with_retry
-from .token_usage import token_usage_callback
 from .prompts import router_system_prompt, clarify_system_prompt, user_sim_system_prompt
+from .llm_factory import get_primary_llm
+from .gpt_llm import OpenAIChatModel
 
 load_dotenv(".env", override=True)
 
-# Main agent (router / clarify / user_sim / execute)
-llm = ChatOpenAI(
-    model="gpt-4o-mini",
-    callbacks=[token_usage_callback],
-)
+# Main agent (router / clarify / execute)
+llm = get_primary_llm()
 
-# User simulator
-user_llm = ChatOpenAI(
-    model="gpt-5.1",
-    temperature=0,
-    model_kwargs={"reasoning_effort": "none"},
-    callbacks=[token_usage_callback],
-)
+# User simulator（保持 OpenAI，确保回答稳定）
+user_llm = OpenAIChatModel(model="gpt-5.1", temperature=0.0)
+
+
+def _safe_router_output(message: AIMessage) -> RouterOutput:
+    """Parse router JSON output; fallback to failure when parsing breaks."""
+    content_text = str(getattr(message, "content", "")).strip()
+    try:
+        data = json.loads(content_text) # 解析LLM的输出为json字典
+        if not isinstance(data, dict):
+            raise ValueError("Router 输出必须是 JSON 对象。")
+        return RouterOutput(**data)
+    except (json.JSONDecodeError, ValidationError, ValueError) as exc:
+        print(
+            "[Router] 解析模型输出失败，将回退到失败动作。"
+            f"错误: {exc}\n原始输出: {content_text}"
+        )
+        return RouterOutput(
+            thought="解析失败，回退到 execute -1",
+            next_decision="execute",
+            action_id=-1,
+        )
 
 
 # ========== Router Node ==========
@@ -47,10 +62,8 @@ def router(state: ClarifyState) -> ClarifyState:
     system_prompt = router_system_prompt(state.mode)
 
     messages = [SystemMessage(content=system_prompt), *state.messages]
-    resp: RouterOutput = invoke_with_retry(
-        llm.with_structured_output(RouterOutput),
-        messages,
-    )
+    raw_resp = invoke_with_retry(llm, messages)
+    resp = _safe_router_output(raw_resp)
 
     # 如果模型没有给出合法的 action_id（例如为 null 或不在 1〜40 范围内），
     # 就回退到失败动作 -1，避免后续节点报错。
