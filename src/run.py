@@ -1,4 +1,5 @@
 import json
+import argparse
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import List
@@ -29,7 +30,7 @@ def _run_for_one_sample(
     )
 
 
-def main(mode: str = "baseline") -> None:
+def main(mode: str) -> None:
     """
     按照不同 mode 跑数据集
     - mode = "baseline"  -> ReAct，无 reflection
@@ -59,7 +60,7 @@ def main(mode: str = "baseline") -> None:
     # Load sample
     data_path = Path("data/processed_data_expanded.json")
     with data_path.open("r", encoding="utf-8") as f:
-        samples = json.load(f)["samples"][:10]
+        samples = json.load(f)["samples"]
 
     # 结果日志文件（按 mode 分开保存，便于断点续跑和单独做评估）
     results_dir = Path("outputs/results")
@@ -97,7 +98,7 @@ def main(mode: str = "baseline") -> None:
     run_id = None
 
     # 使用线程池并行处理不同的 sample（简单并行版）
-    with ThreadPoolExecutor(max_workers=2) as executor:
+    with ThreadPoolExecutor(max_workers=1) as executor:
         future_to_sample = {
             executor.submit(
                 _run_for_one_sample,
@@ -208,5 +209,12 @@ def main(mode: str = "baseline") -> None:
 
 
 if __name__ == "__main__":
-    # 这里可以切换 "baseline" / "reflect" / "reflect_k" / "cot" / "direct"
-    main(mode="reflect")
+    parser = argparse.ArgumentParser(description="Run dataset in specified mode.")
+    parser.add_argument(
+        "--mode",
+        choices=["baseline", "reflect", "reflect_k", "cot", "direct"],
+        default="baseline",
+        help="Select running mode.",
+    )
+    args = parser.parse_args()
+    main(mode=args.mode)

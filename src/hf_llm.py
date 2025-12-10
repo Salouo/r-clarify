@@ -40,6 +40,8 @@ class HuggingFaceChatModel:
         self,
         *,
         model_id: str,
+        device_map: str | None = "auto",
+        torch_dtype: str | None = None,
         max_new_tokens: int = 512,
         temperature: float = 0.7,
     ) -> None:
@@ -49,7 +51,23 @@ class HuggingFaceChatModel:
         self.temperature = temperature
 
         self._tokenizer = AutoTokenizer.from_pretrained(model_id)
-        self._model = AutoModelForCausalLM.from_pretrained(model_id)
+
+        model_kwargs: dict[str, Any] = {}
+        if device_map:
+            model_kwargs["device_map"] = device_map
+        if torch_dtype:
+            import torch
+
+            dtype_map = {
+                "float16": torch.float16,
+                "fp16": torch.float16,
+                "bfloat16": torch.bfloat16,
+                "bf16": torch.bfloat16,
+                "float32": torch.float32,
+            }
+            if torch_dtype.lower() in dtype_map:
+                model_kwargs["torch_dtype"] = dtype_map[torch_dtype.lower()]
+        self._model = AutoModelForCausalLM.from_pretrained(model_id, **model_kwargs)
 
     def invoke(self, messages: List[BaseMessage]):
         tokenizer = self._tokenizer

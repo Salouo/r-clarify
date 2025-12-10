@@ -3,33 +3,69 @@
 from __future__ import annotations
 
 from functools import lru_cache
-from typing import Any
+from threading import Lock
+from typing import Any, Iterable
 
 from .hf_llm import HuggingFaceChatModel
 from .gpt_llm import OpenAIChatModel
 
 
 # 简单的配置开关：手动指定本次要使用的后端
-DEFAULT_BACKEND = "gpt"  # 取值 "gpt" 或 "hf"
+DEFAULT_BACKEND = "hf"  # 取值 "gpt" 或 "hf"
 
 # OpenAI (GPT) 配置
-GPT_MODEL_NAME = "gpt-4o-mini"
+GPT_MODEL_NAME = "gpt-4o"
 GPT_TEMPERATURE = 0.7
 
 # Hugging Face (本地/自建) 模型配置
-HF_MODEL_ID = "Qwen/Qwen2-7B-Instruct"
+HF_MODEL_ID = "Qwen/Qwen3-30B-A3B-Instruct-2507"
 HF_MAX_NEW_TOKENS = 512
 HF_TEMPERATURE = 0.7
+HF_DEVICE_MAP = "auto"  # e.g. "auto", "balanced"
+HF_TORCH_DTYPE = "bfloat16"  # 或 "float16" 等
+HF_DEVICE_IDS: list[str] = []  # e.g. ["cuda:0", "cuda:1", ...]
+
+
+class RoundRobinLLM:
+    """Dispatch invoke() calls across multiple LLM instances for parallel use."""
+
+    def __init__(self, llms: Iterable[Any]) -> None:
+        self._llms = list(llms)
+        if not self._llms:
+            raise ValueError("RoundRobinLLM requires at least one LLM instance")
+        self._lock = Lock()
+        self._index = 0
+
+    def invoke(self, messages):
+        with self._lock:
+            llm = self._llms[self._index]
+            self._index = (self._index + 1) % len(self._llms)
+        return llm.invoke(messages)
 
 
 @lru_cache(maxsize=1)
-def get_primary_llm(backend: str | None = None) -> Any:
+def get_primary_llm() -> Any:
     """Return the LLM instance to use for router/clarify/reflection."""
 
-    target = (backend or DEFAULT_BACKEND).lower()
+    target = (DEFAULT_BACKEND).lower()
     if target == "hf":
+        if HF_DEVICE_IDS:
+            llms = [
+                HuggingFaceChatModel(
+                    model_id=HF_MODEL_ID,
+                    device_map=device_id,
+                    torch_dtype=HF_TORCH_DTYPE,
+                    max_new_tokens=HF_MAX_NEW_TOKENS,
+                    temperature=HF_TEMPERATURE,
+                )
+                for device_id in HF_DEVICE_IDS
+            ]
+            return RoundRobinLLM(llms)
+
         return HuggingFaceChatModel(
             model_id=HF_MODEL_ID,
+            device_map=HF_DEVICE_MAP,
+            torch_dtype=HF_TORCH_DTYPE,
             max_new_tokens=HF_MAX_NEW_TOKENS,
             temperature=HF_TEMPERATURE,
         )

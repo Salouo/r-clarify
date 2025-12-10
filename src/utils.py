@@ -87,11 +87,11 @@ def format_single_trial_episode(final_state: dict) -> str:
 
     # 单 trial 的结果 ()
     lines.append("================ 🚀 Trial Result ================")
-    lines.append(f"Predicted action ({pred_desc}")
+    lines.append(f"Predicted action {pred_desc}")
     if pred_id == label_action_id:
         lines.append("Outcome: Correct ✅")
     else:
-        lines.append("Outcome: Incorrect ❌（この選択を次回は避ける／改善する）")
+        lines.append("Outcome: Incorrect ❌")
 
     return "\n".join(lines)
 
@@ -121,12 +121,13 @@ def format_multi_trial_episode(sample, trials: List[dict]) -> str:
         reflections_before = trial.get("reflections_before")
         reflections_after = trial.get("reflections_after")
         wrong_actions = trial.get("wrong_actions")
+        mode = trial.get("mode", "baseline")
 
         lines.append(f"---------------- ⚙️ Trial {i} ----------------\n")
 
         # 累积的错误动作列表（用于提醒下一轮需要避开什么）
         wrong_block = format_wrong_actions_block(wrong_actions)
-        if wrong_block:
+        if wrong_block and mode in {"reflect", "reflect_k"}:
             lines.append(wrong_block)
             lines.append("")
 

@@ -57,7 +57,7 @@ class OpenAIChatModel:
         self,
         *,
         model: str,
-        temperature: float = 0.2,
+        temperature: float = 0.7,
         max_tokens: int | None = None,
     ) -> None:
         self.model = model

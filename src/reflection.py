@@ -36,7 +36,7 @@ def run_one_trial(
     if reflections:
         system_prompt += "\n\n【過去の試行の振り返り】\n"
         system_prompt += reflections
-    if wrong_actions:
+    if wrong_actions and mode in {"reflect", "reflect_k"}:
         block = _format_wrong_actions_block(wrong_actions)
         if block:
             system_prompt += "\n\n" + block
