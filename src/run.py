@@ -7,7 +7,9 @@ from typing import List
 from tqdm import tqdm
 
 from .reflection import run_trials_for_one_sample
+from .state import action_to_id, id_to_action
 from .token_usage import global_token_stats
+from .utils import extract_trial_steps
 
 
 def _run_for_one_sample(
@@ -122,21 +124,34 @@ def main(mode: str) -> None:
             states = future.result()
             sample = future_to_sample[future]
             sample_index = sample.get("index")
+            label_action_id = sample.get("label_action_id")
+            if label_action_id is None:
+                reflective_action = sample.get("reflective_action")
+                if reflective_action:
+                    label_action_id = action_to_id.get(reflective_action)
+            gold_action_desc = sample.get("reflective_action")
 
             if not states:
                 num_trials = 0
                 correct = False
                 steps_total = 0
                 steps_per_trial: List[int] = []
+                steps_detail_per_trial: List[List[dict]] = []
             else:
                 num_trials = len(states)
                 steps_per_trial = [st.get("step", 0) for st in states]
                 steps_total = sum(steps_per_trial)
+                steps_detail_per_trial = [extract_trial_steps(st) for st in states]
 
                 last_state = states[-1]
                 pred = last_state.get("action_id")
-                label = last_state.get("label_action_id")
-                correct = (pred == label)
+                label_action_id = last_state.get("label_action_id") or label_action_id
+                correct = (pred == label_action_id)
+
+            if not gold_action_desc and label_action_id is not None:
+                gold_action_desc = id_to_action.get(label_action_id)
+            if not states:
+                steps_detail_per_trial = []
 
             records.append(
                 {
@@ -146,13 +161,15 @@ def main(mode: str) -> None:
                     "correct": correct,
                     "steps_total": steps_total,
                     "steps_per_trial": steps_per_trial,
+                    "steps_detail_per_trial": steps_detail_per_trial,
+                    "gold_action": gold_action_desc,
                 }
             )
 
             processed += 1
 
             # 每完成若干个样本（例如 20 个）就排序并写回一次，避免频繁写盘
-            if processed % 20 == 0:
+            if processed % 10 == 0:
                 records.sort(
                     key=lambda r: (
                         r.get("sample_index") is None,

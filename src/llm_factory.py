@@ -19,11 +19,12 @@ GPT_TEMPERATURE = 0.7
 
 # Hugging Face (本地/自建) 模型配置
 HF_MODEL_ID = "Qwen/Qwen3-30B-A3B-Instruct-2507"
-HF_MAX_NEW_TOKENS = 512
+HF_MAX_NEW_TOKENS = 16384
 HF_TEMPERATURE = 0.7
-HF_DEVICE_MAP = "auto"  # e.g. "auto", "balanced"
+HF_DEVICE_MAP = "auto"  # e.g. "auto", "balanced"; use auto to shard one model across visible GPUs
 HF_TORCH_DTYPE = "bfloat16"  # 或 "float16" 等
-HF_DEVICE_IDS: list[str] = []  # e.g. ["cuda:0", "cuda:1", ...]
+# 留空则使用 HF_DEVICE_MAP/accelerate 自动切分到可见卡；填写 ["cuda:0","cuda:1"] 会变为多实例轮询
+HF_DEVICE_IDS: list[str] = []
 
 
 class RoundRobinLLM:

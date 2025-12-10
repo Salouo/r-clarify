@@ -1,6 +1,12 @@
+import re
 from typing import List
 from langchain_core.messages import HumanMessage, AIMessage
 from .state import id_to_action
+
+try:
+    import tiktoken
+except ImportError:  # pragma: no cover - optional dependency
+    tiktoken = None
 
 
 
@@ -22,6 +28,8 @@ def make_system_prompt_from_one_sample(sample) -> str:
     user_prompt += "ソファ前テーブルの物品: " + (f"{sofa_front_table_items}" if sofa_front_table_items else "なし") + "\n"
     user_prompt += "キッチン前テーブルの物品: " + (f"{kitchen_front_table_items}" if kitchen_front_table_items else "なし") + "\n"
     user_prompt += "キッチンの物品: " + (f"{kitchen_items}" if kitchen_items else "なし") + "\n"
+    # 明示：ここに列挙しているのは「現在見えている物」だけで、リストにない物も他の場所から持ってこられる
+    user_prompt += "※以下の物品リストは「今見えている物」だけです。リストにない物でも他の場所から持ってくることができます。\n"
     user_prompt += "\n"
 
     return user_prompt
@@ -153,3 +161,146 @@ def format_multi_trial_episode(sample, trials: List[dict]) -> str:
     lines.append(f"Gold action: {gold_desc}")
 
     return "\n".join(lines)
+
+
+def _count_words(text: str) -> int:
+    """
+    Count tokens in a prompt.
+
+    - Latin text: split on standard word tokens (letters/digits, keep contractions).
+    - Japanese/Chinese: treat contiguous CJK/Hiragana/Katakana blocks as one token.
+    """
+    if not text:
+        return 0
+
+    pattern = re.compile(
+        r"[A-Za-z0-9]+(?:['’][A-Za-z0-9]+)?"
+        r"|[\u3040-\u309F\u30A0-\u30FF\u31F0-\u31FF\uFF65-\uFF9F\u4E00-\u9FFFー]+"
+    )
+    tokens = pattern.findall(text)
+    total = 0
+    for tok in tokens:
+        # 如果包含日/中/假名字符，就用字符数近似“词数”
+        if re.search(r"[\u3040-\u30FF\u31F0-\u31FF\uFF65-\uFF9F\u4E00-\u9FFFー]", tok):
+            total += len(tok)
+        else:
+            total += 1
+    return total
+
+
+def _count_tokens(text: str) -> int:
+    """
+    粗略 token 计数：优先用 tiktoken(cl100k_base)，失败则退回词数。
+    """
+    if not text:
+        return 0
+
+    if tiktoken:
+        try:
+            enc = tiktoken.get_encoding("cl100k_base")
+            return len(enc.encode(text))
+        except Exception:
+            pass
+    return _count_words(text)
+
+
+def extract_clarification_questions(final_state: dict) -> List[str]:
+    """
+    提取单个 trial 中的所有澄清问题（按时间顺序返回文本列表）。
+    """
+    messages = final_state.get("messages") or []
+    trace = final_state.get("trace") or []
+
+    questions: List[str] = []
+    msg_idx = 1  # 跳过 system prompt
+
+    for step in trace:
+        next_decision = getattr(step, "next_decision", None)
+        if isinstance(step, dict):
+            next_decision = step.get("next_decision")
+
+        if next_decision == "clarify":
+            if msg_idx < len(messages) and isinstance(messages[msg_idx], AIMessage):
+                questions.append(messages[msg_idx].content or "")
+
+            if msg_idx < len(messages) and isinstance(messages[msg_idx], AIMessage):
+                msg_idx += 1
+            if msg_idx < len(messages) and isinstance(messages[msg_idx], HumanMessage):
+                msg_idx += 1
+        else:
+            if msg_idx < len(messages) and isinstance(messages[msg_idx], AIMessage):
+                msg_idx += 1
+
+    return questions
+
+
+def extract_clarification_word_counts(final_state: dict) -> List[int]:
+    """
+    从单个 trial 的最终 state 中提取所有澄清问题的词数列表。
+    返回值是按时间顺序排列的澄清问题词数。
+    """
+    questions = extract_clarification_questions(final_state)
+    return [_count_words(q) for q in questions]
+
+
+def extract_trial_steps(final_state: dict) -> List[dict]:
+    """
+    把单个 trial 的完整步骤序列化，便于直接写入 results.json。
+    结构示例：
+    [
+      {"t": 1, "action": "clarify", "question": "...", "question_words": 23, "user_reply": "..."},
+      {"t": 2, "action": "execute", "chosen_action": 12},
+    ]
+    """
+    messages = final_state.get("messages") or []
+    trace = final_state.get("trace") or []
+
+    steps: List[dict] = []
+    msg_idx = 1  # 跳过 system prompt
+
+    for step in trace:
+        t = getattr(step, "step", None)
+        if isinstance(step, dict):
+            t = step.get("step", t)
+        next_decision = getattr(step, "next_decision", None)
+        if isinstance(step, dict):
+            next_decision = step.get("next_decision", next_decision)
+
+        if next_decision == "clarify":
+            question = ""
+            reply = ""
+            if msg_idx < len(messages) and isinstance(messages[msg_idx], AIMessage):
+                question = messages[msg_idx].content or ""
+            if msg_idx < len(messages) and isinstance(messages[msg_idx], AIMessage):
+                msg_idx += 1
+            if msg_idx < len(messages) and isinstance(messages[msg_idx], HumanMessage):
+                reply = messages[msg_idx].content or ""
+                msg_idx += 1
+            steps.append(
+                {
+                    "t": t,
+                    "action": "clarify",
+                    "question": question,
+                    "question_words": _count_words(question),
+                    "question_tokens": _count_tokens(question),
+                    "user_reply": reply,
+                    "user_reply_words": _count_words(reply),
+                    "user_reply_tokens": _count_tokens(reply),
+                }
+            )
+        else:
+            action_id = getattr(step, "action_id", None)
+            if isinstance(step, dict):
+                action_id = step.get("action_id", action_id)
+            # execute_node 会在 messages 中追加一条 AIMessage，跳过它
+            if msg_idx < len(messages) and isinstance(messages[msg_idx], AIMessage):
+                msg_idx += 1
+            steps.append(
+                {
+                    "t": t,
+                    "action": "execute",
+                    "chosen_action": action_id,
+                }
+            )
+
+    return steps

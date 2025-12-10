@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-modes=(baseline reflect reflect_k cot direct)
+# Limit GPUs used by this script
+export CUDA_VISIBLE_DEVICES=2,3
+
+modes=(direct cot baseline)
 
 for mode in "${modes[@]}"; do
   echo "Running mode: ${mode}"
