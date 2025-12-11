@@ -15,16 +15,29 @@ DEFAULT_BACKEND = "hf"  # 取值 "gpt" 或 "hf"
 
 # OpenAI (GPT) 配置
 GPT_MODEL_NAME = "gpt-4o"
-GPT_TEMPERATURE = 0.7
+GPT_TEMPERATURE: float | None = None
 
 # Hugging Face (本地/自建) 模型配置
-HF_MODEL_ID = "Qwen/Qwen3-30B-A3B-Instruct-2507"
-HF_MAX_NEW_TOKENS = 16384
+HF_MODEL_ID = "meta-llama/Llama-3.1-8B-Instruct"
+HF_MAX_NEW_TOKENS = 4096
 HF_TEMPERATURE = 0.7
 HF_DEVICE_MAP = "auto"  # e.g. "auto", "balanced"; use auto to shard one model across visible GPUs
-HF_TORCH_DTYPE = "bfloat16"  # 或 "float16" 等
-# 留空则使用 HF_DEVICE_MAP/accelerate 自动切分到可见卡；填写 ["cuda:0","cuda:1"] 会变为多实例轮询
-HF_DEVICE_IDS: list[str] = []
+
+
+def get_primary_model_name() -> str:
+    """Return the model name/id for the selected backend."""
+    target = (DEFAULT_BACKEND).lower()
+    if target == "hf":
+        return HF_MODEL_ID
+    if target == "gpt":
+        return GPT_MODEL_NAME
+    raise ValueError("backend 只能是 'gpt' 或 'hf'")
+
+
+def get_primary_model_dirname() -> str:
+    """Filesystem-safe dirname for logging outputs."""
+    name = get_primary_model_name()
+    return name.replace("/", "__")
 
 
 class RoundRobinLLM:
@@ -50,23 +63,9 @@ def get_primary_llm() -> Any:
 
     target = (DEFAULT_BACKEND).lower()
     if target == "hf":
-        if HF_DEVICE_IDS:
-            llms = [
-                HuggingFaceChatModel(
-                    model_id=HF_MODEL_ID,
-                    device_map=device_id,
-                    torch_dtype=HF_TORCH_DTYPE,
-                    max_new_tokens=HF_MAX_NEW_TOKENS,
-                    temperature=HF_TEMPERATURE,
-                )
-                for device_id in HF_DEVICE_IDS
-            ]
-            return RoundRobinLLM(llms)
-
         return HuggingFaceChatModel(
             model_id=HF_MODEL_ID,
             device_map=HF_DEVICE_MAP,
-            torch_dtype=HF_TORCH_DTYPE,
             max_new_tokens=HF_MAX_NEW_TOKENS,
             temperature=HF_TEMPERATURE,
         )

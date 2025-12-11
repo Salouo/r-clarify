@@ -12,7 +12,7 @@ from langchain_core.messages import (
     HumanMessage,
     SystemMessage,
 )
-from openai import OpenAI
+from openai import BadRequestError, OpenAI
 
 from .token_usage import global_token_stats
 
@@ -57,7 +57,7 @@ class OpenAIChatModel:
         self,
         *,
         model: str,
-        temperature: float = 0.7,
+        temperature: float | None = None,
         max_tokens: int | None = None,
     ) -> None:
         self.model = model
@@ -77,12 +77,21 @@ class OpenAIChatModel:
         request_kwargs = {
             "model": self.model,
             "messages": payload,
-            "temperature": self.temperature,
         }
+        if self.temperature is not None:
+            request_kwargs["temperature"] = self.temperature
         if self.max_tokens is not None:
             request_kwargs["max_tokens"] = self.max_tokens
 
-        response = self.client.chat.completions.create(**request_kwargs)
+        try:
+            response = self.client.chat.completions.create(**request_kwargs)
+        except BadRequestError as err:
+            err_msg = str(err).lower()
+            if "temperature" in err_msg and self.temperature is not None:
+                request_kwargs.pop("temperature", None)
+                response = self.client.chat.completions.create(**request_kwargs)
+            else:
+                raise
         choice = response.choices[0]
         content = choice.message.content or ""
         if isinstance(content, list):

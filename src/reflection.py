@@ -14,10 +14,11 @@ from .utils import (
     format_wrong_actions_block,
 )
 from .prompts import reflection_system_prompt
-from .llm_factory import get_primary_llm
+from .llm_factory import get_primary_llm, get_primary_model_dirname
 
 # 专门给 reflection 用的 LLM（和 router/clarify 用的可以是同一个模型）
 reflection_llm = get_primary_llm()
+model_dirname = get_primary_model_dirname()
 
 def _format_wrong_actions_block(wrong_actions: Sequence[Tuple[int, str]]) -> str:
     """Format the list of known-wrong actions to feed into reflection/agent."""
@@ -126,8 +127,8 @@ def run_trials_for_one_sample(
     # 累积的错误动作列表（id, 描述），作为“避开列表”提供给 agent 和 reflection
     wrong_actions: List[tuple[int, str]] = []
 
-    # episodes 目录：histories/<mode> 或 histories/<mode>_<run_id>
-    base_dir = Path("outputs/histories")
+    # episodes 目录：<model>/histories/<mode> 或 <model>/histories/<mode>_<run_id>
+    base_dir = Path("outputs") / model_dirname / "histories"
     if run_id:
         episodes_dir = base_dir / f"{mode}_{run_id}"
     else:
@@ -204,6 +205,7 @@ def run_trials_for_one_sample(
                 "reflections_before": reflections_before,
                 "reflections_after": reflections_after,
                 "wrong_actions": list(wrong_actions),
+                "mode": mode,
             }
         )
 

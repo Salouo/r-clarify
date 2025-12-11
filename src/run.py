@@ -10,6 +10,7 @@ from .reflection import run_trials_for_one_sample
 from .state import action_to_id, id_to_action
 from .token_usage import global_token_stats
 from .utils import extract_trial_steps
+from .llm_factory import get_primary_model_dirname
 
 
 def _run_for_one_sample(
@@ -64,8 +65,9 @@ def main(mode: str) -> None:
     with data_path.open("r", encoding="utf-8") as f:
         samples = json.load(f)["samples"]
 
-    # 结果日志文件（按 mode 分开保存，便于断点续跑和单独做评估）
-    results_dir = Path("outputs/results")
+    # 结果日志文件（按模型 + mode 分开保存，便于断点续跑和单独做评估）
+    model_dir = get_primary_model_dirname()
+    results_dir = Path("outputs") / model_dir / "results"
     results_dir.mkdir(parents=True, exist_ok=True)
     metrics_path = results_dir / f"{mode}.json"
 

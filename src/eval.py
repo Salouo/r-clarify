@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 
 
 def calculate_accuracy_by_trial(data: dict, trial: int) -> float:
@@ -36,7 +37,8 @@ def calculate_average_steps_per_sample_by_trial(data: dict, trial: int) -> float
 
 
 def main():
-    with open("results/gpt-4o-mini/baseline.json", "r", encoding="utf-8") as f:
+    metrics_path = Path("outputs/Qwen__Qwen3-4B-Instruct-2507/results/direct.json")
+    with metrics_path.open("r", encoding="utf-8") as f:
         data = json.load(f)
 
     acc = calculate_accuracy_by_trial(data=data, trial=3)

@@ -2,9 +2,9 @@
 set -euo pipefail
 
 # Limit GPUs used by this script
-export CUDA_VISIBLE_DEVICES=2,3
+export CUDA_VISIBLE_DEVICES=2
 
-modes=(direct cot baseline)
+modes=(direct)
 
 for mode in "${modes[@]}"; do
   echo "Running mode: ${mode}"

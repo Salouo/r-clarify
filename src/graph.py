@@ -17,7 +17,7 @@ load_dotenv(".env", override=True)
 llm = get_primary_llm()
 
 # User simulator（保持 OpenAI，确保回答稳定）
-user_llm = OpenAIChatModel(model="gpt-5.1", temperature=0.0)
+user_llm = OpenAIChatModel(model="gpt-5-mini")
 
 
 def _safe_router_output(message: AIMessage) -> RouterOutput:
