@@ -58,7 +58,8 @@ def main(mode: str) -> None:
     elif mode in {"reflect", "reflect_k"}:
         use_reflection = True
 
-    max_trials = 7
+    # 最大的 trial 轮数
+    max_trials = 1
 
     # Load sample
     data_path = Path("data/processed_data_expanded.json")
@@ -232,7 +233,6 @@ if __name__ == "__main__":
     parser.add_argument(
         "--mode",
         choices=["baseline", "reflect", "reflect_k", "cot", "direct"],
-        default="baseline",
         help="Select running mode.",
     )
     args = parser.parse_args()

@@ -56,13 +56,21 @@ class HuggingFaceChatModel:
             model_kwargs["device_map"] = device_map
 
         self._model = AutoModelForCausalLM.from_pretrained(model_id, **model_kwargs)
+        # Ensure pad token is set to avoid generation warnings
+        pad_id = self._tokenizer.pad_token_id or self._tokenizer.eos_token_id
+        if pad_id is None and self._tokenizer.eos_token_id is not None:
+            pad_id = self._tokenizer.eos_token_id
+        if pad_id is not None:
+            self._tokenizer.pad_token_id = pad_id
+            self._tokenizer.pad_token = self._tokenizer.eos_token
+            self._model.config.pad_token_id = pad_id
+            # Some HF versions read from generation_config instead of config
+            if hasattr(self._model, "generation_config"):
+                self._model.generation_config.pad_token_id = pad_id
 
     def invoke(self, messages: List[BaseMessage]):
         tokenizer = self._tokenizer
         model = self._model
-
-        tokenizer.pad_token = tokenizer.eos_token
-        model.config.pad_token_id = tokenizer.eos_token_id
 
         messages = _convert_messages(messages)
 

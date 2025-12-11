@@ -18,6 +18,8 @@ GPT_MODEL_NAME = "gpt-4o"
 GPT_TEMPERATURE: float | None = None
 
 # Hugging Face (本地/自建) 模型配置
+# meta-llama/Llama-3.1-8B-Instruct
+# Qwen/Qwen3-4B-Instruct-2507
 HF_MODEL_ID = "meta-llama/Llama-3.1-8B-Instruct"
 HF_MAX_NEW_TOKENS = 4096
 HF_TEMPERATURE = 0.7
