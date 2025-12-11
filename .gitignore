@@ -218,6 +218,5 @@ Thumbs.db
 *.env
 
 # Local files
-histories/
-results/
+outputs/
 run_all_modes.sh
