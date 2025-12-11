@@ -15,47 +15,43 @@ from .llm_factory import get_primary_model_dirname
 
 def _run_for_one_sample(
     sample: dict,
-    max_trials: int,
     use_reflection: bool,
     mode: str,
     run_id: str | None,
 ) -> List[dict]:
     """
     在一个 sample 上跑指定模式（baseline / reflect）。
-    返回：该 sample 的多条 trial 的 final_state 列表。
+    返回：该 sample 的单条 trial 的 final_state 列表。
     """
     return run_trials_for_one_sample(
         sample,
-        max_trials=max_trials,
         use_reflection=use_reflection,
         mode=mode,
         run_id=run_id,
     )
 
 
-def main(mode: str) -> None:
+def main(mode: str, start: int | None = None, end: int | None = None) -> None:
     """
     按照不同 mode 跑数据集
     - mode = "baseline"  -> ReAct，无 reflection
     - mode = "reflect"   -> ReAct + reflection
-    - mode = "reflect_k" -> 类 Reflexion：最多利用前 k 条反思，不在每个 trial 上反复汇总
     - mode = "cot"       -> 纯 CoT，一步到位（不走 clarify）
     - mode = "direct"    -> 完全ダイレクト：thinking もほぼ書かず，即座に行動を選ぶ
     """
     assert mode in {
         "baseline",
         "reflect",
-        "reflect_k",
         "cot",
         "direct",
-    }, "mode 必须是 'baseline' / 'reflect' / 'reflect_k' / 'cot' / 'direct'"
+    }, "mode 必须是 'baseline' / 'reflect' / 'cot' / 'direct'"
 
-    # Select mode (baseline, reflect, reflect_k, cot, direct)
+    # 按模式选择是否启用澄清后的反思整理
     if mode in {"cot", "direct"}:
         use_reflection = False
     elif mode == "baseline":
         use_reflection = False
-    elif mode in {"reflect", "reflect_k"}:
+    elif mode == "reflect":
         use_reflection = True
 
     # 最大的 trial 轮数
@@ -64,7 +60,10 @@ def main(mode: str) -> None:
     # Load sample
     data_path = Path("data/processed_data_expanded.json")
     with data_path.open("r", encoding="utf-8") as f:
+        # 默认跑全量数据；可通过 start/end 灵活截取子集
         samples = json.load(f)["samples"]
+    if start is not None or end is not None:
+        samples = samples[start:end]
 
     # 结果日志文件（按模型 + mode 分开保存，便于断点续跑和单独做评估）
     model_dir = get_primary_model_dirname()
@@ -108,7 +107,6 @@ def main(mode: str) -> None:
             executor.submit(
                 _run_for_one_sample,
                 sample,
-                max_trials,
                 use_reflection,
                 mode,
                 run_id,
@@ -186,7 +184,7 @@ def main(mode: str) -> None:
                 with metrics_path.open("w", encoding="utf-8") as f:
                     json.dump(payload, f, ensure_ascii=False, indent=2)
 
-    # 循环结束后再做一次最终排序和落盘，确保把不足 20 个的尾巴也写进去
+    # 循环结束后再做一次最终排序和落盘，把剩余的的样本也保存
     records.sort(
         key=lambda r: (r.get("sample_index") is None, r.get("sample_index", -1))
     )
@@ -232,8 +230,20 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run dataset in specified mode.")
     parser.add_argument(
         "--mode",
-        choices=["baseline", "reflect", "reflect_k", "cot", "direct"],
+        choices=["baseline", "reflect", "cot", "direct"],
         help="Select running mode.",
     )
+    parser.add_argument(
+        "--start",
+        type=int,
+        default=None,
+        help="样本起始 index（含）。默认从头开始。",
+    )
+    parser.add_argument(
+        "--end",
+        type=int,
+        default=None,
+        help="样本结束 index（不含）。默认到最后一个样本。",
+    )
     args = parser.parse_args()
-    main(mode=args.mode)
+    main(mode=args.mode, start=args.start, end=args.end)

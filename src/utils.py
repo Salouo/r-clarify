@@ -1,13 +1,9 @@
 import re
+import tiktoken
+
 from typing import List
-from langchain_core.messages import HumanMessage, AIMessage
+from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
 from .state import id_to_action
-
-try:
-    import tiktoken
-except ImportError:  # pragma: no cover - optional dependency
-    tiktoken = None
-
 
 
 def make_system_prompt_from_one_sample(sample) -> str:
@@ -29,7 +25,7 @@ def make_system_prompt_from_one_sample(sample) -> str:
     user_prompt += "キッチン前テーブルの物品: " + (f"{kitchen_front_table_items}" if kitchen_front_table_items else "なし") + "\n"
     user_prompt += "キッチンの物品: " + (f"{kitchen_items}" if kitchen_items else "なし") + "\n"
     # 明示：ここに列挙しているのは「現在見えている物」だけで、リストにない物も他の場所から持ってこられる
-    user_prompt += "※以下の物品リストは「今見えている物」だけです。リストにない物でも他の場所から持ってくることができます。\n"
+    user_prompt += "※以上の物品リストは「今見えている物」だけです。リストにない物でも他の場所から持ってくることができます。\n"
     user_prompt += "\n"
 
     return user_prompt
@@ -58,13 +54,27 @@ def format_single_trial_episode(final_state: dict) -> str:
     # 跳过最开始的 system prompt, messages[0]
     msg_idx = 1
 
+    # 收集澄清后的反思小结（SystemMessage，开头是特定标记）
+    reflection_memos = [
+        m.content
+        for m in messages
+        if isinstance(m, SystemMessage) and str(m.content).startswith("【澄清後のメモ】")
+    ]
+
+    def _skip_system(idx: int) -> int:
+        """Advance index past any SystemMessage blocks."""
+        while idx < len(messages) and isinstance(messages[idx], SystemMessage):
+            idx += 1
+        return idx
+
     # 如果你想在单个 trial 里也看到“初始用户发言”，可以加上这段（可选）
+    msg_idx = _skip_system(msg_idx)
     if msg_idx < len(messages) and isinstance(messages[msg_idx], HumanMessage):
         lines.append(f"User: {messages[msg_idx].content}")
         msg_idx += 1
         lines.append("")
 
-    # 遍历每一个 router step
+    # 遍历每一个 agent step
     for t in trace:
         lines.append(f"【Step {t.step}】")
         if t.thought is not None:
@@ -74,19 +84,29 @@ def format_single_trial_episode(final_state: dict) -> str:
             lines.append("\tAgent: [CLARIFY]")
 
             # clarify 之后：AI（澄清问题）+ Human（用户回答）
+            msg_idx = _skip_system(msg_idx)
             if msg_idx < len(messages) and isinstance(messages[msg_idx], AIMessage):
                 lines.append(f"\t>> Agent: {messages[msg_idx].content}")
                 msg_idx += 1
 
+            msg_idx = _skip_system(msg_idx)
             if msg_idx < len(messages) and isinstance(messages[msg_idx], HumanMessage):
                 lines.append(f"\t>> User: {messages[msg_idx].content}")
                 msg_idx += 1
+
+            # 澄清后，若有反思总结则在这里展示
+            if reflection_memos:
+                memo_text = reflection_memos.pop(0)
+                lines.append("\tAgent: [REFLECT]")
+                for memo_line in memo_text.splitlines():
+                    lines.append(f"\t   {memo_line}")
 
         else:  # execute
             a_desc = id_to_action.get(t.action_id, f"Unknown action_id={t.action_id}")
             lines.append(f"\tAgent: [EXECUTE] {a_desc}")
 
             # execute_node 会追加一条 AIMessage 说明执行情况
+            msg_idx = _skip_system(msg_idx)
             if msg_idx < len(messages) and isinstance(messages[msg_idx], AIMessage):
                 lines.append(f"\t>> Agent は {messages[msg_idx].content}")
                 msg_idx += 1
@@ -100,65 +120,6 @@ def format_single_trial_episode(final_state: dict) -> str:
         lines.append("Outcome: Correct ✅")
     else:
         lines.append("Outcome: Incorrect ❌")
-
-    return "\n".join(lines)
-
-
-def format_multi_trial_episode(sample, trials: List[dict]) -> str:
-    """
-    trials: 每个元素是 {
-        "final_state": dict,
-        "reflections_before": str | None,
-        "reflections_after": str | None,
-    }
-    """
-    lines: List[str] = []
-
-    # Gold action（标签）从 sample 中恢复：
-    # 优先使用 sample["reflective_action"] 的描述，如果没有再退回到 id_to_action。
-    gold_desc = sample.get("reflective_action")
-
-    # ===== 用户信息 / 场景描述（只写一次）=====
-    lines.append("================ 📖 User Context ================\n")
-    lines.append(make_system_prompt_from_one_sample(sample=sample))
-    lines.append("")
-
-    # ===== 多个 trial =====
-    for i, trial in enumerate(trials, start=1):
-        final_state = trial["final_state"]
-        reflections_before = trial.get("reflections_before")
-        reflections_after = trial.get("reflections_after")
-        wrong_actions = trial.get("wrong_actions")
-        mode = trial.get("mode", "baseline")
-
-        lines.append(f"---------------- ⚙️ Trial {i} ----------------\n")
-
-        # 累积的错误动作列表（用于提醒下一轮需要避开什么）
-        wrong_block = format_wrong_actions_block(wrong_actions)
-        if wrong_block and mode in {"reflect", "reflect_k"}:
-            lines.append(wrong_block)
-            lines.append("")
-
-        # trial 前的 reflection（如果有）
-        if reflections_before:
-            # 现在由 reflections_before 自带标题（例如：
-            # [Reflection Before this trial 前 2 次]）
-            lines.append(reflections_before)
-            lines.append("")
-
-        # 单 trial 的完整轨迹
-        lines.append(format_single_trial_episode(final_state))
-        lines.append("")
-
-        # trial 结束后新产生的 reflection（如果有）
-        if reflections_after:
-            lines.append("[Reflections AFTER this trial]")
-            lines.append(reflections_after)
-            lines.append("")
-
-        lines.append("")  # trial 间空一行
-
-    lines.append(f"Gold action: {gold_desc}")
 
     return "\n".join(lines)
 
@@ -214,20 +175,28 @@ def extract_clarification_questions(final_state: dict) -> List[str]:
     questions: List[str] = []
     msg_idx = 1  # 跳过 system prompt
 
+    def _skip_system(idx: int) -> int:
+        while idx < len(messages) and isinstance(messages[idx], SystemMessage):
+            idx += 1
+        return idx
+
     for step in trace:
         next_decision = getattr(step, "next_decision", None)
         if isinstance(step, dict):
             next_decision = step.get("next_decision")
 
         if next_decision == "clarify":
+            msg_idx = _skip_system(msg_idx)
             if msg_idx < len(messages) and isinstance(messages[msg_idx], AIMessage):
                 questions.append(messages[msg_idx].content or "")
 
             if msg_idx < len(messages) and isinstance(messages[msg_idx], AIMessage):
                 msg_idx += 1
+            msg_idx = _skip_system(msg_idx)
             if msg_idx < len(messages) and isinstance(messages[msg_idx], HumanMessage):
                 msg_idx += 1
         else:
+            msg_idx = _skip_system(msg_idx)
             if msg_idx < len(messages) and isinstance(messages[msg_idx], AIMessage):
                 msg_idx += 1
 
@@ -258,6 +227,11 @@ def extract_trial_steps(final_state: dict) -> List[dict]:
     steps: List[dict] = []
     msg_idx = 1  # 跳过 system prompt
 
+    def _skip_system(idx: int) -> int:
+        while idx < len(messages) and isinstance(messages[idx], SystemMessage):
+            idx += 1
+        return idx
+
     for step in trace:
         t = getattr(step, "step", None)
         if isinstance(step, dict):
@@ -269,10 +243,12 @@ def extract_trial_steps(final_state: dict) -> List[dict]:
         if next_decision == "clarify":
             question = ""
             reply = ""
+            msg_idx = _skip_system(msg_idx)
             if msg_idx < len(messages) and isinstance(messages[msg_idx], AIMessage):
                 question = messages[msg_idx].content or ""
             if msg_idx < len(messages) and isinstance(messages[msg_idx], AIMessage):
                 msg_idx += 1
+            msg_idx = _skip_system(msg_idx)
             if msg_idx < len(messages) and isinstance(messages[msg_idx], HumanMessage):
                 reply = messages[msg_idx].content or ""
                 msg_idx += 1
@@ -293,6 +269,7 @@ def extract_trial_steps(final_state: dict) -> List[dict]:
             if isinstance(step, dict):
                 action_id = step.get("action_id", action_id)
             # execute_node 会在 messages 中追加一条 AIMessage，跳过它
+            msg_idx = _skip_system(msg_idx)
             if msg_idx < len(messages) and isinstance(messages[msg_idx], AIMessage):
                 msg_idx += 1
             steps.append(

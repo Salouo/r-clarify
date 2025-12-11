@@ -56,14 +56,14 @@ id_to_action: dict[int, str] = {
 action_to_id: dict[str, int] = {v: k for k, v in id_to_action.items()}
 
 # 每一步 agent 的输出
-class RouterStep(BaseModel):
+class AgentStep(BaseModel):
     step: int                       # 第几步
     thought: Optional[str] = None   # LLM 的思考（thinking），direct 模式下可以为 None
     next_decision: DecisionType     # clarify / execute
     action_id: Optional[int] = None # execute 时选的动作
 
 
-class RouterOutput(BaseModel):
+class AgentOutput(BaseModel):
     thought: Optional[str] = Field(
         default=None,
         description="你对于当前局面，以及对于接下来应该如何决策的思考；direct 模式下可以为 null"
@@ -79,12 +79,12 @@ class RouterOutput(BaseModel):
 
 # ========== Graph State ==========
 
-class ClarifyState(BaseModel):
+class AgentState(BaseModel):
 
     # 对话历史：真实/模拟用户 + agent 的所有对话
     messages: Annotated[list[BaseMessage], add_messages] = Field(default_factory=list)
 
-    # router 决定的下一步决策
+    # agent 决定的下一步决策
     next_decision: Optional[DecisionType] = Field(default=None,)
 
     # 如果 next_decision == "execute"，这里是 1~40 的编号；否则就是null
@@ -102,10 +102,10 @@ class ClarifyState(BaseModel):
     # 原始模糊 utterance（方便在 user_sim 里用）
     original_utterance: str = Field(default="")
 
-    # 当前运行模式（baseline / reflect / reflect_k / cot / direct）
+    # 当前运行模式（baseline / reflect / cot / direct）
     mode: str = Field(
         default="baseline",
-        description="当前样本使用的运行模式，例如 'baseline' / 'reflect' / 'reflect_k' / 'cot' / 'direct'",
+        description="当前样本使用的运行模式，例如 'baseline' / 'reflect' / 'cot' / 'direct'",
     )
 
     # 步数
@@ -115,4 +115,10 @@ class ClarifyState(BaseModel):
     max_steps: int = Field(default=1000,description="最大允许的 step 数，超过后应强制结束或执行")
 
     # 每一个 trial 的轨迹
-    trace: list[RouterStep] = Field(default_factory=list, description="router 每一步的思考和决策轨迹")
+    trace: list[AgentStep] = Field(default_factory=list, description="agent 每一步的思考和决策轨迹")
+
+    # 是否在澄清后使用反思模块对用户回答进行整理
+    enable_reflection: bool = Field(default=False)
+
+    # 预先整理好的用户场景文本，供澄清后的反思使用
+    user_context: str = Field(default="")
