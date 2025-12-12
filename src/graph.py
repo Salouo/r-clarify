@@ -147,9 +147,9 @@ def agent(state: AgentState) -> AgentState:
 
     new_messages = state.messages
     if next_decision == "clarify" and resp.thought:
-        # 将 agent 的澄清意图显式写入对话，供 clarify 节点参考
+        # 将 agent 的明確化意图显式写入对话，供 clarify 节点参考
         new_messages = state.messages + [
-            SystemMessage(content="【Agentの澄清意図】\n" + resp.thought)
+            SystemMessage(content="【Agentの明確化意図】\n" + resp.thought)
         ]
         if clarify_quota_left is not None:
             clarify_quota_left = max(clarify_quota_left - 1, 0)
@@ -234,7 +234,7 @@ def user_sim_node(state: AgentState) -> AgentState:
         "messages": state.messages + [HumanMessage(content=resp.content)],
     }
 
-# ========== Reflection Node（澄清后的总结） ==========
+# ========== Reflection Node（明確化質問後のまとめ） ==========
 
 def reflection_node(state: AgentState) -> AgentState:
     if not state.enable_reflection:
@@ -244,7 +244,7 @@ def reflection_node(state: AgentState) -> AgentState:
     if not summary:
         return {"messages": state.messages}
 
-    reflection_msg = "【澄清後のメモ】\n" + summary
+    reflection_msg = "【明確化質問後のメモ】\n" + summary
 
     return {
         "messages": state.messages + [SystemMessage(content=reflection_msg)],

@@ -54,11 +54,11 @@ def format_single_trial_episode(final_state: dict) -> str:
     # 跳过最开始的 system prompt, messages[0]
     msg_idx = 1
 
-    # 收集澄清后的反思小结（SystemMessage，开头是特定标记）
+    # 收集明確化質問后的反思小结（SystemMessage，开头是特定标记）
     reflection_memos = [
         m.content
         for m in messages
-        if isinstance(m, SystemMessage) and str(m.content).startswith("【澄清後のメモ】")
+        if isinstance(m, SystemMessage) and str(m.content).startswith("【明確化質問後のメモ】")
     ]
 
     def _skip_system(idx: int) -> int:
@@ -69,7 +69,7 @@ def format_single_trial_episode(final_state: dict) -> str:
 
     def _emit_clarify_system(idx: int) -> int:
         """
-        Consume连续的 SystemMessage，如果是澄清相关的思考/意图则写到日志里。
+        Consume连续的 SystemMessage，如果是明確化関連的思考/意图则写到日志里。
         返回消费后新的 idx。
         """
         while idx < len(messages) and isinstance(messages[idx], SystemMessage):
@@ -77,8 +77,8 @@ def format_single_trial_episode(final_state: dict) -> str:
             if content.startswith("【Clarify思考】"):
                 clean = content.replace("【Clarify思考】", "", 1).strip()
                 lines.append(f"\tClarify: <thinking> {clean} </thinking>")
-            elif content.startswith("【Agentの澄清意図】"):
-                clean = content.replace("【Agentの澄清意図】", "", 1).strip()
+            elif content.startswith("【Agentの明確化意図】"):
+                clean = content.replace("【Agentの明確化意図】", "", 1).strip()
                 lines.append(f"\tAgent: <clarify-intent> {clean} </clarify-intent>")
             idx += 1
         return idx
@@ -99,7 +99,7 @@ def format_single_trial_episode(final_state: dict) -> str:
         if t.next_decision == "clarify":
             lines.append("\tAgent: [CLARIFY]")
 
-            # clarify 之后：AI（澄清问题）+ Human（用户回答）
+            # clarify 之后：AI（明確化質問）+ Human（用户回答）
             msg_idx = _emit_clarify_system(msg_idx)
             if msg_idx < len(messages) and isinstance(messages[msg_idx], AIMessage):
                 lines.append(f"\t>> Agent: {messages[msg_idx].content}")
@@ -110,7 +110,7 @@ def format_single_trial_episode(final_state: dict) -> str:
                 lines.append(f"\t>> User: {messages[msg_idx].content}")
                 msg_idx += 1
 
-            # 澄清后，若有反思总结则在这里展示
+            # 明確化質問后，若有反思总结则在这里展示
             if reflection_memos:
                 memo_text = reflection_memos.pop(0)
                 lines.append("\tAgent: [REFLECT]")
@@ -183,7 +183,7 @@ def _count_tokens(text: str) -> int:
 
 def extract_clarification_questions(final_state: dict) -> List[str]:
     """
-    提取单个 trial 中的所有澄清问题（按时间顺序返回文本列表）。
+    提取单个 trial 中的所有明確化質問（按时间顺序返回文本列表）。
     """
     messages = final_state.get("messages") or []
     trace = final_state.get("trace") or []
@@ -221,8 +221,8 @@ def extract_clarification_questions(final_state: dict) -> List[str]:
 
 def extract_clarification_word_counts(final_state: dict) -> List[int]:
     """
-    从单个 trial 的最终 state 中提取所有澄清问题的词数列表。
-    返回值是按时间顺序排列的澄清问题词数。
+    从单个 trial 的最终 state 中提取所有明確化質問的词数列表。
+    返回值是按时间顺序排列的明確化質問词数。
     """
     questions = extract_clarification_questions(final_state)
     return [_count_words(q) for q in questions]

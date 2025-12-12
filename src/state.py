@@ -5,9 +5,6 @@ from langchain_core.messages import BaseMessage
 from pydantic import BaseModel, Field
 
 
-# 所有可用决策
-DecisionType = Literal["clarify", "execute"]
-
 # 动作表放这里，供 graph / utils / main 共用
 id_to_action: dict[int, str] = {
     -1: "動作を特定できない",
@@ -54,6 +51,9 @@ id_to_action: dict[int, str] = {
 }
 
 action_to_id: dict[str, int] = {v: k for k, v in id_to_action.items()}
+
+# 所有可用决策
+DecisionType = Literal["clarify", "execute"]
 
 # 每一步 agent 的输出
 class AgentStep(BaseModel):
