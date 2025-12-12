@@ -14,13 +14,13 @@ from .gpt_llm import OpenAIChatModel
 DEFAULT_BACKEND = "hf"  # 取值 "gpt" 或 "hf"
 
 # OpenAI (GPT) 配置
-GPT_MODEL_NAME = "gpt-4o"
+GPT_MODEL_NAME = "gpt-5-mini"
 GPT_TEMPERATURE: float | None = None
 
 # Hugging Face (本地/自建) 模型配置
 # meta-llama/Llama-3.1-8B-Instruct
 # Qwen/Qwen3-4B-Instruct-2507
-HF_MODEL_ID = "Qwen/Qwen3-4B-Instruct-2507"
+HF_MODEL_ID = "Qwen/Qwen3-30B-A3B-Instruct-2507"
 HF_MAX_NEW_TOKENS = 4096
 HF_TEMPERATURE = 0.7
 HF_DEVICE_MAP = "auto"  # e.g. "auto", "balanced"; use auto to shard one model across visible GPUs

@@ -1,4 +1,5 @@
 import json
+import re
 
 from dotenv import load_dotenv
 from langgraph.graph import StateGraph, END
@@ -23,22 +24,76 @@ user_llm = OpenAIChatModel(model="gpt-5-mini")
 
 def _safe_agent_output(message: AIMessage) -> AgentOutput:
     """Parse agent JSON output; fallback to failure when parsing breaks."""
-    content_text = str(getattr(message, "content", "")).strip()
+    raw_text = str(getattr(message, "content", "")).strip()
+
+    def _strip_code_fence(text: str) -> str:
+        # 去掉 ``` 或 ```json 样式的包裹
+        text = re.sub(r"^```[a-zA-Z0-9_-]*\s*", "", text)
+        text = re.sub(r"\s*```$", "", text)
+        return text.strip()
+
+    def _parse_json(text: str) -> dict:
+        cleaned = _strip_code_fence(text)
+        try:
+            return json.loads(cleaned)
+        except Exception:
+            # 尝试对 thought 字段内的未转义引号做修复
+            thought_match = re.search(
+                r'"thought"\s*:\s*"(.*?)"\s*,\s*"next_decision"', cleaned, flags=re.S
+            )
+            if thought_match:
+                thought_content = thought_match.group(1)
+                escaped_thought = thought_content.replace("\\", "\\\\").replace('"', '\\"')
+                cleaned = (
+                    cleaned[:thought_match.start(1)]
+                    + escaped_thought
+                    + cleaned[thought_match.end(1):]
+                )
+                try:
+                    return json.loads(cleaned)
+                except Exception:
+                    pass
+            # 尝试提取第一个 { ... } 块再解析
+            start = cleaned.find("{")
+            end = cleaned.rfind("}")
+            if start != -1 and end != -1 and end > start:
+                snippet = cleaned[start : end + 1]
+                return json.loads(snippet)
+            raise
+
     try:
-        data = json.loads(content_text) # 解析LLM的输出为json字典
+        data = _parse_json(raw_text) # 解析LLM的输出为json字典
         if not isinstance(data, dict):
             raise ValueError("Agent 输出必须是 JSON 对象。")
         return AgentOutput(**data)
     except (json.JSONDecodeError, ValidationError, ValueError) as exc:
         print(
             "[Agent] 解析模型输出失败，将回退到失败动作。"
-            f"错误: {exc}\n原始输出: {content_text}"
+            f"错误: {exc}\n原始输出: {raw_text}"
         )
         return AgentOutput(
             thought="解析失败，回退到 execute -1",
             next_decision="execute",
             action_id=-1,
         )
+
+
+def _parse_clarify_output(raw_resp: AIMessage) -> tuple[str | None, str]:
+    """Parse clarify model output (thought + question JSON); fallback to raw text."""
+    raw_text = str(getattr(raw_resp, "content", "")).strip()
+    try:
+        data = json.loads(raw_text)
+        if isinstance(data, dict):
+            thought = data.get("thought")
+            question = data.get("question")
+            if not isinstance(thought, str):
+                thought = None
+            if isinstance(question, str) and question.strip():
+                return thought, question.strip()
+    except Exception:
+        pass
+    # 兜底：直接把输出当作问题
+    return None, raw_text
 
 
 # ========== Agent Node ==========
@@ -81,10 +136,18 @@ def agent(state: AgentState) -> AgentState:
     if not allow_clarify:
         next_decision = "execute"
 
+    new_messages = state.messages
+    if next_decision == "clarify" and resp.thought:
+        # 将 agent 的澄清意图显式写入对话，供 clarify 节点参考
+        new_messages = state.messages + [
+            SystemMessage(content="【Agentの澄清意図】\n" + resp.thought)
+        ]
+
     return {
         "next_decision": next_decision,
         "action_id": action_id,
         "step": state.step + 1,
+        "messages": new_messages,
         "trace": state.trace
         + [
             AgentStep(
@@ -103,11 +166,25 @@ def clarify_node(state: AgentState) -> AgentState:
 
     system_prompt = clarify_system_prompt()
 
-    messages = [SystemMessage(content=system_prompt), *state.messages]
+    messages = [SystemMessage(content=system_prompt)]
+
+    # 将 agent 上一步的思考传递给 clarify 模型，减少意图偏差
+    agent_thought = state.trace[-1].thought if state.trace else None
+    if agent_thought:
+        messages.append(SystemMessage(content="【Agent思考メモ】\n" + agent_thought))
+
+    messages.extend(state.messages)
+
     resp = invoke_with_retry(llm, messages)
+    thought, question = _parse_clarify_output(resp)
+
+    new_messages = list(state.messages)
+    if thought:
+        new_messages.append(SystemMessage(content="【Clarify思考】\n" + thought))
+    new_messages.append(AIMessage(content=question))
 
     return {
-        "messages": state.messages + [AIMessage(content=resp.content)],
+        "messages": new_messages,
         "next_decision": None,
         "action_id": None,
     }

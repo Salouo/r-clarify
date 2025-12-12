@@ -10,7 +10,7 @@ from .reflection import run_trials_for_one_sample
 from .state import action_to_id, id_to_action
 from .token_usage import global_token_stats
 from .utils import extract_trial_steps
-from .llm_factory import get_primary_model_dirname
+from .llm_factory import get_primary_model_dirname, get_primary_model_name
 
 
 def _run_for_one_sample(
@@ -31,7 +31,7 @@ def _run_for_one_sample(
     )
 
 
-def main(mode: str, start: int | None = None, end: int | None = None) -> None:
+def main(mode: str) -> None:
     """
     按照不同 mode 跑数据集
     - mode = "baseline"  -> ReAct，无 reflection
@@ -61,9 +61,7 @@ def main(mode: str, start: int | None = None, end: int | None = None) -> None:
     data_path = Path("data/processed_data_expanded.json")
     with data_path.open("r", encoding="utf-8") as f:
         # 默认跑全量数据；可通过 start/end 灵活截取子集
-        samples = json.load(f)["samples"]
-    if start is not None or end is not None:
-        samples = samples[start:end]
+        samples = json.load(f)["samples"][:200]
 
     # 结果日志文件（按模型 + mode 分开保存，便于断点续跑和单独做评估）
     model_dir = get_primary_model_dirname()
@@ -85,9 +83,8 @@ def main(mode: str, start: int | None = None, end: int | None = None) -> None:
         if rec.get("sample_index") is not None
     }
 
-    print(
-        f"[Progress] 模式: {mode}, 已完成样本数: {len(done_indices)}"
-    )
+    model_name = get_primary_model_name()
+    print(f"[Progress] 模式: {mode}, 模型: {model_name}, 已完成样本数: {len(done_indices)}")
 
     # 过滤掉已经完成的样本，只对剩余样本继续跑，而且还能补齐漏了的样本。
     remaining_samples = [s for s in samples if s.get("index") not in done_indices]
@@ -96,7 +93,7 @@ def main(mode: str, start: int | None = None, end: int | None = None) -> None:
         print(f"所有样本在模式 {mode} 下都已经完成。")
         return
 
-    print(f"[Progress] 本次运行将处理样本数: {len(remaining_samples)}")
+    print(f"[Progress] 本次运行将处理样本数: {len(remaining_samples)} (模型: {model_name})")
 
     # 不使用时间戳/运行 ID，histories 直接落在 histories/<mode>
     run_id = None
@@ -233,17 +230,6 @@ if __name__ == "__main__":
         choices=["baseline", "reflect", "cot", "direct"],
         help="Select running mode.",
     )
-    parser.add_argument(
-        "--start",
-        type=int,
-        default=None,
-        help="样本起始 index（含）。默认从头开始。",
-    )
-    parser.add_argument(
-        "--end",
-        type=int,
-        default=None,
-        help="样本结束 index（不含）。默认到最后一个样本。",
-    )
+
     args = parser.parse_args()
-    main(mode=args.mode, start=args.start, end=args.end)
+    main(mode=args.mode)
