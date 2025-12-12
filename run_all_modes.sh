@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Limit GPUs used by this script
-export CUDA_VISIBLE_DEVICES=2,3
+export CUDA_VISIBLE_DEVICES=0,1,2
 
 modes=(baseline reflect)
 
