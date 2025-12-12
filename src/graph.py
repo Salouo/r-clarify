@@ -115,7 +115,11 @@ def agent(state: AgentState) -> AgentState:
         }
 
     # 根据不同的 mode 选择不同的 prompt
-    system_prompt = agent_system_prompt(state.mode)
+    system_prompt = agent_system_prompt(
+        state.mode,
+        clarify_quota_total=state.clarify_quota_total,
+        clarify_quota_left=state.clarify_quota_left,
+    )
 
     messages = [SystemMessage(content=system_prompt), *state.messages]
     raw_resp = invoke_with_retry(llm, messages)
@@ -132,9 +136,14 @@ def agent(state: AgentState) -> AgentState:
     # - baseline / reflect: 使用模型预测的 clarify / execute
     # - cot / direct: 强制只执行 execute（纯 CoT / 纯 direct 一步到位）
     allow_clarify = state.mode in {"baseline", "reflect"}
+    if allow_clarify and state.clarify_quota_left is not None:
+        allow_clarify = state.clarify_quota_left > 0
+
     next_decision = resp.next_decision
     if not allow_clarify:
         next_decision = "execute"
+
+    clarify_quota_left = state.clarify_quota_left
 
     new_messages = state.messages
     if next_decision == "clarify" and resp.thought:
@@ -142,11 +151,15 @@ def agent(state: AgentState) -> AgentState:
         new_messages = state.messages + [
             SystemMessage(content="【Agentの澄清意図】\n" + resp.thought)
         ]
+        if clarify_quota_left is not None:
+            clarify_quota_left = max(clarify_quota_left - 1, 0)
 
     return {
         "next_decision": next_decision,
         "action_id": action_id,
         "step": state.step + 1,
+        "clarify_quota_left": clarify_quota_left,
+        "clarify_quota_total": state.clarify_quota_total,
         "messages": new_messages,
         "trace": state.trace
         + [

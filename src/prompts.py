@@ -10,7 +10,11 @@ def _actions_block() -> str:
 
 
 # agent 的 system prompt
-def agent_system_prompt(mode: str) -> str:
+def agent_system_prompt(
+    mode: str,
+    clarify_quota_total: int | None = None,
+    clarify_quota_left: int | None = None,
+) -> str:
     """
     Agent ノード用の system prompt
 
@@ -69,6 +73,19 @@ def agent_system_prompt(mode: str) -> str:
             "}\n"
         ).strip()
 
+    def _quota_text() -> str:
+        if clarify_quota_total is None and clarify_quota_left is None:
+            return ""
+        total_txt = "制限なし" if clarify_quota_total is None else f"{clarify_quota_total} 回まで"
+        left_txt = "制限なし" if clarify_quota_left is None else f"{clarify_quota_left} 回"
+        return (
+            f"澄清（clarify）の使用回数: 合計 {total_txt} / 現在の残り {left_txt}。\n"
+            "- 残り回数があり、まだ不確実な場合は clarify を優先してよい。\n"
+            "- 残り 0 のときは clarify は使えない。必ず execute を選ぶこと。\n"
+            "- 残り回数を無駄遣いせず、重要な分岐に使うこと。\n"
+            "\n"
+        )
+
     # baseline / reflect 共通の前半
     text = (
         "あなたは家庭内で動作するエージェントです。ユーザの状況に基づいて、\n"
@@ -84,6 +101,7 @@ def agent_system_prompt(mode: str) -> str:
         "実际には飲み物を欲しているかもしれません。\n"
         "そのような場合、適切な質問で意図を明らかにし、正しい行動を选ぶ必要があります。\n"
         "\n"
+        f"{_quota_text()}"
     )
 
     # reflect モードのときだけ、澄清后メモの説明を追加

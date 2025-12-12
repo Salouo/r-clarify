@@ -65,6 +65,7 @@ def run_one_trial(
     sample: dict,
     mode: str = "baseline",
     use_reflection: bool = True,
+    clarify_quota: int | None = None,
 ) -> dict:
 
     # 构建 system prompt：用户场景
@@ -82,6 +83,8 @@ def run_one_trial(
         mode=mode,
         enable_reflection=use_reflection,
         user_context=system_prompt,
+        clarify_quota_total=clarify_quota,
+        clarify_quota_left=clarify_quota,
     )
 
     # 这里导入 graph，避免循环依赖
@@ -100,6 +103,7 @@ def run_trials_for_one_sample(
     use_reflection: bool = True,
     mode: str = "baseline",
     run_id: str | None = None,
+    clarify_quota: int | None = None,
 ) -> List[dict]:
 
     # trial 固定为 1；保留参数以兼容调用方
@@ -107,6 +111,7 @@ def run_trials_for_one_sample(
         sample,
         mode=mode,
         use_reflection=use_reflection,
+        clarify_quota=clarify_quota,
     )
     all_states: List[dict] = [final_state]
 

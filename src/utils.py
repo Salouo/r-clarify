@@ -67,6 +67,22 @@ def format_single_trial_episode(final_state: dict) -> str:
             idx += 1
         return idx
 
+    def _emit_clarify_system(idx: int) -> int:
+        """
+        Consume连续的 SystemMessage，如果是澄清相关的思考/意图则写到日志里。
+        返回消费后新的 idx。
+        """
+        while idx < len(messages) and isinstance(messages[idx], SystemMessage):
+            content = str(messages[idx].content or "")
+            if content.startswith("【Clarify思考】"):
+                clean = content.replace("【Clarify思考】", "", 1).strip()
+                lines.append(f"\tClarify: <thinking> {clean} </thinking>")
+            elif content.startswith("【Agentの澄清意図】"):
+                clean = content.replace("【Agentの澄清意図】", "", 1).strip()
+                lines.append(f"\tAgent: <clarify-intent> {clean} </clarify-intent>")
+            idx += 1
+        return idx
+
     # 如果你想在单个 trial 里也看到“初始用户发言”，可以加上这段（可选）
     msg_idx = _skip_system(msg_idx)
     if msg_idx < len(messages) and isinstance(messages[msg_idx], HumanMessage):
@@ -84,12 +100,12 @@ def format_single_trial_episode(final_state: dict) -> str:
             lines.append("\tAgent: [CLARIFY]")
 
             # clarify 之后：AI（澄清问题）+ Human（用户回答）
-            msg_idx = _skip_system(msg_idx)
+            msg_idx = _emit_clarify_system(msg_idx)
             if msg_idx < len(messages) and isinstance(messages[msg_idx], AIMessage):
                 lines.append(f"\t>> Agent: {messages[msg_idx].content}")
                 msg_idx += 1
 
-            msg_idx = _skip_system(msg_idx)
+            msg_idx = _emit_clarify_system(msg_idx)
             if msg_idx < len(messages) and isinstance(messages[msg_idx], HumanMessage):
                 lines.append(f"\t>> User: {messages[msg_idx].content}")
                 msg_idx += 1

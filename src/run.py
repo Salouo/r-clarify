@@ -18,6 +18,7 @@ def _run_for_one_sample(
     use_reflection: bool,
     mode: str,
     run_id: str | None,
+    clarify_quota: int | None,
 ) -> List[dict]:
     """
     在一个 sample 上跑指定模式（baseline / reflect）。
@@ -28,10 +29,11 @@ def _run_for_one_sample(
         use_reflection=use_reflection,
         mode=mode,
         run_id=run_id,
+        clarify_quota=clarify_quota,
     )
 
 
-def main(mode: str) -> None:
+def main(mode: str, clarify_quota: int | None = None) -> None:
     """
     按照不同 mode 跑数据集
     - mode = "baseline"  -> ReAct，无 reflection
@@ -61,7 +63,7 @@ def main(mode: str) -> None:
     data_path = Path("data/processed_data_expanded.json")
     with data_path.open("r", encoding="utf-8") as f:
         # 默认跑全量数据；可通过 start/end 灵活截取子集
-        samples = json.load(f)["samples"][:200]
+        samples = json.load(f)["samples"][30:60]
 
     # 结果日志文件（按模型 + mode 分开保存，便于断点续跑和单独做评估）
     model_dir = get_primary_model_dirname()
@@ -84,7 +86,8 @@ def main(mode: str) -> None:
     }
 
     model_name = get_primary_model_name()
-    print(f"[Progress] 模式: {mode}, 模型: {model_name}, 已完成样本数: {len(done_indices)}")
+    quota_text = "不限" if clarify_quota is None else f"{clarify_quota} 回"
+    print(f"[Progress] 模式: {mode}, 模型: {model_name}, 已完成样本数: {len(done_indices)}, 澄清额度: {quota_text}")
 
     # 过滤掉已经完成的样本，只对剩余样本继续跑，而且还能补齐漏了的样本。
     remaining_samples = [s for s in samples if s.get("index") not in done_indices]
@@ -93,7 +96,7 @@ def main(mode: str) -> None:
         print(f"所有样本在模式 {mode} 下都已经完成。")
         return
 
-    print(f"[Progress] 本次运行将处理样本数: {len(remaining_samples)} (模型: {model_name})")
+    print(f"[Progress] 本次运行将处理样本数: {len(remaining_samples)} (模型: {model_name}, 澄清额度: {quota_text})")
 
     # 不使用时间戳/运行 ID，histories 直接落在 histories/<mode>
     run_id = None
@@ -107,6 +110,7 @@ def main(mode: str) -> None:
                 use_reflection,
                 mode,
                 run_id,
+                clarify_quota,
             ): sample
             for sample in remaining_samples
         }
@@ -230,6 +234,12 @@ if __name__ == "__main__":
         choices=["baseline", "reflect", "cot", "direct"],
         help="Select running mode.",
     )
+    parser.add_argument(
+        "--clarify-quota",
+        type=int,
+        default=None,
+        help="Optional cap on how many clarify questions the agent may ask per sample (None = unlimited).",
+    )
 
     args = parser.parse_args()
-    main(mode=args.mode)
+    main(mode=args.mode, clarify_quota=args.clarify_quota)

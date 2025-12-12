@@ -122,3 +122,11 @@ class AgentState(BaseModel):
 
     # 预先整理好的用户场景文本，供澄清后的反思使用
     user_context: str = Field(default="")
+
+    # 澄清问题的额度（总数和剩余次数）；None 表示不限
+    clarify_quota_total: Optional[int] = Field(
+        default=None, description="本次 trial 允许澄清的最大次数（None 表示不限）"
+    )
+    clarify_quota_left: Optional[int] = Field(
+        default=None, description="当前剩余的澄清次数（None 表示不限）"
+    )
