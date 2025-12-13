@@ -49,7 +49,7 @@ def _convert_messages(messages: Iterable[BaseMessage]) -> list[dict[str, str]]:
 
 
 class OpenAIChatModel:
-    """Minimal chat model compatible with invoke_with_retry."""
+    """Minimal chat model wrapper around OpenAI Chat Completions."""
 
     _client: OpenAI | None = None
 

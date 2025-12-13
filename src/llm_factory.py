@@ -23,7 +23,7 @@ GPT_TEMPERATURE: float | None = None
 # meta-llama/Llama-3.1-8B-Instruct
 # Qwen/Qwen3-4B-Instruct-2507
 HF_MODEL_ID = "Qwen/Qwen3-30B-A3B-Instruct-2507"
-HF_MAX_NEW_TOKENS = 2048
+HF_MAX_NEW_TOKENS = 8192
 HF_TEMPERATURE = 0.7
 HF_DEVICE_MAP = "auto"  # e.g. "auto", "balanced"; use auto to shard one model across visible GPUs
 
@@ -72,7 +72,7 @@ def get_primary_llm() -> Any:
             device_map=HF_DEVICE_MAP,
             max_new_tokens=HF_MAX_NEW_TOKENS,
             temperature=HF_TEMPERATURE,
-            torch_dtype=torch.bfloat16, # 使用 BF16 降低显存占用
+            dtype=torch.bfloat16, # 使用 BF16 降低显存占用
         )
     if target == "gpt":
         return OpenAIChatModel(

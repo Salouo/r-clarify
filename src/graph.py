@@ -7,7 +7,6 @@ from langchain_core.messages import SystemMessage, AIMessage, HumanMessage
 from pydantic import ValidationError
 
 from .state import AgentState, id_to_action, AgentOutput, AgentStep
-from .retry_utils import invoke_with_retry
 from .prompts import agent_system_prompt, clarify_system_prompt, user_sim_system_prompt
 from .llm_factory import get_primary_llm
 from .gpt_llm import OpenAIChatModel
@@ -33,6 +32,8 @@ def _safe_agent_output(message: AIMessage) -> AgentOutput:
 
     def _parse_json(text: str) -> dict:
         cleaned = _strip_code_fence(text)
+        # 清理掉字符串中潜在的控制字符，避免 json.loads 报错
+        cleaned = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]", " ", cleaned)
         try:
             return json.loads(cleaned)
         except Exception:
@@ -121,7 +122,7 @@ def agent(state: AgentState) -> AgentState:
     )
 
     messages = [SystemMessage(content=system_prompt), *state.messages]
-    raw_resp = invoke_with_retry(llm, messages)
+    raw_resp = llm.invoke(messages)
     resp = _safe_agent_output(raw_resp)
 
     # 如果模型没有给出合法的 action_id（例如为 null 或不在 1〜40 范围内），
@@ -132,9 +133,9 @@ def agent(state: AgentState) -> AgentState:
         action_id = -1
 
     # 根据当前 mode 决定是否允许 clarify：
-    # - baseline / reflect: 使用模型预测的 clarify / execute
+    # - clarify / reflect: 使用模型预测的 clarify / execute
     # - cot / direct: 强制只执行 execute（纯 CoT / 纯 direct 一步到位）
-    allow_clarify = state.mode in {"baseline", "reflect"}
+    allow_clarify = state.mode in {"clarify", "reflect", "reflect_k"}
     if allow_clarify and state.clarify_quota_left is not None:
         allow_clarify = state.clarify_quota_left > 0
 
@@ -187,7 +188,7 @@ def clarify_node(state: AgentState) -> AgentState:
 
     messages.extend(state.messages)
 
-    resp = invoke_with_retry(llm, messages)
+    resp = llm.invoke(messages)
     thought, question = _parse_clarify_output(resp)
 
     new_messages = list(state.messages)
@@ -227,18 +228,13 @@ def user_sim_node(state: AgentState) -> AgentState:
         HumanMessage(content=last_ai_msg.content),
     ]
 
-    resp = invoke_with_retry(user_llm, messages)
+    resp = user_llm.invoke(messages)
 
     return {
         "messages": state.messages + [HumanMessage(content=resp.content)],
     }
 
 # ========== Reflection Node（明確化質問後のまとめ） ==========
-
-def reflection_node(state: AgentState) -> AgentState:
-    # 已移除澄清问答的摘要，直接将原始对话传递给下一步 agent。
-    return {"messages": state.messages, "next_decision": None, "action_id": None}
-
 
 # ========== Execute Node (END) ==========
 
@@ -247,7 +243,10 @@ def execute_node(state: AgentState) -> AgentState:
     # 如果 action_id 异常（None 等），回退到失败动作 -1
     action_id = state.action_id if state.action_id in id_to_action else -1
     desc = id_to_action[action_id]
-    result_text = f"{desc}を执行しました。"
+    if action_id == -1:
+        result_text = "動作を特定できません。"
+    else:
+        result_text = f"{desc}を执行しました。"
 
     return {
         "messages": state.messages + [AIMessage(content=result_text)],
@@ -261,7 +260,6 @@ builder = StateGraph(AgentState)
 builder.add_node("agent", agent)
 builder.add_node("clarify", clarify_node)
 builder.add_node("user_sim", user_sim_node)
-builder.add_node("clarify_reflection", reflection_node)
 builder.add_node("execute", execute_node)
 
 builder.set_entry_point("agent")
@@ -276,8 +274,7 @@ builder.add_conditional_edges(
 )
 
 builder.add_edge("clarify", "user_sim")
-builder.add_edge("user_sim", "clarify_reflection")
-builder.add_edge("clarify_reflection", "agent")
+builder.add_edge("user_sim", "agent")
 
 builder.add_edge("execute", END)
 

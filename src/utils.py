@@ -1,8 +1,8 @@
 import re
 import tiktoken
 
-from typing import List
-from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
+from typing import Iterable, List
+from langchain_core.messages import BaseMessage, HumanMessage, AIMessage, SystemMessage
 from .state import id_to_action
 
 
@@ -41,8 +41,16 @@ def format_wrong_actions_block(wrong_actions) -> str:
     return "\n".join(lines)
 
 
-def format_single_trial_episode(final_state: dict) -> str:
-    """只描述『一个 trial』发生了什么，用于 reflection / 在大 episode 里嵌入。"""
+def format_single_trial_episode(
+    final_state: dict,
+    *,
+    prior_memos: List[str] | None = None,
+    past_failed_actions: List[int] | None = None,
+) -> str:
+    """
+    只描述『一个 trial』发生了什么，用于 reflection / 在大 episode 里嵌入。
+    可选：在步骤前展示本轮带入的 memo 和此前试错过的 action。
+    """
     lines: List[str] = []
 
     messages = final_state["messages"]
@@ -88,6 +96,21 @@ def format_single_trial_episode(final_state: dict) -> str:
     if msg_idx < len(messages) and isinstance(messages[msg_idx], HumanMessage):
         lines.append(f"User: {messages[msg_idx].content}")
         msg_idx += 1
+        lines.append("")
+
+    memos_to_show = prior_memos or []
+    if memos_to_show:
+        lines.append("【Prior reflection memos given to this trial】")
+        for memo_idx, memo_text in enumerate(memos_to_show, start=1):
+            lines.append(f"[{memo_idx}] {memo_text}")
+        lines.append("")
+
+    past_actions = past_failed_actions or []
+    if past_actions:
+        lines.append("【Previously tried actions before this trial】")
+        for aid in past_actions:
+            desc = id_to_action.get(aid, f"Unknown action_id={aid}")
+            lines.append(f"- {desc} (id={aid})")
         lines.append("")
 
     # 遍历每一个 agent step
@@ -137,6 +160,23 @@ def format_single_trial_episode(final_state: dict) -> str:
     else:
         lines.append("Outcome: Incorrect ❌")
 
+    return "\n".join(lines)
+
+
+def format_full_messages(history: Iterable[BaseMessage]) -> str:
+    """
+    将完整对话按顺序格式化成易读文本，标注角色和序号。
+    用于调试/监控消息流。
+    """
+    lines: List[str] = []
+    for idx, msg in enumerate(history, start=1):
+        role = "System"
+        if isinstance(msg, HumanMessage):
+            role = "User"
+        elif isinstance(msg, AIMessage):
+            role = "Agent"
+        content = str(getattr(msg, "content", ""))
+        lines.append(f"[{idx}] {role}: {content}")
     return "\n".join(lines)
 
 

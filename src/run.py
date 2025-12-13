@@ -23,7 +23,7 @@ def _run_for_one_sample(
     memo_window: int,
 ) -> List[dict]:
     """
-    在一个 sample 上跑指定模式（baseline / reflect）。
+    在一个 sample 上跑指定模式（clarify / reflect）。
     返回：该 sample 的单条 trial 的 final_state 列表。
     """
     return run_trials_for_one_sample(
@@ -45,24 +45,24 @@ def main(
 ) -> None:
     """
     按照不同 mode 跑数据集
-    - mode = "baseline"  -> ReAct，无 reflection
+    - mode = "clarify"  -> ReAct，无 reflection
     - mode = "reflect"   -> ReAct + reflection
     - mode = "cot"       -> 纯 CoT，一步到位（不走 clarify）
     - mode = "direct"    -> 完全ダイレクト：thinking もほぼ書かず，即座に行動を選ぶ
     - mode = "reflect_k" -> ReAct + reflection，多轮 trial，携带最近 k 轮 memo
     """
     assert mode in {
-        "baseline",
+        "clarify",
         "reflect",
         "cot",
         "direct",
         "reflect_k",
-    }, "mode 必须是 'baseline' / 'reflect' / 'cot' / 'direct' / 'reflect_k'"
+    }, "mode 必须是 'clarify' / 'reflect' / 'cot' / 'direct' / 'reflect_k'"
 
     # 按模式选择是否启用澄清后的反思整理
     if mode in {"cot", "direct"}:
         use_reflection = False
-    elif mode == "baseline":
+    elif mode == "clarify":
         use_reflection = False
     elif mode in {"reflect", "reflect_k"}:
         use_reflection = True
@@ -79,7 +79,7 @@ def main(
     data_path = Path("data/processed_data_expanded.json")
     with data_path.open("r", encoding="utf-8") as f:
         # 默认跑全量数据；可通过 start/end 灵活截取子集
-        samples = json.load(f)["samples"][45:55]
+        samples = json.load(f)["samples"][:10]
 
     # 结果日志文件（按模型 + mode 分开保存，便于断点续跑和单独做评估）
     model_dir = get_primary_model_dirname()
@@ -290,7 +290,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run dataset in specified mode.")
     parser.add_argument(
         "--mode",
-        choices=["baseline", "reflect", "cot", "direct", "reflect_k"],
+        choices=["clarify", "reflect", "cot", "direct", "reflect_k"],
         help="Select running mode.",
     )
     parser.add_argument(

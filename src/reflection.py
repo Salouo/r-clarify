@@ -4,51 +4,35 @@ from typing import List, Optional
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 
 from .state import AgentState, action_to_id, id_to_action
-from .retry_utils import invoke_with_retry
 from .utils import (
     make_system_prompt_from_one_sample,
     format_single_trial_episode,
-    extract_trial_steps,
 )
 from .llm_factory import get_primary_llm, get_primary_model_dirname
+from .prompts import trial_reflection_system_prompt
 
 # 专门给 reflection 用的 LLM（和 agent/clarify 用的可以是同一个模型）
 reflection_llm = get_primary_llm()
 model_dirname = get_primary_model_dirname()
 
 
-def _trial_reflection_system_prompt() -> str:
+def _format_episode_for_reflection(
+    *,
+    trial_index: int,
+    final_state: dict,
+) -> str:
+    """
+    将最新トライアルを episode と同じフォーマットでまとめる。
+    （ユーザコンテキスト + ステップログ）
+    """
+    user_ctx = final_state.get("user_context") or ""
+    trial_body = format_single_trial_episode(final_state)
     return (
-        "You are a reflection helper that writes a short memo for the next trial of an agent.\n"
-        "Inputs you receive:\n"
-        "- User context (scene)\n"
-        "- The latest trial transcript (clarify Q/A and final chosen action)\n"
-        "- Whether that trial succeeded (true/false); no gold label is provided.\n"
-        "- Actions already attempted in previous trials.\n"
-        "- Recent reflection memos (if any).\n"
-        "\n"
-        "Write a concise bullet list (3-6 bullets) to help the next trial improve:\n"
-        "- Key evidence learned from clarify answers or observations.\n"
-        "- Likely mistakes or missing info from the last trial.\n"
-        "- Concrete next steps: what to ask next / what action to try, and which tried actions to avoid.\n"
-        "- Do not mention any hidden gold label or external knowledge; reason only from provided info.\n"
-        "- Keep it terse; no preface or closing sentences.\n"
+        "================ 📖 User Context ================\n\n"
+        f"{user_ctx}\n\n"
+        f"---------------- ⚙️ Episode (trial {trial_index}) ----------------\n\n"
+        f"{trial_body}"
     )
-
-
-def _format_steps_for_reflection(final_state: dict) -> str:
-    steps = extract_trial_steps(final_state)
-    lines = []
-    for st in steps:
-        if st.get("action") == "clarify":
-            q = st.get("question") or ""
-            a = st.get("user_reply") or ""
-            lines.append(f"- Clarify Q: {q}")
-            lines.append(f"  User A: {a}")
-        else:
-            aid = st.get("chosen_action")
-            lines.append(f"- Execute action_id={aid} ({id_to_action.get(aid, 'Unknown')})")
-    return "\n".join(lines)
 
 
 def generate_trial_reflection_memo(
@@ -69,29 +53,28 @@ def generate_trial_reflection_memo(
     tried_action_descs = [
         f"{aid}: {id_to_action.get(aid, 'Unknown')}" for aid in tried_actions
     ]
-    steps_text = _format_steps_for_reflection(final_state)
-    prior_memos_text = "\n".join(f"- {m}" for m in recent_memos) if recent_memos else "None"
+    episode_text = _format_episode_for_reflection(trial_index=trial_index, final_state=final_state)
+    prior_memos_text = "\n".join(f"- {m}" for m in recent_memos) if recent_memos else "なし"
 
     human_prompt = (
-        f"Trial #{trial_index} summary\n"
-        f"- User context:\n{user_ctx}\n"
-        f"- Trial success: {'true' if success else 'false'}\n"
-        f"- Chosen action: {chosen_desc} (id={chosen_action})\n"
-        f"- Steps:\n{steps_text}\n"
-        f"- Tried actions so far: {', '.join(tried_action_descs) if tried_action_descs else 'None'}\n"
-        f"- Recent reflection memos (latest first):\n{prior_memos_text}\n"
+        f"トライアル {trial_index} の完全ログ:\n"
+        f"{episode_text}\n"
         "\n"
-        "Write a memo for the next trial."
+        f"- 成否: {'成功' if success else '失敗'}\n"
+        f"- ここまで試した行動: {', '.join(tried_action_descs) if tried_action_descs else 'なし'}\n"
+        f"- 直近の反省メモ（新しい順）:\n{prior_memos_text}\n"
+        "\n"
+        "次のトライアルのための反省メモを書いてください。"
     )
 
-    system_msg = SystemMessage(content=_trial_reflection_system_prompt())
-    resp = invoke_with_retry(reflection_llm, [system_msg, HumanMessage(content=human_prompt)])
+    system_msg = SystemMessage(content=trial_reflection_system_prompt())
+    resp = reflection_llm.invoke([system_msg, HumanMessage(content=human_prompt)])
     return resp.content if resp and resp.content else None
 
 
 def run_one_trial(
     sample: dict,
-    mode: str = "baseline",
+    mode: str = "clarify",
     use_reflection: bool = True,
     clarify_quota: int | None = None,
     extra_system_messages: Optional[list] = None,
@@ -131,10 +114,11 @@ def run_one_trial(
     return final_state
 
 
+# 重要：主程序的入口
 def run_trials_for_one_sample(
     sample: dict,
     use_reflection: bool = True,
-    mode: str = "baseline",
+    mode: str = "clarify",
     run_id: str | None = None,
     clarify_quota: int | None = None,
     max_trials: int = 1,
@@ -147,22 +131,31 @@ def run_trials_for_one_sample(
     all_states: List[dict] = []
     reflection_memos: List[str] = []
     trial_memos: List[dict] = []
+    trial_contexts: List[dict] = []
     tried_actions: List[int] = []
 
+    # 
     if memo_window is None:
         memo_window = 3 if mode == "reflect_k" else 1
 
     for trial_idx in range(max_trials):
         extra_messages: List[SystemMessage] = []
+        past_actions = list(tried_actions)
 
         prior_memos: List[str] = []
         if use_reflection and reflection_memos:
             prior_memos = reflection_memos[-memo_window:]
             for idx, memo in enumerate(prior_memos, start=1):
-                extra_messages.append(SystemMessage(content=f"【Reflection memo #{idx}】\n{memo}"))
+                if mode == "reflect":
+                    extra_messages.append(SystemMessage(content=f"【Reflection memo】\n{memo}"))
+                else:
+                    # idx=1 は最も古いメモ、末尾が最新。現在の trial からの距離を明示。
+                    distance = len(prior_memos) - idx + 1
+                    label = f"{distance} trial前"
+                    extra_messages.append(SystemMessage(content=f"【Reflection memo（{label}）】\n{memo}"))
 
-        if tried_actions:
-            tried_lines = [f"- {id_to_action.get(aid, 'Unknown')} (id={aid})" for aid in tried_actions]
+        if past_actions:
+            tried_lines = [f"- {id_to_action.get(aid, 'Unknown')} (id={aid})" for aid in past_actions]
             extra_messages.append(
                 SystemMessage(
                     content="【Tried actions so far（avoid repeating）】\n" + "\n".join(tried_lines)
@@ -177,6 +170,12 @@ def run_trials_for_one_sample(
             extra_system_messages=extra_messages,
         )
         all_states.append(final_state)
+        trial_contexts.append(
+            {
+                "prior_memos": prior_memos,
+                "past_actions": past_actions,
+            }
+        )
 
         pred = final_state.get("action_id")
         if isinstance(pred, int):
@@ -184,7 +183,7 @@ def run_trials_for_one_sample(
 
         success = bool(label_action_id is not None and pred == label_action_id)
 
-        if use_reflection:
+        if use_reflection and not success:
             memo = generate_trial_reflection_memo(
                 trial_index=trial_idx + 1,
                 final_state=final_state,
@@ -197,7 +196,6 @@ def run_trials_for_one_sample(
                 trial_memos.append(
                     {
                         "trial": trial_idx + 1,
-                        "prior_memos": prior_memos,
                         "new_memo": memo,
                     }
                 )
@@ -208,11 +206,11 @@ def run_trials_for_one_sample(
             break
 
     # episodes 目录：<model>/histories/<mode> 或 <model>/histories/<mode>_<run_id>
-    base_dir = Path("outputs") / model_dirname / "episodes"
+    episodes_base = Path("outputs") / model_dirname
     if run_id:
-        episodes_dir = base_dir / f"{mode}_{run_id}"
+        episodes_dir = episodes_base / "episodes" / f"{mode}_{run_id}"
     else:
-        episodes_dir = base_dir / mode
+        episodes_dir = episodes_base / "episodes" / mode
     episodes_dir.mkdir(parents=True, exist_ok=True)
 
     # 生成 episode 文件
@@ -224,23 +222,24 @@ def run_trials_for_one_sample(
     ]
 
     for idx, state in enumerate(all_states, start=1):
+        context = trial_contexts[idx - 1] if idx - 1 < len(trial_contexts) else {}
+        prior_memos = context.get("prior_memos") or []
+        past_actions = context.get("past_actions") or []
         episode_lines.extend(
             [
                 f"---------------- ⚙️ Episode (trial {idx}/{max_trials}) ----------------\n",
-                format_single_trial_episode(state),
+                format_single_trial_episode(
+                    state,
+                    prior_memos=prior_memos,
+                    past_failed_actions=past_actions,
+                ),
                 "",
             ]
         )
         # 在 episode 中写入本轮 trial 使用的旧 memo 和生成的新 memo（如果有）
         for rec in trial_memos:
             if rec.get("trial") == idx:
-                prior = rec.get("prior_memos") or []
                 new_memo = rec.get("new_memo")
-                if prior:
-                    episode_lines.append("【Prior reflection memos given to this trial】")
-                    for memo_idx, memo_text in enumerate(prior, start=1):
-                        episode_lines.append(f"[{memo_idx}] {memo_text}")
-                    episode_lines.append("")
                 if new_memo:
                     episode_lines.extend(
                         [
@@ -250,6 +249,7 @@ def run_trials_for_one_sample(
                         ]
                     )
 
+    # 最终保存 episode 的时候才保存 gold action
     episode_lines.append(f"Gold action: {sample.get('reflective_action')}")
 
     episode_str = "\n".join(episode_lines)
