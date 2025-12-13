@@ -42,6 +42,8 @@ def _sanitize_json_text(text: str) -> str:
     text = _strip_code_fence(text)
     # 清理控制字符，避免 json.loads 报错
     text = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]", " ", text)
+    # 模型有时会在字符串结束后多输出一个单引号再跟逗号，破坏 JSON
+    text = text.replace("\"',", "\",")
     return text.strip()
 
 

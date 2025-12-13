@@ -67,7 +67,7 @@ def main(
     elif mode in {"reflect", "reflect_k"}:
         use_reflection = True
 
-    # 最大的 trial 轮数
+    # 最大的 trial 轮数 default
     if max_trials is None:
         max_trials = 3 if mode in {"reflect", "reflect_k"} else 1
 
@@ -79,7 +79,7 @@ def main(
     data_path = Path("data/processed_data_expanded.json")
     with data_path.open("r", encoding="utf-8") as f:
         # 默认跑全量数据；可通过 start/end 灵活截取子集
-        samples = json.load(f)["samples"][10:15]
+        samples = json.load(f)["samples"][:200]
 
     # 结果日志文件（按模型 + mode 分开保存，便于断点续跑和单独做评估）
     model_dir = get_primary_model_dirname()

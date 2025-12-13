@@ -172,8 +172,8 @@ def run_trials_for_one_sample(
         all_states.append(final_state)
         trial_contexts.append(
             {
-                "prior_memos": prior_memos,
-                "past_actions": past_actions,
+                "prior_memos": prior_memos if use_reflection else [],
+                "past_actions": past_actions if use_reflection else [],
             }
         )
 
