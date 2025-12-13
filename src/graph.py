@@ -11,7 +11,6 @@ from .retry_utils import invoke_with_retry
 from .prompts import agent_system_prompt, clarify_system_prompt, user_sim_system_prompt
 from .llm_factory import get_primary_llm
 from .gpt_llm import OpenAIChatModel
-from .reflection import summarize_clarification
 
 load_dotenv(".env", override=True)
 
@@ -237,20 +236,8 @@ def user_sim_node(state: AgentState) -> AgentState:
 # ========== Reflection Node（明確化質問後のまとめ） ==========
 
 def reflection_node(state: AgentState) -> AgentState:
-    if not state.enable_reflection:
-        return {"messages": state.messages}
-
-    summary = summarize_clarification(state)
-    if not summary:
-        return {"messages": state.messages}
-
-    reflection_msg = "【明確化質問後のメモ】\n" + summary
-
-    return {
-        "messages": state.messages + [SystemMessage(content=reflection_msg)],
-        "next_decision": None,
-        "action_id": None,
-    }
+    # 已移除澄清问答的摘要，直接将原始对话传递给下一步 agent。
+    return {"messages": state.messages, "next_decision": None, "action_id": None}
 
 
 # ========== Execute Node (END) ==========

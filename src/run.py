@@ -19,6 +19,8 @@ def _run_for_one_sample(
     mode: str,
     run_id: str | None,
     clarify_quota: int | None,
+    max_trials: int,
+    memo_window: int,
 ) -> List[dict]:
     """
     在一个 sample 上跑指定模式（baseline / reflect）。
@@ -30,40 +32,54 @@ def _run_for_one_sample(
         mode=mode,
         run_id=run_id,
         clarify_quota=clarify_quota,
+        max_trials=max_trials,
+        memo_window=memo_window,
     )
 
 
-def main(mode: str, clarify_quota: int | None = None) -> None:
+def main(
+    mode: str,
+    clarify_quota: int | None = None,
+    max_trials: int | None = None,
+    memo_window: int | None = None,
+) -> None:
     """
     按照不同 mode 跑数据集
     - mode = "baseline"  -> ReAct，无 reflection
     - mode = "reflect"   -> ReAct + reflection
     - mode = "cot"       -> 纯 CoT，一步到位（不走 clarify）
     - mode = "direct"    -> 完全ダイレクト：thinking もほぼ書かず，即座に行動を選ぶ
+    - mode = "reflect_k" -> ReAct + reflection，多轮 trial，携带最近 k 轮 memo
     """
     assert mode in {
         "baseline",
         "reflect",
         "cot",
         "direct",
-    }, "mode 必须是 'baseline' / 'reflect' / 'cot' / 'direct'"
+        "reflect_k",
+    }, "mode 必须是 'baseline' / 'reflect' / 'cot' / 'direct' / 'reflect_k'"
 
     # 按模式选择是否启用澄清后的反思整理
     if mode in {"cot", "direct"}:
         use_reflection = False
     elif mode == "baseline":
         use_reflection = False
-    elif mode == "reflect":
+    elif mode in {"reflect", "reflect_k"}:
         use_reflection = True
 
     # 最大的 trial 轮数
-    max_trials = 1
+    if max_trials is None:
+        max_trials = 3 if mode in {"reflect", "reflect_k"} else 1
+
+    # 反思 memo 窗口（给下一轮看的最近 k 条 memo）
+    if memo_window is None:
+        memo_window = 1 if mode == "reflect" else (3 if mode == "reflect_k" else 0)
 
     # Load sample
     data_path = Path("data/processed_data_expanded.json")
     with data_path.open("r", encoding="utf-8") as f:
         # 默认跑全量数据；可通过 start/end 灵活截取子集
-        samples = json.load(f)["samples"][50:120]
+        samples = json.load(f)["samples"][45:55]
 
     # 结果日志文件（按模型 + mode 分开保存，便于断点续跑和单独做评估）
     model_dir = get_primary_model_dirname()
@@ -87,7 +103,12 @@ def main(mode: str, clarify_quota: int | None = None) -> None:
 
     model_name = get_primary_model_name()
     quota_text = "不限" if clarify_quota is None else f"{clarify_quota} 回"
-    print(f"[Progress] 模式: {mode}, 模型: {model_name}, 已完成样本数: {len(done_indices)}, 澄清额度: {quota_text}")
+    trial_text = f"{max_trials} 回"
+    memo_text = f"{memo_window} 条" if memo_window else "0"
+    print(
+        f"[Progress] 模式: {mode}, 模型: {model_name}, 已完成样本数: {len(done_indices)}, "
+        f"澄清额度: {quota_text}, max_trials: {trial_text}, memo_window: {memo_text}"
+    )
 
     # 过滤掉已经完成的样本，只对剩余样本继续跑，而且还能补齐漏了的样本。
     remaining_samples = [s for s in samples if s.get("index") not in done_indices]
@@ -96,7 +117,10 @@ def main(mode: str, clarify_quota: int | None = None) -> None:
         print(f"所有样本在模式 {mode} 下都已经完成。")
         return
 
-    print(f"[Progress] 本次运行将处理样本数: {len(remaining_samples)} (模型: {model_name}, 澄清额度: {quota_text})")
+    print(
+        f"[Progress] 本次运行将处理样本数: {len(remaining_samples)} "
+        f"(模型: {model_name}, 澄清额度: {quota_text}, max_trials: {trial_text}, memo_window: {memo_text})"
+    )
 
     # 不使用时间戳/运行 ID，histories 直接落在 histories/<mode>
     run_id = None
@@ -111,6 +135,8 @@ def main(mode: str, clarify_quota: int | None = None) -> None:
                 mode,
                 run_id,
                 clarify_quota,
+                max_trials,
+                memo_window,
             ): sample
             for sample in remaining_samples
         }
@@ -123,7 +149,21 @@ def main(mode: str, clarify_quota: int | None = None) -> None:
             desc="Samples",
             unit="sample",
         ):
-            states = future.result()
+            raw_states = future.result() or []
+            states: List[dict] = []
+            for st in raw_states:
+                if isinstance(st, dict):
+                    converted = st
+                elif hasattr(st, "model_dump"):
+                    converted = st.model_dump()
+                elif hasattr(st, "dict"):
+                    converted = st.dict()
+                else:
+                    try:
+                        converted = dict(st)
+                    except Exception:
+                        converted = {}
+                states.append(converted)
             sample = future_to_sample[future]
             sample_index = sample.get("index")
             label_action_id = sample.get("label_action_id")
@@ -139,11 +179,28 @@ def main(mode: str, clarify_quota: int | None = None) -> None:
                 steps_total = 0
                 steps_per_trial: List[int] = []
                 steps_detail_per_trial: List[List[dict]] = []
+                clarifications_per_trial: List[List[dict]] = []
             else:
                 num_trials = len(states)
                 steps_per_trial = [st.get("step", 0) for st in states]
                 steps_total = sum(steps_per_trial)
                 steps_detail_per_trial = [extract_trial_steps(st) for st in states]
+                clarifications_per_trial = []
+                for detail in steps_detail_per_trial:
+                    clarifications = [
+                        {
+                            "t": step.get("t"),
+                            "question": step.get("question"),
+                            "question_words": step.get("question_words"),
+                            "question_tokens": step.get("question_tokens"),
+                            "user_reply": step.get("user_reply"),
+                            "user_reply_words": step.get("user_reply_words"),
+                            "user_reply_tokens": step.get("user_reply_tokens"),
+                        }
+                        for step in detail
+                        if step.get("action") == "clarify"
+                    ]
+                    clarifications_per_trial.append(clarifications)
 
                 last_state = states[-1]
                 pred = last_state.get("action_id")
@@ -154,6 +211,7 @@ def main(mode: str, clarify_quota: int | None = None) -> None:
                 gold_action_desc = id_to_action.get(label_action_id)
             if not states:
                 steps_detail_per_trial = []
+                clarifications_per_trial = []
 
             records.append(
                 {
@@ -164,6 +222,7 @@ def main(mode: str, clarify_quota: int | None = None) -> None:
                     "steps_total": steps_total,
                     "steps_per_trial": steps_per_trial,
                     "steps_detail_per_trial": steps_detail_per_trial,
+                    "clarify_turns_per_trial": clarifications_per_trial,
                     "gold_action": gold_action_desc,
                 }
             )
@@ -231,7 +290,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run dataset in specified mode.")
     parser.add_argument(
         "--mode",
-        choices=["baseline", "reflect", "cot", "direct"],
+        choices=["baseline", "reflect", "cot", "direct", "reflect_k"],
         help="Select running mode.",
     )
     parser.add_argument(
@@ -240,6 +299,23 @@ if __name__ == "__main__":
         default=None,
         help="Optional cap on how many clarify questions the agent may ask per sample (None = unlimited).",
     )
+    parser.add_argument(
+        "--max-trials",
+        type=int,
+        default=None,
+        help="Max trials to run per sample (reflect/reflect_k default 3; others force 1 when None).",
+    )
+    parser.add_argument(
+        "--memo-window",
+        type=int,
+        default=None,
+        help="How many latest reflection memos to pass to the next trial (reflect default 1, reflect_k default 3).",
+    )
 
     args = parser.parse_args()
-    main(mode=args.mode, clarify_quota=args.clarify_quota)
+    main(
+        mode=args.mode,
+        clarify_quota=args.clarify_quota,
+        max_trials=args.max_trials,
+        memo_window=args.memo_window,
+    )

@@ -6,6 +6,8 @@ from functools import lru_cache
 from threading import Lock
 from typing import Any, Iterable
 
+import torch
+
 from .hf_llm import HuggingFaceChatModel
 from .gpt_llm import OpenAIChatModel
 
@@ -70,6 +72,7 @@ def get_primary_llm() -> Any:
             device_map=HF_DEVICE_MAP,
             max_new_tokens=HF_MAX_NEW_TOKENS,
             temperature=HF_TEMPERATURE,
+            torch_dtype=torch.bfloat16, # 使用 BF16 降低显存占用
         )
     if target == "gpt":
         return OpenAIChatModel(

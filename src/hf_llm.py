@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import Any, Iterable, List
+import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
 
@@ -43,6 +44,7 @@ class HuggingFaceChatModel:
         device_map: str | None = "auto",
         max_new_tokens: int = 4096,
         temperature: float = 0.7,
+        torch_dtype: Any | None = torch.bfloat16,
     ) -> None:
         """ 初始化参数 """
         self.model_id = model_id
@@ -54,6 +56,8 @@ class HuggingFaceChatModel:
         model_kwargs: dict[str, Any] = {}
         if device_map:
             model_kwargs["device_map"] = device_map
+        if torch_dtype is not None:
+            model_kwargs["torch_dtype"] = torch_dtype
 
         self._model = AutoModelForCausalLM.from_pretrained(model_id, **model_kwargs)
         # Ensure pad token is set to avoid generation warnings
