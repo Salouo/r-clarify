@@ -19,81 +19,130 @@ llm = get_primary_llm()
 # User simulator（保持 OpenAI，确保回答稳定）
 user_llm = OpenAIChatModel(model="gpt-5-mini")
 
+_FENCE_RE = re.compile(
+    r"```[a-zA-Z0-9_-]*\s*([\s\S]*?)\s*```",
+    re.MULTILINE,
+)
+
+
+def _strip_code_fence(text: str) -> str:
+    text = (text or "").strip()
+    blocks = _FENCE_RE.findall(text)
+    if blocks:
+        # 优先挑看起来像 JSON 的 block
+        for b in blocks:
+            b2 = b.strip()
+            if "{" in b2 and "}" in b2:
+                return b2
+        return blocks[0].strip()
+    return text
+
+
+def _sanitize_json_text(text: str) -> str:
+    text = _strip_code_fence(text)
+    # 清理控制字符，避免 json.loads 报错
+    text = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]", " ", text)
+    return text.strip()
+
+
+def _extract_first_json_object(text: str) -> str | None:
+    """
+    找到第一个括号平衡的 {...}，并且忽略 JSON 字符串中的 { }。
+    """
+    start = None
+    depth = 0
+    in_str = False
+    esc = False
+
+    for i, ch in enumerate(text):
+        if in_str:
+            if esc:
+                esc = False
+                continue
+            if ch == "\\":
+                esc = True
+            elif ch == '"':
+                in_str = False
+            continue
+
+        # not in string
+        if ch == '"':
+            in_str = True
+            continue
+
+        if ch == "{":
+            if depth == 0:
+                start = i
+            depth += 1
+        elif ch == "}":
+            if depth > 0:
+                depth -= 1
+                if depth == 0 and start is not None:
+                    return text[start : i + 1]
+
+    return None
+
 
 def _safe_agent_output(message: AIMessage) -> AgentOutput:
-    """Parse agent JSON output; fallback to failure when parsing breaks."""
     raw_text = str(getattr(message, "content", "")).strip()
 
-    def _strip_code_fence(text: str) -> str:
-        # 去掉 ``` 或 ```json 样式的包裹
-        text = re.sub(r"^```[a-zA-Z0-9_-]*\s*", "", text)
-        text = re.sub(r"\s*```$", "", text)
-        return text.strip()
-
     def _parse_json(text: str) -> dict:
-        cleaned = _strip_code_fence(text)
-        # 清理掉字符串中潜在的控制字符，避免 json.loads 报错
-        cleaned = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]", " ", cleaned)
+        cleaned = _sanitize_json_text(text)
+        # 先直接解析
         try:
             return json.loads(cleaned)
         except Exception:
-            # 尝试对 thought 字段内的未转义引号做修复
-            thought_match = re.search(
-                r'"thought"\s*:\s*"(.*?)"\s*,\s*"next_decision"', cleaned, flags=re.S
-            )
-            if thought_match:
-                thought_content = thought_match.group(1)
-                escaped_thought = thought_content.replace("\\", "\\\\").replace('"', '\\"')
-                cleaned = (
-                    cleaned[:thought_match.start(1)]
-                    + escaped_thought
-                    + cleaned[thought_match.end(1):]
-                )
-                try:
-                    return json.loads(cleaned)
-                except Exception:
-                    pass
-            # 尝试提取第一个 { ... } 块再解析
-            start = cleaned.find("{")
-            end = cleaned.rfind("}")
-            if start != -1 and end != -1 and end > start:
-                snippet = cleaned[start : end + 1]
-                return json.loads(snippet)
-            raise
+            try:
+                return json.loads(cleaned, strict=False)
+            except Exception:
+                # 抽取第一个平衡的 {...}
+                snippet = _extract_first_json_object(cleaned)
+                if snippet:
+                    return json.loads(snippet, strict=False)
+                raise
 
     try:
-        data = _parse_json(raw_text) # 解析LLM的输出为json字典
+        data = _parse_json(raw_text)
         if not isinstance(data, dict):
             raise ValueError("Agent 输出必须是 JSON 对象。")
+        if isinstance(data.get("action_id"), str) and data["action_id"].strip().isdigit():
+            data["action_id"] = int(data["action_id"].strip())
         return AgentOutput(**data)
     except (json.JSONDecodeError, ValidationError, ValueError) as exc:
         print(
             "[Agent] 解析模型输出失败，将回退到失败动作。"
             f"错误: {exc}\n原始输出: {raw_text}"
         )
+        # 关键：这里依赖 schema 允许 -1
         return AgentOutput(
-            thought="解析失败，回退到 execute -1",
+            thought="解析失败。execute -1 にフォールバック。",
             next_decision="execute",
             action_id=-1,
         )
 
 
 def _parse_clarify_output(raw_resp: AIMessage) -> tuple[str | None, str]:
-    """Parse clarify model output (thought + question JSON); fallback to raw text."""
     raw_text = str(getattr(raw_resp, "content", "")).strip()
-    try:
-        data = json.loads(raw_text)
-        if isinstance(data, dict):
-            thought = data.get("thought")
-            question = data.get("question")
-            if not isinstance(thought, str):
-                thought = None
-            if isinstance(question, str) and question.strip():
-                return thought, question.strip()
-    except Exception:
-        pass
-    # 兜底：直接把输出当作问题
-    return None, raw_text
+    cleaned = _sanitize_json_text(raw_text)
+
+    # 先尝试整段 JSON
+    for candidate in (cleaned, _extract_first_json_object(cleaned)):
+        if not candidate:
+            continue
+        try:
+            data = json.loads(candidate, strict=False)
+            if isinstance(data, dict):
+                thought = data.get("thought")
+                question = data.get("question")
+                if not isinstance(thought, str):
+                    thought = None
+                if isinstance(question, str) and question.strip():
+                    return thought, question.strip()
+        except Exception:
+            pass
+
+    # 兜底：把清洗后的文本当作问题（避免把 ```json 带下去）
+    return None, cleaned
 
 
 # ========== Agent Node ==========
@@ -125,6 +174,11 @@ def agent(state: AgentState) -> AgentState:
     raw_resp = llm.invoke(messages)
     resp = _safe_agent_output(raw_resp)
 
+    valid_decisions = {"clarify", "execute"}
+    next_decision = (resp.next_decision or "").strip().lower()
+    if next_decision not in valid_decisions:
+        next_decision = "execute"
+
     # 如果模型没有给出合法的 action_id（例如为 null 或不在 1〜40 范围内），
     # 就回退到失败动作 -1，避免后续节点报错。
     if isinstance(resp.action_id, int) and 1 <= resp.action_id <= 40:
@@ -139,9 +193,9 @@ def agent(state: AgentState) -> AgentState:
     if allow_clarify and state.clarify_quota_left is not None:
         allow_clarify = state.clarify_quota_left > 0
 
-    next_decision = resp.next_decision
     if not allow_clarify:
         next_decision = "execute"
+
 
     clarify_quota_left = state.clarify_quota_left
 

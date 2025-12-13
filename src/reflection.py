@@ -183,7 +183,9 @@ def run_trials_for_one_sample(
 
         success = bool(label_action_id is not None and pred == label_action_id)
 
-        if use_reflection and not success:
+        is_last_trial = (trial_idx + 1) >= max_trials
+
+        if use_reflection and (not success) and (not is_last_trial):
             memo = generate_trial_reflection_memo(
                 trial_index=trial_idx + 1,
                 final_state=final_state,
@@ -225,6 +227,11 @@ def run_trials_for_one_sample(
         context = trial_contexts[idx - 1] if idx - 1 < len(trial_contexts) else {}
         prior_memos = context.get("prior_memos") or []
         past_actions = context.get("past_actions") or []
+        memo_for_trial = None
+        for rec in trial_memos:
+            if rec.get("trial") == idx:
+                memo_for_trial = rec.get("new_memo")
+                break
         episode_lines.extend(
             [
                 f"---------------- ⚙️ Episode (trial {idx}/{max_trials}) ----------------\n",
@@ -233,21 +240,16 @@ def run_trials_for_one_sample(
                     prior_memos=prior_memos,
                     past_failed_actions=past_actions,
                 ),
-                "",
             ]
         )
-        # 在 episode 中写入本轮 trial 使用的旧 memo 和生成的新 memo（如果有）
-        for rec in trial_memos:
-            if rec.get("trial") == idx:
-                new_memo = rec.get("new_memo")
-                if new_memo:
-                    episode_lines.extend(
-                        [
-                            f"【Reflection memo after trial {idx}】",
-                            new_memo,
-                            "",
-                        ]
-                    )
+        if memo_for_trial:
+            episode_lines.extend(
+                [
+                    f"【Reflection memo after trial {idx}】",
+                    memo_for_trial,
+                ]
+            )
+        episode_lines.append("")
 
     # 最终保存 episode 的时候才保存 gold action
     episode_lines.append(f"Gold action: {sample.get('reflective_action')}")
