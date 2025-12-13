@@ -25,6 +25,23 @@ _FENCE_RE = re.compile(
 )
 
 
+def _trace_to_messages(trace: list[AgentStep]) -> list[SystemMessage]:
+    """Expose prior agent thinking/decisions to the next turn as system notes."""
+    msgs: list[SystemMessage] = []
+    for t in trace:
+        action_desc = id_to_action.get(t.action_id, "不明な行動")
+        thought = t.thought or "（thought なし）"
+        msgs.append(
+            SystemMessage(
+                content=(
+                    f"【Agent前回ログ step {t.step}】thought: {thought}; "
+                    f"next_decision: {t.next_decision}; action_id: {t.action_id}（{action_desc}）"
+                )
+            )
+        )
+    return msgs
+
+
 def _strip_code_fence(text: str) -> str:
     text = (text or "").strip()
     blocks = _FENCE_RE.findall(text)
@@ -42,6 +59,8 @@ def _sanitize_json_text(text: str) -> str:
     text = _strip_code_fence(text)
     # 清理控制字符，避免 json.loads 报错
     text = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]", " ", text)
+    # 模型有时在字符串里直接换行，JSON 不允许裸换行
+    text = text.replace("\r", " ").replace("\n", " ")
     # 模型有时会在字符串结束后多输出一个单引号再跟逗号，破坏 JSON
     text = text.replace("\"',", "\",")
     return text.strip()
@@ -172,7 +191,24 @@ def agent(state: AgentState) -> AgentState:
         clarify_quota_left=state.clarify_quota_left,
     )
 
-    messages = [SystemMessage(content=system_prompt), *state.messages]
+    # 让 agent 在同一 trial 内能看到自己历史的思考/决策
+    trace_messages = _trace_to_messages(state.trace)
+
+    base_messages = [m for m in state.messages if not (
+        isinstance(m, SystemMessage)
+        and isinstance(m.content, str)
+        and m.content.startswith("【Agentの明確化意図】")
+    )]
+    has_same_system = (
+        base_messages
+        and isinstance(base_messages[0], SystemMessage)
+        and base_messages[0].content == system_prompt
+    )
+    if has_same_system:
+        # 保持原有的系统 prompt，不重复；trace 插在其后
+        messages = [base_messages[0], *trace_messages, *base_messages[1:]]
+    else:
+        messages = [SystemMessage(content=system_prompt), *trace_messages, *base_messages]
     raw_resp = llm.invoke(messages)
     resp = _safe_agent_output(raw_resp)
 
@@ -203,7 +239,7 @@ def agent(state: AgentState) -> AgentState:
 
     new_messages = state.messages
     if next_decision == "clarify" and resp.thought:
-        # 将 agent 的明確化意图显式写入对话，供 clarify 节点参考
+        # 明确化意图写入对话，供 clarify 节点提醒；agent 侧会过滤掉这类消息
         new_messages = state.messages + [
             SystemMessage(content="【Agentの明確化意図】\n" + resp.thought)
         ]
