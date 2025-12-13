@@ -67,9 +67,9 @@ def main(
     elif mode in {"reflect", "reflect_k"}:
         use_reflection = True
 
-    # 最大的 trial 轮数 default
+    # max_trials 必须外部指定（所有模式统一由参数决定）
     if max_trials is None:
-        max_trials = 3 if mode in {"reflect", "reflect_k"} else 1
+        raise ValueError("max_trials must be provided via --max-trials.")
 
     # 反思 memo 窗口（给下一轮看的最近 k 条 memo）
     if memo_window is None:
@@ -302,8 +302,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--max-trials",
         type=int,
-        default=None,
-        help="Max trials to run per sample (reflect/reflect_k default 3; others force 1 when None).",
+        required=True,
+        help="Max trials to run per sample (must be provided explicitly).",
     )
     parser.add_argument(
         "--memo-window",
