@@ -23,7 +23,7 @@ GPT_TEMPERATURE: float | None = None
 # meta-llama/Llama-3.1-8B-Instruct
 # Qwen/Qwen3-4B-Instruct-2507
 HF_MODEL_ID = "Qwen/Qwen3-30B-A3B-Instruct-2507"
-HF_MAX_NEW_TOKENS = 8192
+HF_MAX_NEW_TOKENS = 2048
 HF_TEMPERATURE = 0.7
 HF_DEVICE_MAP = "auto"  # e.g. "auto", "balanced"; use auto to shard one model across visible GPUs
 

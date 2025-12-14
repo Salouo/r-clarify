@@ -238,13 +238,15 @@ def agent(state: AgentState) -> AgentState:
     clarify_quota_left = state.clarify_quota_left
 
     new_messages = state.messages
-    if next_decision == "clarify" and resp.thought:
-        # 明确化意图写入对话，供 clarify 节点提醒；agent 侧会过滤掉这类消息
-        new_messages = state.messages + [
-            SystemMessage(content="【Agentの明確化意図】\n" + resp.thought)
-        ]
+    if next_decision == "clarify":
+        if resp.thought:
+            new_messages = state.messages + [SystemMessage(content="【Agentの明確化意図】\n" + resp.thought)]
+        else:
+            new_messages = state.messages
+
         if clarify_quota_left is not None:
             clarify_quota_left = max(clarify_quota_left - 1, 0)
+
 
     return {
         "next_decision": next_decision,
@@ -300,7 +302,16 @@ def clarify_node(state: AgentState) -> AgentState:
 def user_sim_node(state: AgentState) -> AgentState:
 
     action_id = state.label_action_id
-    action_desc = id_to_action[action_id]
+    action_desc = id_to_action.get(action_id, "不明な行動")
+    if action_id not in id_to_action:
+        # ラベルが不明な場合は即座に失敗扱い
+        fallback_msg = "ラベルが不明のため、失敗として扱います。"
+        return {
+            "messages": state.messages + [HumanMessage(content=fallback_msg)],
+            "step": state.max_steps,
+            "next_decision": "execute",
+            "action_id": -1,
+        }
 
     # Find the last AIMessage as the "clarification question"
     last_ai_msg = None
@@ -315,9 +326,21 @@ def user_sim_node(state: AgentState) -> AgentState:
         env=state.env,
     )
 
+    if last_ai_msg:
+        question_text = last_ai_msg.content
+    else:
+        # Agent が clarify を選んだのに質問が生成されていない場合は即座に失敗判定へ
+        question_text = "エージェントが明確化質問が生成されなかったため、失敗として扱います。"
+        return {
+            "messages": state.messages + [HumanMessage(content=question_text)],
+            "step": state.max_steps,       # 次の agent 呼び出しで強制終了させる
+            "next_decision": "execute",
+            "action_id": -1,
+        }
+
     messages = [
         SystemMessage(content=system_prompt),
-        HumanMessage(content=last_ai_msg.content),
+        HumanMessage(content=question_text),
     ]
 
     resp = user_llm.invoke(messages)
@@ -325,6 +348,7 @@ def user_sim_node(state: AgentState) -> AgentState:
     return {
         "messages": state.messages + [HumanMessage(content=resp.content)],
     }
+
 
 # ========== Reflection Node（明確化質問後のまとめ） ==========
 
@@ -358,11 +382,8 @@ builder.set_entry_point("agent")
 
 builder.add_conditional_edges(
     "agent",
-    lambda state: state.next_decision,
-    {
-        "clarify": "clarify",
-        "execute": "execute",
-    },
+    lambda s: s.next_decision if s.next_decision in {"clarify","execute"} else "execute",
+    {"clarify": "clarify", "execute": "execute"},
 )
 
 builder.add_edge("clarify", "user_sim")
