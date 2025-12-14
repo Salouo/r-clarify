@@ -37,7 +37,7 @@ def calculate_average_steps_per_sample_by_trial(data: dict, trial: int) -> float
 
 
 def main():
-    metrics_path = Path("outputs/meta-llama__Llama-3.1-8B-Instruct/results/clarify.json")
+    metrics_path = Path("outputs/Qwen__Qwen3-30B-A3B-Instruct-2507/results/reflect_k.json")
     with metrics_path.open("r", encoding="utf-8") as f:
         data = json.load(f)
 
