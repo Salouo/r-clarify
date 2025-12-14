@@ -209,6 +209,8 @@ def agent(state: AgentState) -> AgentState:
         messages = [base_messages[0], *trace_messages, *base_messages[1:]]
     else:
         messages = [SystemMessage(content=system_prompt), *trace_messages, *base_messages]
+    
+    # 得到干净 agent 输出
     raw_resp = llm.invoke(messages)
     resp = _safe_agent_output(raw_resp)
 

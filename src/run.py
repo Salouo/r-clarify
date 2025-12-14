@@ -230,7 +230,7 @@ def main(
             processed += 1
 
             # 每完成若干个样本（例如 10 个）就排序并写回一次，避免频繁写盘
-            if processed % 10 == 0:
+            if processed % 2 == 0:
                 records.sort(
                     key=lambda r: (
                         r.get("sample_index") is None,
