@@ -8,7 +8,6 @@ from tqdm import tqdm
 
 from .reflection import run_trials_for_one_sample
 from .state import action_to_id, id_to_action
-from .token_usage import global_token_stats
 from .utils import extract_trial_steps
 from .llm_factory import get_primary_model_dirname, get_primary_model_name
 
@@ -192,10 +191,8 @@ def main(
                             "t": step.get("t"),
                             "question": step.get("question"),
                             "question_words": step.get("question_words"),
-                            "question_tokens": step.get("question_tokens"),
                             "user_reply": step.get("user_reply"),
                             "user_reply_words": step.get("user_reply_words"),
-                            "user_reply_tokens": step.get("user_reply_tokens"),
                         }
                         for step in detail
                         if step.get("action") == "clarify"
@@ -254,36 +251,6 @@ def main(
     }
     with metrics_path.open("w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, indent=2)
-
-    # 额外写一份本次运行的 token 使用统计
-    tokens_path = results_dir / f"tokens_{mode}.json"
-    tokens_payload = {
-        "run_id": run_id,
-        "mode": mode,
-        "input_tokens": global_token_stats.input_tokens,
-        "output_tokens": global_token_stats.output_tokens,
-        "total_tokens": global_token_stats.total_tokens,
-    }
-
-    # 追加写：历史记录存在则加载为列表，没有则创建新的列表
-    tokens_records = []
-    if tokens_path.exists():
-        try:
-            existing = json.loads(tokens_path.read_text(encoding="utf-8"))
-            if isinstance(existing, list):
-                tokens_records = existing
-            elif isinstance(existing, dict):
-                # 兼容旧格式的单条记录
-                tokens_records = [existing]
-        except Exception:
-            # 如果旧文件损坏或格式异常，保留原文件同时重新开始记录
-            tokens_records = []
-
-    tokens_records.append(tokens_payload)
-    tokens_path.write_text(
-        json.dumps(tokens_records, ensure_ascii=False, indent=2),
-        encoding="utf-8",
-    )
 
 
 if __name__ == "__main__":

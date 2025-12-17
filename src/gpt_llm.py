@@ -14,7 +14,6 @@ from langchain_core.messages import (
 )
 from openai import BadRequestError, OpenAI
 
-from .token_usage import global_token_stats
 
 load_dotenv(".env", override=False)
 
@@ -101,15 +100,5 @@ class OpenAIChatModel:
             )
         else:
             text = str(content)
-
-        usage = getattr(response, "usage", None)
-        if usage:
-            global_token_stats.add_usage(
-                {
-                    "input_tokens": getattr(usage, "prompt_tokens", 0),
-                    "output_tokens": getattr(usage, "completion_tokens", 0),
-                    "total_tokens": getattr(usage, "total_tokens", 0),
-                }
-            )
 
         return AIMessage(content=text)

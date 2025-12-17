@@ -1,5 +1,4 @@
 import re
-import tiktoken
 
 from typing import Iterable, List
 from langchain_core.messages import BaseMessage, HumanMessage, AIMessage, SystemMessage
@@ -205,22 +204,6 @@ def _count_words(text: str) -> int:
     return total
 
 
-def _count_tokens(text: str) -> int:
-    """
-    粗略 token 计数：优先用 tiktoken(cl100k_base)，失败则退回词数。
-    """
-    if not text:
-        return 0
-
-    if tiktoken:
-        try:
-            enc = tiktoken.get_encoding("cl100k_base")
-            return len(enc.encode(text))
-        except Exception:
-            pass
-    return _count_words(text)
-
-
 def extract_clarification_questions(final_state: dict) -> List[str]:
     """
     提取单个 trial 中的所有明確化質問（按时间顺序返回文本列表）。
@@ -314,10 +297,8 @@ def extract_trial_steps(final_state: dict) -> List[dict]:
                     "action": "clarify",
                     "question": question,
                     "question_words": _count_words(question),
-                    "question_tokens": _count_tokens(question),
                     "user_reply": reply,
                     "user_reply_words": _count_words(reply),
-                    "user_reply_tokens": _count_tokens(reply),
                 }
             )
         else:
