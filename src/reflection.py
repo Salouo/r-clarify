@@ -245,7 +245,7 @@ def run_trials_for_one_sample(
         if memo_for_trial:
             episode_lines.extend(
                 [
-                    f"【Reflection memo after trial {idx}】",
+                    f"\n【Reflection memo after trial {idx}】",
                     memo_for_trial,
                 ]
             )
