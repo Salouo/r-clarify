@@ -7,7 +7,7 @@ from langchain_core.messages import SystemMessage, AIMessage, HumanMessage
 from pydantic import ValidationError
 
 from .state import AgentState, id_to_action, AgentOutput, AgentStep
-from .prompts import agent_system_prompt, clarify_system_prompt, user_sim_system_prompt
+from .prompts import agent_system_prompt, user_sim_system_prompt
 from .llm_factory import get_primary_llm
 from .gpt_llm import OpenAIChatModel
 
@@ -128,6 +128,8 @@ def _safe_agent_output(message: AIMessage) -> AgentOutput:
             raise ValueError("Agent 输出必须是 JSON 对象。")
         if isinstance(data.get("action_id"), str) and data["action_id"].strip().isdigit():
             data["action_id"] = int(data["action_id"].strip())
+        if isinstance(data.get("question"), str):
+            data["question"] = data["question"].strip()
         return AgentOutput(**data)
     except (json.JSONDecodeError, ValidationError, ValueError) as exc:
         print(
@@ -142,30 +144,6 @@ def _safe_agent_output(message: AIMessage) -> AgentOutput:
         )
 
 
-def _parse_clarify_output(raw_resp: AIMessage) -> tuple[str | None, str]:
-    raw_text = str(getattr(raw_resp, "content", "")).strip()
-    cleaned = _sanitize_json_text(raw_text)
-
-    # 先尝试整段 JSON
-    for candidate in (cleaned, _extract_first_json_object(cleaned)):
-        if not candidate:
-            continue
-        try:
-            data = json.loads(candidate, strict=False)
-            if isinstance(data, dict):
-                thought = data.get("thought")
-                question = data.get("question")
-                if not isinstance(thought, str):
-                    thought = None
-                if isinstance(question, str) and question.strip():
-                    return thought, question.strip()
-        except Exception:
-            pass
-
-    # 兜底：把清洗后的文本当作问题（避免把 ```json 带下去）
-    return None, cleaned
-
-
 # ========== Agent Node ==========
 
 def agent(state: AgentState) -> AgentState:
@@ -175,7 +153,8 @@ def agent(state: AgentState) -> AgentState:
         return {
             "next_decision": "execute",
             "action_id": -1,
-            "step": state.step + 1,
+            "step": state.max_steps,
+            "clarify_question": None,
             "trace": state.trace + [AgentStep(
                 step=state.step,
                 thought="最大ステップ数を超過したため、失敗を判定します。",
@@ -194,11 +173,7 @@ def agent(state: AgentState) -> AgentState:
     # 让 agent 在同一 trial 内能看到自己历史的思考/决策
     trace_messages = _trace_to_messages(state.trace)
 
-    base_messages = [m for m in state.messages if not (
-        isinstance(m, SystemMessage)
-        and isinstance(m.content, str)
-        and m.content.startswith("【Agentの明確化意図】")
-    )]
+    base_messages = list(state.messages)
     has_same_system = (
         base_messages
         and isinstance(base_messages[0], SystemMessage)
@@ -226,6 +201,8 @@ def agent(state: AgentState) -> AgentState:
     else:
         action_id = -1
 
+    clarify_question = (resp.question or "").strip() if next_decision == "clarify" else None
+
     # 根据当前 mode 决定是否允许 clarify：
     # - clarify / reflect: 使用模型预测的 clarify / execute
     # - cot / direct: 强制只执行 execute（纯 CoT / 纯 direct 一步到位）
@@ -235,17 +212,13 @@ def agent(state: AgentState) -> AgentState:
 
     if not allow_clarify:
         next_decision = "execute"
+        clarify_question = None
 
 
     clarify_quota_left = state.clarify_quota_left
 
     new_messages = state.messages
     if next_decision == "clarify":
-        if resp.thought:
-            new_messages = state.messages + [SystemMessage(content="【Agentの明確化意図】\n" + resp.thought)]
-        else:
-            new_messages = state.messages
-
         if clarify_quota_left is not None:
             clarify_quota_left = max(clarify_quota_left - 1, 0)
 
@@ -253,17 +226,19 @@ def agent(state: AgentState) -> AgentState:
     return {
         "next_decision": next_decision,
         "action_id": action_id,
-        "step": state.step + 1,
+        "step": state.step,  # clarify/execute 节点才记步
         "clarify_quota_left": clarify_quota_left,
         "clarify_quota_total": state.clarify_quota_total,
         "messages": new_messages,
+        "clarify_question": clarify_question,
         "trace": state.trace
         + [
             AgentStep(
-                step=state.step + 1,
+                step=state.step + 1,  # 这里标注将要执行的动作序号
                 thought=resp.thought,
                 next_decision=next_decision,
                 action_id=action_id,
+                question=clarify_question,
             )
         ],
     }
@@ -273,29 +248,27 @@ def agent(state: AgentState) -> AgentState:
 
 def clarify_node(state: AgentState) -> AgentState:
 
-    system_prompt = clarify_system_prompt()
-
-    messages = [SystemMessage(content=system_prompt)]
-
-    # 将 agent 上一步的思考传递给 clarify 模型，减少意图偏差
-    agent_thought = state.trace[-1].thought if state.trace else None
-    if agent_thought:
-        messages.append(SystemMessage(content="【Agent思考メモ】\n" + agent_thought))
-
-    messages.extend(state.messages)
-
-    resp = llm.invoke(messages)
-    thought, question = _parse_clarify_output(resp)
+    question_text = (state.clarify_question or "").strip()
 
     new_messages = list(state.messages)
-    if thought:
-        new_messages.append(SystemMessage(content="【Clarify思考】\n" + thought))
-    new_messages.append(AIMessage(content=question))
+    if not question_text:
+        question_text = "エージェントが明確化質問を生成できなかったため、失敗として扱います。"
+        return {
+            "messages": new_messages + [AIMessage(content=question_text)],
+            "next_decision": "execute",
+            "action_id": -1,
+            "step": state.max_steps,
+            "clarify_question": None,
+        }
+
+    new_messages.append(AIMessage(content=question_text))
 
     return {
         "messages": new_messages,
+        "step": state.step + 1,
         "next_decision": None,
         "action_id": None,
+        "clarify_question": None,
     }
 
 
@@ -368,6 +341,7 @@ def execute_node(state: AgentState) -> AgentState:
 
     return {
         "messages": state.messages + [AIMessage(content=result_text)],
+        "step": state.step + 1,
     }
 
 
