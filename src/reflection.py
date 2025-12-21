@@ -43,20 +43,27 @@ def generate_trial_reflection_memo(
     success: bool,
     tried_actions: list[int],
     recent_memos: list[str],
+    mode: str,
     usage_collector: TokenUsageCollector | None = None,
 ) -> Optional[str]:
     """
     生成一段供下一轮 trial 使用的反思 memo，不暴露金标签，只说明成功/失败。
     """
-    user_ctx = final_state.get("user_context") or ""
-    chosen_action = final_state.get("action_id")
-    chosen_desc = id_to_action.get(chosen_action, f"Unknown action_id={chosen_action}")
-
     tried_action_descs = [
         f"{aid}: {id_to_action.get(aid, 'Unknown')}" for aid in tried_actions
     ]
     episode_text = _format_episode_for_reflection(trial_index=trial_index, final_state=final_state)
     prior_memos_text = "\n".join(f"- {m}" for m in recent_memos) if recent_memos else "なし"
+
+    if mode == "reflect_k":
+        memo_instruction = (
+            "次のトライアルのために、このトライアルの失敗や学びを3〜6行の箇条書きで新規メモとしてまとめてください。"
+            "既存メモを上書きせず、今回の学びを簡潔に追加するイメージで。"
+        )
+    else:
+        memo_instruction = (
+            "次のトライアルのために、直近メモを踏まえて必要なら修正しつつ、3〜6行の箇条書きでまとめてください。"
+        )
 
     human_prompt = (
         f"トライアル {trial_index} の完全ログ:\n"
@@ -66,7 +73,7 @@ def generate_trial_reflection_memo(
         f"- ここまで試した行動: {', '.join(tried_action_descs) if tried_action_descs else 'なし'}\n"
         f"- 直近の反省メモ（新しい順）:\n{prior_memos_text}\n"
         "\n"
-        "次のトライアルのための反省メモを書いてください。"
+        f"{memo_instruction}"
     )
 
     system_msg = SystemMessage(content=trial_reflection_system_prompt())
@@ -74,7 +81,7 @@ def generate_trial_reflection_memo(
     if usage_collector is not None:
         token = set_usage_collector(usage_collector)
     try:
-        resp = reflection_llm.invoke([system_msg, HumanMessage(content=human_prompt)])
+        resp = reflection_llm.invoke([system_msg, HumanMessage(content=human_prompt)])  # Call the LLM
     finally:
         if token is not None:
             clear_usage_collector(token)
@@ -205,6 +212,7 @@ def run_trials_for_one_sample(
                 success=success,
                 tried_actions=tried_actions,
                 recent_memos=reflection_memos[-memo_window:],
+                mode=mode,
                 usage_collector=reflection_usage,
             )
             usage_after = reflection_usage.snapshot()
