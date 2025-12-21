@@ -12,10 +12,10 @@ set -euo pipefail
 # Script uses uv (required). Make sure uv is installed.
 
 # 可以直接在这里设默认值，也可以在命令行传参覆盖
-gpu_id="${CUDA_VISIBLE_DEVICES:-3}"   # 例: "0,1,2,3" 多卡
+gpu_id="${CUDA_VISIBLE_DEVICES:-1}"   # 例: "0,1,2,3" 多卡
 max_trials=5
 memo_window=3      # only used for reflect_k unless overridden
-clarify_quota=3    # clarify 次数默认 3，可通过 -c 覆盖
+clarify_quota=2    # clarify 次数默认 3，可通过 -c 覆盖
 
 while getopts ":g:t:w:c:h" opt; do
   case "$opt" in
@@ -44,8 +44,8 @@ if ! command -v uv >/dev/null 2>&1; then
 fi
 runner_cmd=(uv run python)
 
-# 选择 modes
-modes=(cot direct)
+# 选择 modes（默认全跑，如需限定可手动编辑此数组）
+modes=(reflect)
 
 for mode in "${modes[@]}"; do
   echo "----------------------------------------"
@@ -56,9 +56,7 @@ for mode in "${modes[@]}"; do
 
   # memo_window: reflect_k 可指定；其他模式固定 1（即便 run.py 不使用，也保持显式一致）
   if [[ "$mode" == "reflect_k" ]]; then
-    if [[ -n "$memo_window" ]]; then
-      cmd+=(--memo-window "$memo_window")
-    fi
+    cmd+=(--memo-window "$memo_window")
   else
     cmd+=(--memo-window 1)
   fi

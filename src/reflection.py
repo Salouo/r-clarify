@@ -10,6 +10,7 @@ from .utils import (
 )
 from .llm_factory import get_primary_llm, get_primary_model_dirname
 from .prompts import trial_reflection_system_prompt
+from .token_usage import TokenUsageCollector, set_usage_collector, clear_usage_collector
 
 # 专门给 reflection 用的 LLM（和 agent/clarify 用的可以是同一个模型）
 reflection_llm = get_primary_llm()
@@ -42,6 +43,7 @@ def generate_trial_reflection_memo(
     success: bool,
     tried_actions: list[int],
     recent_memos: list[str],
+    usage_collector: TokenUsageCollector | None = None,
 ) -> Optional[str]:
     """
     生成一段供下一轮 trial 使用的反思 memo，不暴露金标签，只说明成功/失败。
@@ -68,7 +70,15 @@ def generate_trial_reflection_memo(
     )
 
     system_msg = SystemMessage(content=trial_reflection_system_prompt())
-    resp = reflection_llm.invoke([system_msg, HumanMessage(content=human_prompt)])
+    token = None
+    if usage_collector is not None:
+        token = set_usage_collector(usage_collector)
+    try:
+        resp = reflection_llm.invoke([system_msg, HumanMessage(content=human_prompt)])
+    finally:
+        if token is not None:
+            clear_usage_collector(token)
+
     return resp.content if resp and resp.content else None
 
 
@@ -134,6 +144,8 @@ def run_trials_for_one_sample(
     trial_contexts: List[dict] = []
     tried_actions: List[int] = []
 
+    reflection_usage = TokenUsageCollector()
+
     # 
     if memo_window is None:
         memo_window = 3 if mode == "reflect_k" else 1
@@ -186,13 +198,17 @@ def run_trials_for_one_sample(
         is_last_trial = (trial_idx + 1) >= max_trials
 
         if use_reflection and (not success) and (not is_last_trial):
+            usage_before = reflection_usage.snapshot()
             memo = generate_trial_reflection_memo(
                 trial_index=trial_idx + 1,
                 final_state=final_state,
                 success=success,
                 tried_actions=tried_actions,
                 recent_memos=reflection_memos[-memo_window:],
+                usage_collector=reflection_usage,
             )
+            usage_after = reflection_usage.snapshot()
+            delta = TokenUsageCollector.diff(usage_after, usage_before)
             if memo:
                 reflection_memos.append(memo)
                 trial_memos.append(
@@ -203,6 +219,12 @@ def run_trials_for_one_sample(
                 )
                 if len(reflection_memos) > memo_window:
                     reflection_memos = reflection_memos[-memo_window:]
+                # 把本轮反思的 token 消耗挂到当前 trial 的最终 state 上
+                try:
+                    all_states[-1]["reflection_token_usage"] = delta
+                    reflection_usage_log.append({"trial": trial_idx + 1, "token_usage": delta})
+                except Exception:
+                    pass
 
         if success:
             break

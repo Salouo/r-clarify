@@ -125,7 +125,7 @@ def main(
     run_id = None
 
     # 使用线程池并行处理不同的 sample（简单并行版）；目前设置为 1 ，不并行
-    with ThreadPoolExecutor(max_workers=1) as executor:
+    with ThreadPoolExecutor(max_workers=3) as executor:
         future_to_sample = {
             executor.submit(
                 _run_for_one_sample,
@@ -203,12 +203,14 @@ def main(
                 pred = last_state.get("action_id")
                 label_action_id = last_state.get("label_action_id") or label_action_id
                 correct = (pred == label_action_id)
+                token_usage = last_state.get("token_usage") or last_state.get("reflection_token_usage") or {}
 
             if not gold_action_desc and label_action_id is not None:
                 gold_action_desc = id_to_action.get(label_action_id)
             if not states:
                 steps_detail_per_trial = []
                 clarifications_per_trial = []
+                token_usage = {}
 
             records.append(
                 {
@@ -221,6 +223,7 @@ def main(
                     "steps_detail_per_trial": steps_detail_per_trial,
                     "clarify_turns_per_trial": clarifications_per_trial,
                     "gold_action": gold_action_desc,
+                    "token_usage": token_usage,
                 }
             )
 
@@ -236,6 +239,8 @@ def main(
                 )
                 payload = {
                     "n_processed": len(records),
+                    "clarify_quota": clarify_quota,
+                    "memo_window": memo_window,
                     "results": records,
                 }
                 with metrics_path.open("w", encoding="utf-8") as f:
@@ -247,6 +252,8 @@ def main(
     )
     payload = {
         "n_processed": len(records),
+        "clarify_quota": clarify_quota,
+        "memo_window": memo_window,
         "results": records,
     }
     with metrics_path.open("w", encoding="utf-8") as f:

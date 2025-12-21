@@ -262,6 +262,7 @@ def extract_trial_steps(final_state: dict) -> List[dict]:
     """
     messages = final_state.get("messages") or []
     trace = final_state.get("trace") or []
+    reflection_usage = final_state.get("reflection_token_usage")
 
     steps: List[dict] = []
     msg_idx = 1  # 跳过 system prompt
@@ -271,13 +272,16 @@ def extract_trial_steps(final_state: dict) -> List[dict]:
             idx += 1
         return idx
 
-    for step in trace:
+    for step_idx, step in enumerate(trace):
         t = getattr(step, "step", None)
         if isinstance(step, dict):
             t = step.get("step", t)
         next_decision = getattr(step, "next_decision", None)
         if isinstance(step, dict):
             next_decision = step.get("next_decision", next_decision)
+        token_usage_agent = getattr(step, "token_usage", None)
+        if isinstance(step, dict):
+            token_usage_agent = step.get("token_usage", token_usage_agent)
 
         if next_decision == "clarify":
             question = ""
@@ -316,5 +320,14 @@ def extract_trial_steps(final_state: dict) -> List[dict]:
                     "chosen_action": action_id,
                 }
             )
+
+        if token_usage_agent:
+            steps[-1]["token_usage_agent"] = token_usage_agent
+
+        # 在最后一步补充反思节点的 token 消耗（如果有）
+        is_last_step = (step_idx == len(trace) - 1)
+        if is_last_step and reflection_usage:
+            steps[-1]["token_usage_reflect"] = reflection_usage
+        # 不再记录总计，由外部按 trial 汇总
 
     return steps

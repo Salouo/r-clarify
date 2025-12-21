@@ -187,6 +187,11 @@ def agent(state: AgentState) -> AgentState:
     
     # 得到干净 agent 输出
     raw_resp = llm.invoke(messages)
+    token_usage = {}
+    try:
+        token_usage = getattr(raw_resp, "additional_kwargs", {}).get("token_usage") or {}
+    except Exception:
+        token_usage = {}
     resp = _safe_agent_output(raw_resp)
 
     valid_decisions = {"clarify", "execute"}
@@ -239,6 +244,7 @@ def agent(state: AgentState) -> AgentState:
                 next_decision=next_decision,
                 action_id=action_id,
                 question=clarify_question,
+                token_usage=token_usage or None,
             )
         ],
     }

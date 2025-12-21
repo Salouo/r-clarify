@@ -14,6 +14,7 @@ from langchain_core.messages import (
 )
 from openai import BadRequestError, OpenAI
 
+from .token_usage import get_usage_collector
 
 load_dotenv(".env", override=False)
 
@@ -92,6 +93,13 @@ class OpenAIChatModel:
             else:
                 raise
         choice = response.choices[0]
+        usage = getattr(response, "usage", None)
+        prompt_tokens = getattr(usage, "prompt_tokens", None) if usage else None
+        completion_tokens = getattr(usage, "completion_tokens", None) if usage else None
+        collector = get_usage_collector()
+        if collector and (prompt_tokens or completion_tokens):
+            collector.add(prompt=prompt_tokens, completion=completion_tokens)
+
         content = choice.message.content or ""
         if isinstance(content, list):
             text = "\n".join(
@@ -101,4 +109,12 @@ class OpenAIChatModel:
         else:
             text = str(content)
 
-        return AIMessage(content=text)
+        add_kwargs = {}
+        if prompt_tokens is not None or completion_tokens is not None:
+            add_kwargs["token_usage"] = {
+                "prompt_tokens": prompt_tokens or 0,
+                "completion_tokens": completion_tokens or 0,
+                "total_tokens": (prompt_tokens or 0) + (completion_tokens or 0),
+            }
+
+        return AIMessage(content=text, additional_kwargs=add_kwargs)

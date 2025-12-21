@@ -62,6 +62,7 @@ class AgentStep(BaseModel):
     next_decision: DecisionType     # clarify / execute
     action_id: Optional[int] = None # execute 时选的动作
     question: Optional[str] = None  # clarify 时由 agent 生成的问题文本
+    token_usage: Optional[dict] = None  # 本步 agent 模型调用的 token 消耗（prompt/completion/total）
 
 
 class AgentOutput(BaseModel):

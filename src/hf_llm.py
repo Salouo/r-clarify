@@ -4,6 +4,7 @@ import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
 
+from .token_usage import get_usage_collector
 
 def _message_content_to_text(content: Any) -> str:
     if isinstance(content, str):
@@ -104,4 +105,20 @@ class HuggingFaceChatModel:
         generated = outputs[0][input_len:]
 
         text = self._tokenizer.decode(generated, skip_special_tokens=True)
-        return AIMessage(content=text)
+        prompt_tokens = int(input_len)
+        completion_tokens = int(generated.shape[-1])
+
+        collector = get_usage_collector()
+        if collector:
+            collector.add(prompt=prompt_tokens, completion=completion_tokens)
+
+        return AIMessage(
+            content=text,
+            additional_kwargs={
+                "token_usage": {
+                    "prompt_tokens": prompt_tokens,
+                    "completion_tokens": completion_tokens,
+                    "total_tokens": prompt_tokens + completion_tokens,
+                }
+            },
+        )

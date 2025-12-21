@@ -37,12 +37,12 @@ def calculate_average_steps_per_sample_by_trial(data: dict, trial: int) -> float
 
 
 def main():
-    metrics_path = Path("outputs/gpt-5-mini/results/reflect.json")
+    metrics_path = Path("outputs/Qwen__Qwen3-30B-A3B-Instruct-2507/results/reflect.json")
     with metrics_path.open("r", encoding="utf-8") as f:
         data = json.load(f)
 
-    acc = calculate_accuracy_by_trial(data=data, trial=5)
-    avg_steps = calculate_average_steps_per_sample_by_trial(data=data, trial=5)
+    acc = calculate_accuracy_by_trial(data=data, trial=3)
+    avg_steps = calculate_average_steps_per_sample_by_trial(data=data, trial=3)
 
     print(f"Accuracy: {acc:.4f}")
     print(f"Steps per sample: {avg_steps:.4f}")
