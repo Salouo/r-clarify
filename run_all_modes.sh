@@ -45,7 +45,7 @@ fi
 runner_cmd=(uv run python)
 
 # 选择 modes（默认全跑，如需限定可手动编辑此数组）
-modes=(reflect)
+modes=(reflect_k)
 
 for mode in "${modes[@]}"; do
   echo "----------------------------------------"
