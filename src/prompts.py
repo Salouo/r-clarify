@@ -118,7 +118,7 @@ def agent_system_prompt(
             "\n"
         )
 
-        def _quota_text() -> str:
+        def _clarify_quota_text() -> str:
             if clarify_quota_total is None and clarify_quota_left is None:
                 return ""
             total_txt = "制限なし" if clarify_quota_total is None else f"{clarify_quota_total} 回まで"
@@ -155,7 +155,7 @@ def agent_system_prompt(
             " - 質問は 1 文だけ、自然な口語で。括弧や番号付きの案内文、UI 説明は入れない。\n"
             " - 40 個の行動候補のどれを選ぶかを絞り込むために本質的な一点に絞った質問にする。\n"
             " - 同じ質問を重ねない。ユーザのニーズ理解に役立たない場合は聞かない。\n"
-            f"{_quota_text()}"
+            f"{_clarify_quota_text()}"
             "\n"
             "2. \"execute\"（1〜40 のうち 1 つの気が利く行動を実行する）:\n"
             "\n"

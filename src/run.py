@@ -203,14 +203,12 @@ def main(
                 pred = last_state.get("action_id")
                 label_action_id = last_state.get("label_action_id") or label_action_id
                 correct = (pred == label_action_id)
-                token_usage = last_state.get("token_usage") or last_state.get("reflection_token_usage") or {}
 
             if not gold_action_desc and label_action_id is not None:
                 gold_action_desc = id_to_action.get(label_action_id)
             if not states:
                 steps_detail_per_trial = []
                 clarifications_per_trial = []
-                token_usage = {}
 
             records.append(
                 {
@@ -223,7 +221,6 @@ def main(
                     "steps_detail_per_trial": steps_detail_per_trial,
                     "clarify_turns_per_trial": clarifications_per_trial,
                     "gold_action": gold_action_desc,
-                    "token_usage": token_usage,
                 }
             )
 

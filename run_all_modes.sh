@@ -12,7 +12,7 @@ set -euo pipefail
 # Script uses uv (required). Make sure uv is installed.
 
 # 可以直接在这里设默认值，也可以在命令行传参覆盖
-gpu_id="${CUDA_VISIBLE_DEVICES:-1}"   # 例: "0,1,2,3" 多卡
+gpu_id="${CUDA_VISIBLE_DEVICES:-0,1,2,3}"   # 例: "0,1,2,3" 多卡
 max_trials=5
 memo_window=3      # only used for reflect_k unless overridden
 clarify_quota=2    # clarify 次数默认 3，可通过 -c 覆盖
