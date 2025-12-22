@@ -331,8 +331,6 @@ def user_sim_node(state: AgentState) -> AgentState:
     }
 
 
-# ========== Reflection Node（明確化質問後のまとめ） ==========
-
 # ========== Execute Node (END) ==========
 
 def execute_node(state: AgentState) -> AgentState:

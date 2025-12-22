@@ -78,7 +78,7 @@ def main(
     data_path = Path("data/processed_data_expanded.json")
     with data_path.open("r", encoding="utf-8") as f:
         # 默认跑全量数据；可通过 start/end 灵活截取子集
-        samples = json.load(f)["samples"][:10]
+        samples = json.load(f)["samples"][:100]
 
     # 结果日志文件（按模型 + mode 分开保存，便于断点续跑和单独做评估）
     model_dir = get_primary_model_dirname()
@@ -125,7 +125,7 @@ def main(
     run_id = None
 
     # 使用线程池并行处理不同的 sample（简单并行版）；目前设置为 1 ，不并行
-    with ThreadPoolExecutor(max_workers=3) as executor:
+    with ThreadPoolExecutor(max_workers=1) as executor:
         future_to_sample = {
             executor.submit(
                 _run_for_one_sample,
