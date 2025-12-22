@@ -30,25 +30,14 @@ def make_system_prompt_from_one_sample(sample) -> str:
     return user_prompt
 
 
-def format_wrong_actions_block(wrong_actions) -> str:
-    """Render a bullet list of known-wrong actions (id, desc)."""
-    if not wrong_actions:
-        return ""
-    lines: List[str] = ["【これまでに誤って選んだ行動（避けるべき）】"]
-    for aid, desc in wrong_actions:
-        lines.append(f"- {desc}")
-    return "\n".join(lines)
-
-
 def format_single_trial_episode(
     final_state: dict,
     *,
     prior_memos: List[str] | None = None,
-    past_failed_actions: List[int] | None = None,
 ) -> str:
     """
     只描述『一个 trial』发生了什么，用于 reflection / 在大 episode 里嵌入。
-    可选：在步骤前展示本轮带入的 memo 和此前试错过的 action。
+    可选：在步骤前展示本轮带入的 memo。
     """
     lines: List[str] = []
 
@@ -102,14 +91,6 @@ def format_single_trial_episode(
         lines.append("【Prior reflection memos given to this trial】")
         for memo_idx, memo_text in enumerate(memos_to_show, start=1):
             lines.append(f"[{memo_idx}] {memo_text}")
-        lines.append("")
-
-    past_actions = past_failed_actions or []
-    if past_actions:
-        lines.append("【Previously tried actions before this trial】")
-        for aid in past_actions:
-            desc = id_to_action.get(aid, f"Unknown action_id={aid}")
-            lines.append(f"- {desc} (id={aid})")
         lines.append("")
 
     # 遍历每一个 agent step

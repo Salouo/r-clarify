@@ -3,7 +3,7 @@ from typing import List, Optional
 
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 
-from .state import AgentState, action_to_id, id_to_action
+from .state import AgentState, action_to_id
 from .utils import (
     make_system_prompt_from_one_sample,
     format_single_trial_episode,
@@ -41,7 +41,6 @@ def generate_trial_reflection_memo(
     trial_index: int,
     final_state: dict,
     success: bool,
-    tried_actions: list[int],
     recent_memos: list[str],
     mode: str,
     usage_collector: TokenUsageCollector | None = None,
@@ -49,9 +48,6 @@ def generate_trial_reflection_memo(
     """
     生成一段供下一轮 trial 使用的反思 memo，不暴露金标签，只说明成功/失败。
     """
-    tried_action_descs = [
-        f"{aid}: {id_to_action.get(aid, 'Unknown')}" for aid in tried_actions
-    ]
     episode_text = _format_episode_for_reflection(trial_index=trial_index, final_state=final_state)
     prior_memos_text = "\n".join(f"- {m}" for m in recent_memos) if recent_memos else "なし"
 
@@ -70,7 +66,6 @@ def generate_trial_reflection_memo(
         f"{episode_text}\n"
         "\n"
         f"- 成否: {'成功' if success else '失敗'}\n"
-        f"- ここまで試した行動: {', '.join(tried_action_descs) if tried_action_descs else 'なし'}\n"
         f"- 直近の反省メモ（新しい順）:\n{prior_memos_text}\n"
         "\n"
         f"{memo_instruction}"
@@ -149,7 +144,6 @@ def run_trials_for_one_sample(
     reflection_memos: List[str] = []
     trial_memos: List[dict] = []
     trial_contexts: List[dict] = []
-    tried_actions: List[int] = []
 
     reflection_usage = TokenUsageCollector()
 
@@ -159,7 +153,6 @@ def run_trials_for_one_sample(
 
     for trial_idx in range(max_trials):
         extra_messages: List[SystemMessage] = []
-        past_actions = list(tried_actions)
 
         prior_memos: List[str] = []
         if use_reflection and reflection_memos:
@@ -173,14 +166,6 @@ def run_trials_for_one_sample(
                     label = f"{distance} trial前"
                     extra_messages.append(SystemMessage(content=f"【Reflection memo（{label}）】\n{memo}"))
 
-        if past_actions:
-            tried_lines = [f"- {id_to_action.get(aid, 'Unknown')} (id={aid})" for aid in past_actions]
-            extra_messages.append(
-                SystemMessage(
-                    content="【Tried actions so far（avoid repeating）】\n" + "\n".join(tried_lines)
-                )
-            )
-
         final_state = run_one_trial(
             sample,
             mode=mode,
@@ -192,13 +177,10 @@ def run_trials_for_one_sample(
         trial_contexts.append(
             {
                 "prior_memos": prior_memos if use_reflection else [],
-                "past_actions": past_actions if use_reflection else [],
             }
         )
 
         pred = final_state.get("action_id")
-        if isinstance(pred, int):
-            tried_actions.append(pred)
 
         success = bool(label_action_id is not None and pred == label_action_id)
 
@@ -210,7 +192,6 @@ def run_trials_for_one_sample(
                 trial_index=trial_idx + 1,
                 final_state=final_state,
                 success=success,
-                tried_actions=tried_actions,
                 recent_memos=reflection_memos[-memo_window:],
                 mode=mode,
                 usage_collector=reflection_usage,
@@ -230,7 +211,6 @@ def run_trials_for_one_sample(
                 # 把本轮反思的 token 消耗挂到当前 trial 的最终 state 上
                 try:
                     all_states[-1]["reflection_token_usage"] = delta
-                    reflection_usage_log.append({"trial": trial_idx + 1, "token_usage": delta})
                 except Exception:
                     pass
 
@@ -256,7 +236,6 @@ def run_trials_for_one_sample(
     for idx, state in enumerate(all_states, start=1):
         context = trial_contexts[idx - 1] if idx - 1 < len(trial_contexts) else {}
         prior_memos = context.get("prior_memos") or []
-        past_actions = context.get("past_actions") or []
         memo_for_trial = None
         for rec in trial_memos:
             if rec.get("trial") == idx:
@@ -268,7 +247,6 @@ def run_trials_for_one_sample(
                 format_single_trial_episode(
                     state,
                     prior_memos=prior_memos,
-                    past_failed_actions=past_actions,
                 ),
             ]
         )
