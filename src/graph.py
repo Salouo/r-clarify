@@ -17,7 +17,7 @@ load_dotenv(".env", override=True)
 llm = get_primary_llm()
 
 # User simulator（保持 OpenAI，确保回答稳定）
-user_llm = OpenAIChatModel(model="gpt-5-mini")
+user_llm = OpenAIChatModel(model="gpt-5.2")
 
 _FENCE_RE = re.compile(
     r"```[a-zA-Z0-9_-]*\s*([\s\S]*?)\s*```",
