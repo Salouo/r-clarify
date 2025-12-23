@@ -44,8 +44,8 @@ if ! command -v uv >/dev/null 2>&1; then
 fi
 runner_cmd=(uv run python)
 
-# 选择 modes（默认全跑，如需限定可手动编辑此数组）
-modes=(reflect_k reflect)
+# 选择 modes（cot, cot_reflect, clarify, reflect, reflect_k）
+modes=(reflect_k reflect cot_reflect)
 
 for mode in "${modes[@]}"; do
   echo "----------------------------------------"

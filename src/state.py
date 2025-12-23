@@ -108,10 +108,10 @@ class AgentState(BaseModel):
     # 原始模糊 utterance（方便在 user_sim 里用）
     original_utterance: str = Field(default="")
 
-    # 当前运行模式（clarify / reflect / cot / direct）
+    # 当前运行模式（clarify / reflect / reflect_k / cot / cot_reflect / direct）
     mode: str = Field(
         default="clarify",
-        description="当前样本使用的运行模式，例如 'clarify' / 'reflect' / 'cot' / 'direct'",
+        description="当前样本使用的运行模式，例如 'clarify' / 'reflect' / 'reflect_k' / 'cot' / 'cot_reflect' / 'direct'",
     )
 
     # 步数

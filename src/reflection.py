@@ -158,7 +158,7 @@ def run_trials_for_one_sample(
         if use_reflection and reflection_memos:
             prior_memos = reflection_memos[-memo_window:]
             for idx, memo in enumerate(prior_memos, start=1):
-                if mode == "reflect":
+                if mode in {"reflect", "cot_reflect"}:
                     extra_messages.append(SystemMessage(content=f"【Reflection memo】\n{memo}"))
                 else:
                     # idx=1 は最も古いメモ、末尾が最新。現在の trial からの距離を明示。

@@ -47,6 +47,7 @@ def main(
     - mode = "clarify"  -> ReAct，无 reflection
     - mode = "reflect"   -> ReAct + reflection
     - mode = "cot"       -> 纯 CoT，一步到位（不走 clarify）
+    - mode = "cot_reflect" -> CoT + reflection（不走 clarify）
     - mode = "direct"    -> 完全ダイレクト：thinking もほぼ書かず，即座に行動を選ぶ
     - mode = "reflect_k" -> ReAct + reflection，多轮 trial，携带最近 k 轮 memo
     """
@@ -54,16 +55,17 @@ def main(
         "clarify",
         "reflect",
         "cot",
+        "cot_reflect",
         "direct",
         "reflect_k",
-    }, "mode 必须是 'clarify' / 'reflect' / 'cot' / 'direct' / 'reflect_k'"
+    }, "mode 必须是 'clarify' / 'reflect' / 'cot' / 'cot_reflect' / 'direct' / 'reflect_k'"
 
     # 按模式选择是否启用澄清后的反思整理
     if mode in {"cot", "direct"}:
         use_reflection = False
     elif mode == "clarify":
         use_reflection = False
-    elif mode in {"reflect", "reflect_k"}:
+    elif mode in {"reflect", "reflect_k", "cot_reflect"}:
         use_reflection = True
 
     # max_trials 必须外部指定（所有模式统一由参数决定）
@@ -72,7 +74,7 @@ def main(
 
     # 反思 memo 窗口（给下一轮看的最近 k 条 memo）
     if memo_window is None:
-        memo_window = 1 if mode == "reflect" else (3 if mode == "reflect_k" else 0)
+        memo_window = 1 if mode in {"reflect", "cot_reflect"} else (3 if mode == "reflect_k" else 0)
 
     # Load sample
     data_path = Path("data/processed_data_expanded.json")
@@ -260,7 +262,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run dataset in specified mode.")
     parser.add_argument(
         "--mode",
-        choices=["clarify", "reflect", "cot", "direct", "reflect_k"],
+        choices=["clarify", "reflect", "cot", "cot_reflect", "direct", "reflect_k"],
         help="Select running mode.",
     )
     parser.add_argument(
@@ -279,7 +281,7 @@ if __name__ == "__main__":
         "--memo-window",
         type=int,
         default=None,
-        help="How many latest reflection memos to pass to the next trial (reflect default 1, reflect_k default 3).",
+        help="How many latest reflection memos to pass to the next trial (reflect/cot_reflect default 1, reflect_k default 3).",
     )
 
     args = parser.parse_args()
