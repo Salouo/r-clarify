@@ -12,21 +12,21 @@ from .hf_llm import HuggingFaceChatModel
 from .gpt_llm import OpenAIChatModel
 
 
-# 简单的配置开关：手动指定本次要使用的后端
+# backend settings
 DEFAULT_BACKEND = "gpt"  # 取值 "gpt" 或 "hf"
 
-# OpenAI (GPT) 配置
+# OpenAI (GPT) settings
 GPT_MODEL_NAME = "gpt-5-nano"
 GPT_TEMPERATURE: float | None = None
 
-# Hugging Face (本地/自建) 模型配置
+# Hugging Face model settings
 # meta-llama/Llama-3.1-8B-Instruct
 # Qwen/Qwen3-4B-Instruct-2507
 # Qwen/Qwen3-Next-80B-A3B-Instruct
 HF_MODEL_ID = "Qwen/Qwen3-Next-80B-A3B-Instruct"
 HF_MAX_NEW_TOKENS = 2048
 HF_TEMPERATURE = 0.7
-HF_DEVICE_MAP = "auto"  # e.g. "auto", "balanced"; use auto to shard one model across visible GPUs
+HF_DEVICE_MAP = "auto"
 
 
 def get_primary_model_name() -> str:

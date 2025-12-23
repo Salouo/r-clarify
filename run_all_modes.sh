@@ -37,21 +37,13 @@ done
 export CUDA_VISIBLE_DEVICES="$gpu_id"
 echo "Using GPU $CUDA_VISIBLE_DEVICES; max_trials=$max_trials; reflect_k memo_window=$memo_window; clarify_quota=$clarify_quota"
 
-# Require uv
-if ! command -v uv >/dev/null 2>&1; then
-  echo "uv is required but not found in PATH." >&2
-  exit 1
-fi
 runner_cmd=(uv run python)
 
 # 选择 modes（cot, cot_reflect, clarify, reflect, reflect_k）
-modes=(reflect_k reflect cot_reflect)
+modes=(reflect_k reflect)
 
 for mode in "${modes[@]}"; do
-  echo "----------------------------------------"
-  echo "Running mode: $mode"
   cmd=("${runner_cmd[@]}" -m src.run --mode "$mode" --max-trials "$max_trials")
-
   cmd+=(--clarify-quota "$clarify_quota")
 
   # memo_window: reflect_k 可指定；其他模式固定 1（即便 run.py 不使用，也保持显式一致）

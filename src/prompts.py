@@ -28,7 +28,7 @@ def agent_system_prompt(
     """
     actions_text = _actions_block()
 
-    # 直接选择，没有 CoT
+    # `direct` mode
     if mode == "direct":
         return (
             "あなたは家庭内で動作するエージェントです。ユーザの状況に基づいて、\n"
@@ -55,7 +55,7 @@ def agent_system_prompt(
             "}\n"
         ).strip()
 
-    # 纯CoT（没有 CLARIFICATION 和 RELFECTION）
+    # `cot` mode
     elif mode == "cot":
         return (
             "あなたは家庭内で動作するエージェントです。ユーザの状況に基づいて、\n"
