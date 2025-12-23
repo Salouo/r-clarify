@@ -78,7 +78,7 @@ def main(
     data_path = Path("data/processed_data_expanded.json")
     with data_path.open("r", encoding="utf-8") as f:
         # 默认跑全量数据；可通过 start/end 灵活截取子集
-        samples = json.load(f)["samples"][:100]
+        samples = json.load(f)["samples"]
 
     # 结果日志文件（按模型 + mode 分开保存，便于断点续跑和单独做评估）
     model_dir = get_primary_model_dirname()
@@ -101,31 +101,30 @@ def main(
     }
 
     model_name = get_primary_model_name()
-    quota_text = "不限" if clarify_quota is None else f"{clarify_quota} 回"
-    trial_text = f"{max_trials} 回"
-    memo_text = f"{memo_window} 条" if memo_window else "0"
+    quota_text = "infinite" if clarify_quota is None else f"{clarify_quota}"
+    trial_text = f"{max_trials}"
+    memo_text = f"{memo_window}" if memo_window else "0"
     print(
-        f"[Progress] 模式: {mode}, 模型: {model_name}, 已完成样本数: {len(done_indices)}, "
-        f"澄清额度: {quota_text}, max_trials: {trial_text}, memo_window: {memo_text}"
+        f"[Progress] Mode: {mode}, Model: {model_name}, Sample(done): {len(done_indices)}, "
+        f"Clarification quote: {quota_text}, max_trials: {trial_text}, memo_window: {memo_text}"
     )
 
     # 过滤掉已经完成的样本，只对剩余样本继续跑，而且还能补齐漏了的样本。
     remaining_samples = [s for s in samples if s.get("index") not in done_indices]
 
     if not remaining_samples:
-        print(f"所有样本在模式 {mode} 下都已经完成。")
+        print(f"All samples had been processed under {mode} mode.")
         return
 
     print(
-        f"[Progress] 本次运行将处理样本数: {len(remaining_samples)} "
-        f"(模型: {model_name}, 澄清额度: {quota_text}, max_trials: {trial_text}, memo_window: {memo_text})"
+        f"[Progress] Number of sample to be processed: {len(remaining_samples)} "
     )
 
     # 不使用时间戳/运行 ID，histories 直接落在 histories/<mode>
     run_id = None
 
     # 使用线程池并行处理不同的 sample（简单并行版）；目前设置为 1 ，不并行
-    with ThreadPoolExecutor(max_workers=1) as executor:
+    with ThreadPoolExecutor(max_workers=3) as executor:
         future_to_sample = {
             executor.submit(
                 _run_for_one_sample,
