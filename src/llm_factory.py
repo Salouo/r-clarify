@@ -13,7 +13,7 @@ from .gpt_llm import OpenAIChatModel
 
 
 # backend settings
-DEFAULT_BACKEND = "gpt"  # 取值 "gpt" 或 "hf"
+DEFAULT_BACKEND = "hf"  # 取值 "gpt" 或 "hf"
 
 # OpenAI (GPT) settings
 GPT_MODEL_NAME = "gpt-5-nano"

@@ -71,7 +71,7 @@ def generate_trial_reflection_memo(
         f"{memo_instruction}"
     )
 
-    system_msg = SystemMessage(content=trial_reflection_system_prompt())
+    system_msg = SystemMessage(content=trial_reflection_system_prompt(mode))
     token = None
     if usage_collector is not None:
         token = set_usage_collector(usage_collector)
