@@ -86,17 +86,80 @@ def calculate_dpass_at_k(
     return total_score / total
 
 
+def calculate_reflection_token_usage_before_success(
+    data: dict, trial: int, k: int | None = None
+) -> dict:
+    """
+    统计成功 trial 之前的反思 token 消耗平均值（prompt/completion/total）。
+    仅统计在 trial 次内成功的样本，失败样本不计入。
+    """
+    results = data["results"]
+    if k is not None:
+        results = results[:k]
+
+    totals = {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
+    num_success = 0
+
+    for res in results:
+        if not res.get("correct"):
+            continue
+        num_trials = res.get("num_trials", 0)
+        if num_trials <= 0 or num_trials > trial:
+            continue
+
+        steps_detail = res.get("steps_detail_per_trial", [])
+        for t in range(num_trials - 1):
+            if t >= len(steps_detail):
+                break
+            trial_steps = steps_detail[t] or []
+            usage = None
+            for step in trial_steps:
+                usage = step.get("token_usage_reflect")
+                if usage:
+                    break
+            if not usage:
+                continue
+            prompt = usage.get("prompt_tokens", 0)
+            completion = usage.get("completion_tokens", 0)
+            total = usage.get("total_tokens", prompt + completion)
+            totals["prompt_tokens"] += prompt
+            totals["completion_tokens"] += completion
+            totals["total_tokens"] += total
+
+        num_success += 1
+
+    if num_success == 0:
+        return {
+            "prompt_tokens": 0.0,
+            "completion_tokens": 0.0,
+            "total_tokens": 0.0,
+            "num_success": 0,
+            "num_samples": len(results),
+        }
+
+    return {
+        "prompt_tokens": totals["prompt_tokens"] / num_success,
+        "completion_tokens": totals["completion_tokens"] / num_success,
+        "total_tokens": totals["total_tokens"] / num_success,
+        "num_success": num_success,
+        "num_samples": len(results),
+    }
+
+
 def main():
     metrics_path = Path("outputs/Qwen__Qwen3-Next-80B-A3B-Instruct/results/reflect.json")
     with metrics_path.open("r", encoding="utf-8") as f:
         data = json.load(f)
 
-    trial = 3   # 最大允许多少个 trial
-    k = None     # 测试多少个样本
+    trial = 5   # up to n_trials
+    k = None     # eval up to n_samples
     alpha = 0.6
     acc = calculate_accuracy_by_trial(data=data, trial=trial, k=k)
     avg_steps = calculate_average_steps_of_successful_trial(data=data, trial=trial, k=k)
     dpass = calculate_dpass_at_k(data=data, trial=trial, alpha=alpha, k=k)
+    reflect_usage = calculate_reflection_token_usage_before_success(
+        data=data, trial=trial, k=k
+    )
 
     if k:  
         print(f"Pass@{trial} (k={k}): {acc:.4f}")
@@ -104,6 +167,15 @@ def main():
     else:
         print(f"Pass@{trial} (k=full): {acc:.4f}")
         print(f"DPass@{trial} (k=full, alpha={alpha}): {dpass:.4f}")
+
+    print(
+        "Reflection token usage before success\n"
+        f"(k={'full' if k is None else k}, trial={trial}):\n"
+        f"prompt_tokens: {reflect_usage['prompt_tokens']:.2f},\n"
+        f"completion_tokens: {reflect_usage['completion_tokens']:.2f},\n"
+        f"total_tokens: {reflect_usage['total_tokens']:.2f},\n"
+        f"success={reflect_usage['num_success']}\n"
+    )
 
     print(f"Steps per successful trial: {avg_steps:.4f}")
 

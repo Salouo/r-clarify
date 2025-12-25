@@ -3,28 +3,34 @@ set -euo pipefail
 
 # Run src/run.py across all modes with shared config.
 # Usage:
-#   ./run_all_modes.sh -g 0 -t 3 -w 2
+#   ./run_all_modes.sh -g 0 -t 3 -w 2 -s 0 -e 150
 # Options:
 #   -g  GPU id/list to expose via CUDA_VISIBLE_DEVICES (default: env CUDA_VISIBLE_DEVICES, else 0)
 #   -t  max trials per sample (default: 5)
 #   -w  memo window length for reflect_k only (default reflect_k: 3; others fixed at 1)
 #   -c  clarify quota (default: 3)
+#   -s  start sample index (inclusive)
+#   -e  end sample index (exclusive)
 # Script uses uv (required). Make sure uv is installed.
 
 # 可以直接在这里设默认值，也可以在命令行传参覆盖
-gpu_id="${CUDA_VISIBLE_DEVICES:-0,1,2,3}"   # 例: "0,1,2,3" 多卡
+gpu_id="${CUDA_VISIBLE_DEVICES:-0}"   # 例: "0,1,2,3" 多卡
 max_trials=5
 memo_window=3      # only used for reflect_k unless overridden
 clarify_quota=2    # clarify 次数默认 3，可通过 -c 覆盖
+start_idx="0"
+end_idx="150"
 
-while getopts ":g:t:w:c:h" opt; do
+while getopts ":g:t:w:c:s:e:h" opt; do
   case "$opt" in
     g) gpu_id="$OPTARG" ;;
     t) max_trials="$OPTARG" ;;
     w) memo_window="$OPTARG" ;;
     c) clarify_quota="$OPTARG" ;;
+    s) start_idx="$OPTARG" ;;
+    e) end_idx="$OPTARG" ;;
     h)
-      echo "Usage: $0 [-g <gpu_id_list>] [-t <max_trials>] [-w <memo_window_for_reflect_k>] [-c <clarify_quota>]"
+      echo "Usage: $0 [-g <gpu_id_list>] [-t <max_trials>] [-w <memo_window_for_reflect_k>] [-c <clarify_quota>] [-s <start_idx>] [-e <end_idx>]"
       exit 0
       ;;
     \?)
@@ -40,11 +46,17 @@ echo "Using GPU $CUDA_VISIBLE_DEVICES"
 runner_cmd=(uv run python)
 
 # 选择 modes（cot, cot_reflect, clarify, reflect, reflect_k）
-modes=(cot_reflect)
+modes=(reflect)
 
 for mode in "${modes[@]}"; do
   cmd=("${runner_cmd[@]}" -m src.run --mode "$mode" --max-trials "$max_trials")
   cmd+=(--clarify-quota "$clarify_quota")
+  if [[ -n "$start_idx" ]]; then
+    cmd+=(--start "$start_idx")
+  fi
+  if [[ -n "$end_idx" ]]; then
+    cmd+=(--end "$end_idx")
+  fi
 
   # memo_window setting
   if [[ "$mode" == "reflect_k" ]]; then

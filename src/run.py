@@ -41,6 +41,8 @@ def main(
     clarify_quota: int | None = None,
     max_trials: int | None = None,
     memo_window: int | None = None,
+    start: int | None = None,
+    end: int | None = None,
 ) -> None:
     """
     按照不同 mode 跑数据集
@@ -79,14 +81,21 @@ def main(
     # Load sample
     data_path = Path("data/processed_data_expanded.json")
     with data_path.open("r", encoding="utf-8") as f:
-        # 默认跑全量数据；可通过 start/end 灵活截取子集
         samples = json.load(f)["samples"]
+
+    if start is not None or end is not None:
+        start_idx = 0 if start is None else start
+        end_idx = len(samples) if end is None else end
+        samples = [s for s in samples if start_idx <= s.get("index", -1) < end_idx]
 
     # 结果日志文件（按模型 + mode 分开保存，便于断点续跑和单独做评估）
     model_dir = get_primary_model_dirname()
     results_dir = Path("outputs") / model_dir / "results"
     results_dir.mkdir(parents=True, exist_ok=True)
-    metrics_path = results_dir / f"{mode}.json"
+    metrics_suffix = ""
+    if start is not None or end is not None:
+        metrics_suffix = f"_{start_idx}_{end_idx}"
+    metrics_path = results_dir / f"{mode}{metrics_suffix}.json"
 
     # 读取已经完成的样本结果（如果有）
     if metrics_path.exists():
@@ -106,9 +115,13 @@ def main(
     quota_text = "infinite" if clarify_quota is None else f"{clarify_quota}"
     trial_text = f"{max_trials}"
     memo_text = f"{memo_window}" if memo_window else "0"
+    shard_text = ""
+    if start is not None or end is not None:
+        shard_text = f", range: [{start_idx}, {end_idx})"
     print(
         f"[Progress] Mode: {mode}, Model: {model_name}, Sample(done): {len(done_indices)}, "
         f"Clarification quote: {quota_text}, max_trials: {trial_text}, memo_window: {memo_text}"
+        f"{shard_text}"
     )
 
     # 过滤掉已经完成的样本，只对剩余样本继续跑，而且还能补齐漏了的样本。
@@ -283,6 +296,18 @@ if __name__ == "__main__":
         default=None,
         help="How many latest reflection memos to pass to the next trial (reflect/cot_reflect default 1, reflect_k default 3).",
     )
+    parser.add_argument(
+        "--start",
+        type=int,
+        default=None,
+        help="Start sample index (inclusive).",
+    )
+    parser.add_argument(
+        "--end",
+        type=int,
+        default=None,
+        help="End sample index (exclusive).",
+    )
 
     args = parser.parse_args()
     main(
@@ -290,4 +315,6 @@ if __name__ == "__main__":
         clarify_quota=args.clarify_quota,
         max_trials=args.max_trials,
         memo_window=args.memo_window,
+        start=args.start,
+        end=args.end,
     )
