@@ -146,8 +146,95 @@ def calculate_reflection_token_usage_before_success(
     }
 
 
+def calculate_total_token_usage_before_success(
+    data: dict, trial: int, k: int | None = None
+) -> dict:
+    """
+    统计成功 trial 之前的总 token 消耗平均值（prompt/completion/total）。
+    包含 reflect + execute + clarify，并给出分项。
+    仅统计在 trial 次内成功的样本，失败样本不计入。
+    """
+    results = data["results"]
+    if k is not None:
+        results = results[:k]
+
+    def _new_bucket() -> dict:
+        return {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
+
+    def _add_usage(bucket: dict, usage: dict) -> None:
+        prompt = usage.get("prompt_tokens", 0)
+        completion = usage.get("completion_tokens", 0)
+        total = usage.get("total_tokens", prompt + completion)
+        bucket["prompt_tokens"] += prompt
+        bucket["completion_tokens"] += completion
+        bucket["total_tokens"] += total
+
+    totals = {
+        "overall": _new_bucket(),
+        "reflect": _new_bucket(),
+        "execute": _new_bucket(),
+        "clarify": _new_bucket(),
+    }
+    num_success = 0
+
+    for res in results:
+        if not res.get("correct"):
+            continue
+        num_trials = res.get("num_trials", 0)
+        if num_trials <= 0 or num_trials > trial:
+            continue
+
+        steps_detail = res.get("steps_detail_per_trial", [])
+        for t in range(num_trials - 1):
+            if t >= len(steps_detail):
+                break
+            trial_steps = steps_detail[t] or []
+            for step in trial_steps:
+                action = step.get("action")
+                usage_agent = step.get("token_usage_agent")
+                if usage_agent:
+                    _add_usage(totals["overall"], usage_agent)
+                    if action == "clarify":
+                        _add_usage(totals["clarify"], usage_agent)
+                    else:
+                        _add_usage(totals["execute"], usage_agent)
+
+                usage_reflect = step.get("token_usage_reflect")
+                if usage_reflect:
+                    _add_usage(totals["overall"], usage_reflect)
+                    _add_usage(totals["reflect"], usage_reflect)
+
+        num_success += 1
+
+    if num_success == 0:
+        return {
+            "overall": {**_new_bucket()},
+            "reflect": {**_new_bucket()},
+            "execute": {**_new_bucket()},
+            "clarify": {**_new_bucket()},
+            "num_success": 0,
+            "num_samples": len(results),
+        }
+
+    def _avg(bucket: dict) -> dict:
+        return {
+            "prompt_tokens": bucket["prompt_tokens"] / num_success,
+            "completion_tokens": bucket["completion_tokens"] / num_success,
+            "total_tokens": bucket["total_tokens"] / num_success,
+        }
+
+    return {
+        "overall": _avg(totals["overall"]),
+        "reflect": _avg(totals["reflect"]),
+        "execute": _avg(totals["execute"]),
+        "clarify": _avg(totals["clarify"]),
+        "num_success": num_success,
+        "num_samples": len(results),
+    }
+
+
 def main():
-    metrics_path = Path("outputs/Qwen__Qwen3-Next-80B-A3B-Instruct/results/reflect.json")
+    metrics_path = Path("outputs/Qwen__Qwen3-Next-80B-A3B-Instruct/results/reflect_k.json")
     with metrics_path.open("r", encoding="utf-8") as f:
         data = json.load(f)
 
@@ -160,6 +247,9 @@ def main():
     reflect_usage = calculate_reflection_token_usage_before_success(
         data=data, trial=trial, k=k
     )
+    total_usage = calculate_total_token_usage_before_success(
+        data=data, trial=trial, k=k
+    )
 
     if k:  
         print(f"Pass@{trial} (k={k}): {acc:.4f}")
@@ -169,12 +259,15 @@ def main():
         print(f"DPass@{trial} (k=full, alpha={alpha}): {dpass:.4f}")
 
     print(
-        "Reflection token usage before success\n"
+        "Total token usage before success (reflect + execute + clarify)\n"
         f"(k={'full' if k is None else k}, trial={trial}):\n"
-        f"prompt_tokens: {reflect_usage['prompt_tokens']:.2f},\n"
-        f"completion_tokens: {reflect_usage['completion_tokens']:.2f},\n"
-        f"total_tokens: {reflect_usage['total_tokens']:.2f},\n"
-        f"success={reflect_usage['num_success']}\n"
+        f"overall_prompt_tokens: {total_usage['overall']['prompt_tokens']:.2f},\n"
+        f"overall_completion_tokens: {total_usage['overall']['completion_tokens']:.2f},\n"
+        f"overall_total_tokens: {total_usage['overall']['total_tokens']:.2f},\n"
+        f"reflect_total_tokens: {total_usage['reflect']['total_tokens']:.2f},\n"
+        f"execute_total_tokens: {total_usage['execute']['total_tokens']:.2f},\n"
+        f"clarify_total_tokens: {total_usage['clarify']['total_tokens']:.2f},\n"
+        f"success={total_usage['num_success']}\n"
     )
 
     print(f"Steps per successful trial: {avg_steps:.4f}")
