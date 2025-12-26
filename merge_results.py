@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import json
 from pathlib import Path
 
@@ -49,9 +48,9 @@ def merge_results(files: list[Path]) -> dict:
 
 
 def main() -> None:
-    input_dir = Path("outputs/gpt-5.2/results")
+    input_dir = Path("outputs/Qwen__Qwen3-30B-A3B-Instruct-2507/results")
     glob_pattern = "reflect_*.json"
-    output_path = Path("outputs/gpt-5.2/results/reflect.json")
+    output_path = Path("outputs/Qwen__Qwen3-30B-A3B-Instruct-2507/results/reflect.json")
 
     files = sorted(input_dir.glob(glob_pattern))
     if not files:

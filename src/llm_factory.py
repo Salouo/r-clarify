@@ -42,7 +42,7 @@ def get_primary_model_name() -> str:
 def get_primary_model_dirname() -> str:
     """Filesystem-safe dirname for logging outputs."""
     name = get_primary_model_name()
-    return name.replace("/", "__")
+    return name.split("/")[-1]
 
 
 class RoundRobinLLM:
