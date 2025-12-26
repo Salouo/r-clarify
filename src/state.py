@@ -62,6 +62,7 @@ class AgentStep(BaseModel):
     next_decision: DecisionType     # clarify / execute
     action_id: Optional[int] = None # execute 时选的动作
     question: Optional[str] = None  # clarify 时由 agent 生成的问题文本
+    answer: Optional[str] = None    # clarify 时用户的回答文本
     token_usage: Optional[dict] = None  # 本步 agent 模型调用的 token 消耗（prompt/completion/total）
 
 
@@ -138,6 +139,6 @@ class AgentState(BaseModel):
     )
 
     # Agent 选择 clarify 时生成的问题，会由 clarify 节点直接记录
-    clarify_question: Optional[str] = Field(
+    clarification_question: Optional[str] = Field(
         default=None, description="agent 选择 clarify 时生成的一句话澄清问题"
     )

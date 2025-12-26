@@ -29,13 +29,24 @@ def _trace_to_messages(trace: list[AgentStep]) -> list[SystemMessage]:
     """Expose prior agent thinking/decisions to the next turn as system notes."""
     msgs: list[SystemMessage] = []
     for t in trace:
-        action_desc = id_to_action.get(t.action_id, "不明な行動")
         thought = t.thought or "（thought なし）"
+        if t.next_decision == "clarify":
+            question_text = t.question or "（question なし）"
+            answer_text = t.answer or "（answer なし）"
+            decision_detail = (
+                f"next_decision: clarify; action_id: None（確認を選択、まだ行動未決定）; "
+                f"question: {question_text}; user_answer: {answer_text}"
+            )
+        else:
+            action_desc = id_to_action.get(t.action_id, "不明な行動")
+            decision_detail = (
+                f"next_decision: {t.next_decision}; action_id: {t.action_id}（{action_desc}）"
+            )
         msgs.append(
             SystemMessage(
                 content=(
                     f"【Agent前回ログ step {t.step}】thought: {thought}; "
-                    f"next_decision: {t.next_decision}; action_id: {t.action_id}（{action_desc}）"
+                    f"{decision_detail}"
                 )
             )
         )
@@ -154,7 +165,7 @@ def agent(state: AgentState) -> AgentState:
             "next_decision": "execute",
             "action_id": -1,
             "step": state.max_steps,
-            "clarify_question": None,
+            "clarification_question": None,
             "trace": state.trace + [AgentStep(
                 step=state.step,
                 thought="最大ステップ数を超過したため、失敗を判定します。",
@@ -174,26 +185,34 @@ def agent(state: AgentState) -> AgentState:
     trace_messages = _trace_to_messages(state.trace)
 
     base_messages = list(state.messages)
-    has_same_system = (
+
+    # 检查当前是否在历史信息中已存在 system prompt（是否是第一次进入当前 trial）
+    has_same_system: bool = (
         base_messages
         and isinstance(base_messages[0], SystemMessage)
         and base_messages[0].content == system_prompt
     )
+    # 如果不是第一次进入当前 trial，保持原有的系统 prompt，不重复；trace 插在其后
     if has_same_system:
-        # 保持原有的系统 prompt，不重复；trace 插在其后
         messages = [base_messages[0], *trace_messages, *base_messages[1:]]
+    # 如果是第一次进入当前 trial，加入 system prompt
     else:
         messages = [SystemMessage(content=system_prompt), *trace_messages, *base_messages]
     
-    # 得到干净 agent 输出
+    # 得到 agent 的原始输出
     raw_resp = llm.invoke(messages)
+
+    # 记录 token usage
     token_usage = {}
     try:
         token_usage = getattr(raw_resp, "additional_kwargs", {}).get("token_usage") or {}
     except Exception:
         token_usage = {}
+    
+    # Parse agent's raw output and obtain clear agent's output.
     resp = _safe_agent_output(raw_resp)
 
+    # 得到当前 agent 的 decision (Clarify / Execute)
     valid_decisions = {"clarify", "execute"}
     next_decision = (resp.next_decision or "").strip().lower()
     if next_decision not in valid_decisions:
@@ -206,27 +225,28 @@ def agent(state: AgentState) -> AgentState:
     else:
         action_id = -1
 
-    clarify_question = (resp.question or "").strip() if next_decision == "clarify" else None
+    # 如果当前 agent 选择了 Clarify，则记录下澄清问题
+    clarification_question = (resp.question or "").strip() if next_decision == "clarify" else None
 
     # 根据当前 mode 决定是否允许 clarify：
-    # - clarify / reflect: 使用模型预测的 clarify / execute
-    # - cot / direct: 强制只执行 execute（纯 CoT / 纯 direct 一步到位）
+    # - clarify / reflect / reflect_k: 使用模型预测的 clarify / execute
+    # - direct / cot / cot_reflect: 强制只执行 execute
     allow_clarify = state.mode in {"clarify", "reflect", "reflect_k"}
     if allow_clarify and state.clarify_quota_left is not None:
         allow_clarify = state.clarify_quota_left > 0
 
     if not allow_clarify:
         next_decision = "execute"
-        clarify_question = None
+        clarification_question = None
 
-
+    # 得到当前的 clarification quota；如果下一个决策是 Clarify，那么 quota - 1.
     clarify_quota_left = state.clarify_quota_left
-
-    new_messages = state.messages
     if next_decision == "clarify":
         if clarify_quota_left is not None:
             clarify_quota_left = max(clarify_quota_left - 1, 0)
 
+    # 虽然当前没有追加新的 messages，但未来有可能追加，因此保留 new_messages
+    new_messages = state.messages
 
     return {
         "next_decision": next_decision,
@@ -235,7 +255,8 @@ def agent(state: AgentState) -> AgentState:
         "clarify_quota_left": clarify_quota_left,
         "clarify_quota_total": state.clarify_quota_total,
         "messages": new_messages,
-        "clarify_question": clarify_question,
+        "clarification_question": clarification_question,
+        # 记录下当前的 agent 的行动，并追加到 trace 中去；trace 还主要用于 当前 prompt 组成
         "trace": state.trace
         + [
             AgentStep(
@@ -243,7 +264,7 @@ def agent(state: AgentState) -> AgentState:
                 thought=resp.thought,
                 next_decision=next_decision,
                 action_id=action_id,
-                question=clarify_question,
+                question=clarification_question,
                 token_usage=token_usage or None,
             )
         ],
@@ -254,7 +275,7 @@ def agent(state: AgentState) -> AgentState:
 
 def clarify_node(state: AgentState) -> AgentState:
 
-    question_text = (state.clarify_question or "").strip()
+    question_text = (state.clarification_question or "").strip()
 
     new_messages = list(state.messages)
     if not question_text:
@@ -264,7 +285,7 @@ def clarify_node(state: AgentState) -> AgentState:
             "next_decision": "execute",
             "action_id": -1,
             "step": state.max_steps,
-            "clarify_question": None,
+            "clarification_question": None,
         }
 
     new_messages.append(AIMessage(content=question_text))
@@ -274,7 +295,7 @@ def clarify_node(state: AgentState) -> AgentState:
         "step": state.step + 1,
         "next_decision": None,
         "action_id": None,
-        "clarify_question": None,
+        "clarification_question": None,
     }
 
 
@@ -326,8 +347,19 @@ def user_sim_node(state: AgentState) -> AgentState:
 
     resp = user_llm.invoke(messages)
 
+    new_trace = list(state.trace)
+    if new_trace:
+        last = new_trace[-1]
+        if isinstance(last, AgentStep):
+            new_trace[-1] = last.copy(update={"answer": resp.content})
+        elif isinstance(last, dict):
+            last = dict(last)
+            last["answer"] = resp.content
+            new_trace[-1] = last
+
     return {
         "messages": state.messages + [HumanMessage(content=resp.content)],
+        "trace": new_trace,
     }
 
 
