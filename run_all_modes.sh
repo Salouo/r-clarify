@@ -1,25 +1,12 @@
-#!/usr/bin/env bash
 set -euo pipefail
 
-# Run src/run.py across all modes with shared config.
-# Usage:
-#   ./run_all_modes.sh -g 0 -t 3 -w 2 -s 0 -e 150
-# Options:
-#   -g  GPU id/list to expose via CUDA_VISIBLE_DEVICES (default: env CUDA_VISIBLE_DEVICES, else 0)
-#   -t  max trials per sample (default: 5)
-#   -w  memo window length for reflect_k only (default reflect_k: 3; others fixed at 1)
-#   -c  clarify quota (default: 3)
-#   -s  start sample index (inclusive)
-#   -e  end sample index (exclusive)
-# Script uses uv (required). Make sure uv is installed.
-
 # 可以直接在这里设默认值，也可以在命令行传参覆盖
-gpu_id="${CUDA_VISIBLE_DEVICES:-0}"   # 例: "0,1,2,3" 多卡
+gpu_id="${CUDA_VISIBLE_DEVICES:-3}"   # 例: "0,1,2,3" 多卡
 max_trials=5
 memo_window=3      # only used for reflect_k unless overridden
-clarify_quota=2    # clarify 次数默认 3，可通过 -c 覆盖
-start_idx="0"
-end_idx="150"
+clarify_quota=2    # clarify 次数默认 2
+start_idx="10"
+end_idx="50"
 
 while getopts ":g:t:w:c:s:e:h" opt; do
   case "$opt" in
@@ -45,7 +32,7 @@ echo "Using GPU $CUDA_VISIBLE_DEVICES"
 
 runner_cmd=(uv run python)
 
-# 选择 modes（cot, cot_reflect, clarify, reflect, reflect_k）
+# modes setting (cot, cot_reflect, clarify, reflect, reflect_k)
 modes=(reflect)
 
 for mode in "${modes[@]}"; do
