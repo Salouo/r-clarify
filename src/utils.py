@@ -206,9 +206,16 @@ def extract_clarification_questions(final_state: dict) -> List[str]:
             next_decision = step.get("next_decision")
 
         if next_decision == "clarify":
+            if isinstance(step, dict):
+                q_text = step.get("clarification_question") or ""
+            else:
+                q_text = getattr(step, "clarification_question", "") or ""
+            if q_text:
+                questions.append(q_text)
             msg_idx = _skip_system(msg_idx)
             if msg_idx < len(messages) and isinstance(messages[msg_idx], AIMessage):
-                questions.append(messages[msg_idx].content or "")
+                if not q_text:
+                    questions.append(messages[msg_idx].content or "")
 
             if msg_idx < len(messages) and isinstance(messages[msg_idx], AIMessage):
                 msg_idx += 1
@@ -237,7 +244,7 @@ def extract_trial_steps(final_state: dict) -> List[dict]:
     把单个 trial 的完整步骤序列化，便于直接写入 results.json。
     结构示例：
     [
-      {"t": 1, "action": "clarify", "question": "...", "question_words": 23, "user_reply": "..."},
+      {"t": 1, "action": "clarify", "clarification_question": "...", "clarification_question_words": 23, "user_reply": "..."},
       {"t": 2, "action": "execute", "chosen_action": 12},
     ]
     """
@@ -267,21 +274,29 @@ def extract_trial_steps(final_state: dict) -> List[dict]:
         if next_decision == "clarify":
             question = ""
             reply = ""
+            if isinstance(step, dict):
+                question = step.get("clarification_question") or ""
+                reply = step.get("user_reply") or ""
+            else:
+                question = getattr(step, "clarification_question", "") or ""
+                reply = getattr(step, "user_reply", "") or ""
             msg_idx = _skip_system(msg_idx)
             if msg_idx < len(messages) and isinstance(messages[msg_idx], AIMessage):
-                question = messages[msg_idx].content or ""
+                if not question:
+                    question = messages[msg_idx].content or ""
             if msg_idx < len(messages) and isinstance(messages[msg_idx], AIMessage):
                 msg_idx += 1
             msg_idx = _skip_system(msg_idx)
             if msg_idx < len(messages) and isinstance(messages[msg_idx], HumanMessage):
-                reply = messages[msg_idx].content or ""
+                if not reply:
+                    reply = messages[msg_idx].content or ""
                 msg_idx += 1
             steps.append(
                 {
                     "t": t,
                     "action": "clarify",
-                    "question": question,
-                    "question_words": _count_words(question),
+                    "clarification_question": question,
+                    "clarification_question_words": _count_words(question),
                     "user_reply": reply,
                     "user_reply_words": _count_words(reply),
                 }

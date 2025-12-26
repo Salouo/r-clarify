@@ -203,8 +203,8 @@ def main(
                     clarifications = [
                         {
                             "t": step.get("t"),
-                            "question": step.get("question"),
-                            "question_words": step.get("question_words"),
+                            "clarification_question": step.get("clarification_question"),
+                            "clarification_question_words": step.get("clarification_question_words"),
                             "user_reply": step.get("user_reply"),
                             "user_reply_words": step.get("user_reply_words"),
                         }

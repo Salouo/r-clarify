@@ -202,17 +202,17 @@ def agent_system_prompt(
             "JSON ブロックの前後に余分な文章や説明を一切書いてはいけません。"
             "コードフェンス（```）も使用禁止です。必ず JSON のみを返答してください。\n"
             "【厳守】\n"
-            " - clarify を選ぶ場合、thought に「迷っている行動候補（可能なら action_id）」と「それを決めるために知りたい一点」を明記し、question にはユーザへ投げる 1 文の明確化質問を必ず入れること。\n"
+            " - clarify を選ぶ場合、thought に「迷っている行動候補（可能なら action_id）」と「それを決めるために知りたい一点」を明記し、clarification_question にはユーザへ投げる 1 文の明確化質問を必ず入れること。\n"
             " - プレーンテキストで JSON オブジェクトだけを出力すること。\n"
             " - コードブロックや ```json は絶対に使わないこと。\n"
-            " - thought/next_decision/action_id/question 以外のキーを追加しないこと。\n"
+            " - thought/next_decision/action_id/clarification_question 以外のキーを追加しないこと。\n"
             " - thought 内で引用符が必要な場合は「」を使い、二重引用符(\")は使わないこと。\n"
             " - thought は改行しないこと。\n"
             "{\n"
             '  "thought": "<現在の状況についての推論。40 個の候補を逐一列挙せず、2〜4 文程度で要点だけ述べる。>",\n'
             '  "next_decision": "clarify" または "execute",\n'
             '  "action_id": <next_decision が \"execute\" のときは 1〜40 の整数，それ以外は null>,\n'
-            '  "question": <next_decision が \"clarify\" のときはユーザに聞く 1 文の質問，それ以外は null>\n'
+            '  "clarification_question": <next_decision が \"clarify\" のときはユーザに聞く 1 文の質問，それ以外は null>\n'
             "}\n"
         )
 

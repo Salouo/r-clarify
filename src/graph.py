@@ -26,16 +26,19 @@ _FENCE_RE = re.compile(
 
 
 def _trace_to_messages(trace: list[AgentStep]) -> list[SystemMessage]:
-    """Expose prior agent thinking/decisions to the next turn as system notes."""
+    """
+    - Expose prior agent thinking/decisions to the next turn as system notes.
+    - 虽然和总体的system messages里面的内容有重复，但是为了不破坏整体结构，先保留。
+    """
     msgs: list[SystemMessage] = []
     for t in trace:
         thought = t.thought or "（thought なし）"
         if t.next_decision == "clarify":
-            question_text = t.question or "（question なし）"
-            answer_text = t.answer or "（answer なし）"
+            question_text = t.clarification_question or "（clarification_question なし）"
+            reply_text = t.user_reply or "（user_reply なし）"
             decision_detail = (
                 f"next_decision: clarify; action_id: None（確認を選択、まだ行動未決定）; "
-                f"question: {question_text}; user_answer: {answer_text}"
+                f"clarification_question: {question_text}; user_reply: {reply_text}"
             )
         else:
             action_desc = id_to_action.get(t.action_id, "不明な行動")
@@ -137,10 +140,12 @@ def _safe_agent_output(message: AIMessage) -> AgentOutput:
         data = _parse_json(raw_text)
         if not isinstance(data, dict):
             raise ValueError("Agent 输出必须是 JSON 对象。")
+        if "clarification_question" not in data and "question" in data:
+            data["clarification_question"] = data.get("question")
         if isinstance(data.get("action_id"), str) and data["action_id"].strip().isdigit():
             data["action_id"] = int(data["action_id"].strip())
-        if isinstance(data.get("question"), str):
-            data["question"] = data["question"].strip()
+        if isinstance(data.get("clarification_question"), str):
+            data["clarification_question"] = data["clarification_question"].strip()
         return AgentOutput(**data)
     except (json.JSONDecodeError, ValidationError, ValueError) as exc:
         print(
@@ -226,7 +231,9 @@ def agent(state: AgentState) -> AgentState:
         action_id = -1
 
     # 如果当前 agent 选择了 Clarify，则记录下澄清问题
-    clarification_question = (resp.question or "").strip() if next_decision == "clarify" else None
+    clarification_question = (
+        (resp.clarification_question or "").strip() if next_decision == "clarify" else None
+    )
 
     # 根据当前 mode 决定是否允许 clarify：
     # - clarify / reflect / reflect_k: 使用模型预测的 clarify / execute
@@ -264,7 +271,7 @@ def agent(state: AgentState) -> AgentState:
                 thought=resp.thought,
                 next_decision=next_decision,
                 action_id=action_id,
-                question=clarification_question,
+                clarification_question=clarification_question,
                 token_usage=token_usage or None,
             )
         ],
@@ -351,10 +358,10 @@ def user_sim_node(state: AgentState) -> AgentState:
     if new_trace:
         last = new_trace[-1]
         if isinstance(last, AgentStep):
-            new_trace[-1] = last.copy(update={"answer": resp.content})
+            new_trace[-1] = last.copy(update={"user_reply": resp.content})
         elif isinstance(last, dict):
             last = dict(last)
-            last["answer"] = resp.content
+            last["user_reply"] = resp.content
             new_trace[-1] = last
 
     return {

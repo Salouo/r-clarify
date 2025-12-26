@@ -61,8 +61,8 @@ class AgentStep(BaseModel):
     thought: Optional[str] = None   # LLM 的思考（thinking），direct 模式下可以为 None
     next_decision: DecisionType     # clarify / execute
     action_id: Optional[int] = None # execute 时选的动作
-    question: Optional[str] = None  # clarify 时由 agent 生成的问题文本
-    answer: Optional[str] = None    # clarify 时用户的回答文本
+    clarification_question: Optional[str] = None  # clarify 时由 agent 生成的问题文本
+    user_reply: Optional[str] = None    # clarify 时用户的回答文本
     token_usage: Optional[dict] = None  # 本步 agent 模型调用的 token 消耗（prompt/completion/total）
 
 
@@ -78,7 +78,7 @@ class AgentOutput(BaseModel):
         default=None,
         description="当你选择 next_decision 为 execute 时，必须是 1 到 40 的整数; clarify 时为 None",
     )
-    question: Optional[str] = Field(
+    clarification_question: Optional[str] = Field(
         default=None,
         description="当你选择 next_decision 为 clarify 时，必须填写 1 条澄清问题; execute 时为 null",
     )
