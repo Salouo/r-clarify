@@ -149,8 +149,8 @@ def _safe_agent_output(message: AIMessage) -> AgentOutput:
         return AgentOutput(**data)
     except (json.JSONDecodeError, ValidationError, ValueError) as exc:
         print(
-            "[Agent] 解析模型输出失败，将回退到失败动作。"
-            f"错误: {exc}\n原始输出: {raw_text}"
+            #"[Agent] 解析模型输出失败，将回退到失败动作。"
+            #f"错误: {exc}\n原始输出: {raw_text}"
         )
         # 关键：这里依赖 schema 允许 -1
         return AgentOutput(

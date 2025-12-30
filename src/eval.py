@@ -234,19 +234,16 @@ def calculate_total_token_usage_before_success(
 
 
 def main():
-    metrics_path = Path("outputs/Qwen__Qwen3-30B-A3B-Instruct-2507/results/reflect.json")
+    metrics_path = Path("outputs/Qwen3-Next-80B-A3B-Instruct/results/cot.json")
     with metrics_path.open("r", encoding="utf-8") as f:
         data = json.load(f)
 
-    trial = 5   # up to n_trials
+    trial = 3   # up to n_trials
     k = None     # eval up to n_samples
     alpha = 0.6
     acc = calculate_accuracy_by_trial(data=data, trial=trial, k=k)
     avg_steps = calculate_average_steps_of_successful_trial(data=data, trial=trial, k=k)
     dpass = calculate_dpass_at_k(data=data, trial=trial, alpha=alpha, k=k)
-    reflect_usage = calculate_reflection_token_usage_before_success(
-        data=data, trial=trial, k=k
-    )
     total_usage = calculate_total_token_usage_before_success(
         data=data, trial=trial, k=k
     )

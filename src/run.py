@@ -138,7 +138,7 @@ def main(
     # 不使用时间戳/运行 ID，histories 直接落在 histories/<mode>
     run_id = None
 
-    # 使用线程池并行处理不同的 sample（简单并行版）；目前设置为 1 ，不并行
+    # 使用线程池并行处理不同的 sample；目前设置为 1 ，不并行
     with ThreadPoolExecutor(max_workers=1) as executor:
         future_to_sample = {
             executor.submit(
