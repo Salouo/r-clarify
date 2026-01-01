@@ -150,7 +150,7 @@ def calculate_total_token_usage_before_success(
     data: dict, trial: int, k: int | None = None
 ) -> dict:
     """
-    统计成功 trial 之前的总 token 消耗平均值（prompt/completion/total）。
+    统计成功 trial 之前（含成功轮）的总 token 消耗平均值（prompt/completion/total）。
     包含 reflect + execute + clarify，并给出分项。
     仅统计在 trial 次内成功的样本，失败样本不计入。
     """
@@ -185,7 +185,8 @@ def calculate_total_token_usage_before_success(
             continue
 
         steps_detail = res.get("steps_detail_per_trial", [])
-        for t in range(num_trials - 1):
+        # 包含成功轮：统计 0..num_trials-1
+        for t in range(num_trials):
             if t >= len(steps_detail):
                 break
             trial_steps = steps_detail[t] or []
@@ -234,7 +235,7 @@ def calculate_total_token_usage_before_success(
 
 
 def main():
-    metrics_path = Path("outputs/Qwen3-Next-80B-A3B-Instruct/results/cot.json")
+    metrics_path = Path("outputs/Qwen3-Next-80B-A3B-Instruct/results/reflect.json")
     with metrics_path.open("r", encoding="utf-8") as f:
         data = json.load(f)
 
@@ -256,7 +257,7 @@ def main():
         print(f"DPass@{trial} (k=full, alpha={alpha}): {dpass:.4f}")
 
     print(
-        "Total token usage before success (reflect + execute + clarify)\n"
+        "Total token usage up to success (reflect + execute + clarify)\n"
         f"(k={'full' if k is None else k}, trial={trial}):\n"
         f"overall_prompt_tokens: {total_usage['overall']['prompt_tokens']:.2f},\n"
         f"overall_completion_tokens: {total_usage['overall']['completion_tokens']:.2f},\n"

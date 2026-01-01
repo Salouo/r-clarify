@@ -1,12 +1,12 @@
 set -euo pipefail
 
 # 可以直接在这里设默认值，也可以在命令行传参覆盖
-gpu_id="${CUDA_VISIBLE_DEVICES:-0,1,2,3}"   # 例: "0,1,2,3" 多卡
+gpu_id="${CUDA_VISIBLE_DEVICES:-3}"   # 例: "0,1,2,3" 多卡
 max_trials=5
 memo_window=3      # only used for reflect_k unless overridden
 clarify_quota=2    # clarify 次数默认 2
-start_idx="170"
-end_idx="210"
+start_idx="411"
+end_idx="546"
 
 while getopts ":g:t:w:c:s:e:h" opt; do
   case "$opt" in
@@ -33,7 +33,7 @@ echo "Using GPU $CUDA_VISIBLE_DEVICES"
 runner_cmd=(uv run python)
 
 # modes setting (cot, cot_reflect, clarify, reflect, reflect_k)
-modes=(reflect)
+modes=(reflect_k)
 
 for mode in "${modes[@]}"; do
   cmd=("${runner_cmd[@]}" -m src.run --mode "$mode" --max-trials "$max_trials")

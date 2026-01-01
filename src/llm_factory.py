@@ -13,7 +13,7 @@ from .gpt_llm import OpenAIChatModel
 
 
 # backend settings
-DEFAULT_BACKEND = "gpt"  # 取值 "gpt" 或 "hf"
+DEFAULT_BACKEND = "hf"  # 取值 "gpt" 或 "hf"
 
 # OpenAI (GPT) settings
 GPT_MODEL_NAME = "gpt-5.2"
@@ -23,7 +23,7 @@ GPT_TEMPERATURE: float | None = None
 # meta-llama/Llama-3.1-8B-Instruct
 # Qwen/Qwen3-30B-A3B-Instruct-2507
 # Qwen/Qwen3-Next-80B-A3B-Instruct
-HF_MODEL_ID = "Qwen/Qwen3-Next-80B-A3B-Instruct"
+HF_MODEL_ID = "Qwen/Qwen3-30B-A3B-Instruct-2507"
 HF_MAX_NEW_TOKENS = 2048
 HF_TEMPERATURE = 0.7
 HF_DEVICE_MAP = "auto"
