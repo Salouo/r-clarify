@@ -5,7 +5,7 @@ from langchain_core.messages import BaseMessage
 from pydantic import BaseModel, Field
 
 
-# 动作表放这里，供 graph / utils / main 共用
+# Action table shared by graph / utils / main.
 id_to_action: dict[int, str] = {
     -1: "動作を特定できない",
     1: "[1]バナナを持ってくる",
@@ -52,18 +52,18 @@ id_to_action: dict[int, str] = {
 
 action_to_id: dict[str, int] = {v: k for k, v in id_to_action.items()}
 
-# 所有可用决策
+# All available decisions.
 DecisionType = Literal["clarify", "execute"]
 
-# 每一步 agent 的输出
+# Agent output for each step.
 class AgentStep(BaseModel):
-    step: int                       # 第几步
-    thought: Optional[str] = None   # LLM 的思考（thinking），direct 模式下可以为 None
+    step: int                       # Step number.
+    thought: Optional[str] = None   # LLM thinking; may be None in direct mode.
     next_decision: DecisionType     # clarify / execute
-    action_id: Optional[int] = None # execute 时选的动作
-    clarification_question: Optional[str] = None  # clarify 时由 agent 生成的问题文本
-    user_reply: Optional[str] = None    # clarify 时用户的回答文本
-    token_usage: Optional[dict] = None  # 本步 agent 模型调用的 token 消耗（prompt/completion/total）
+    action_id: Optional[int] = None # Action chosen when executing.
+    clarification_question: Optional[str] = None  # Question text generated in clarify.
+    user_reply: Optional[str] = None    # User reply text in clarify.
+    token_usage: Optional[dict] = None  # Token usage for this agent call (prompt/completion/total).
 
 
 class AgentOutput(BaseModel):
@@ -88,49 +88,49 @@ class AgentOutput(BaseModel):
 
 class AgentState(BaseModel):
 
-    # 对话历史：真实/模拟用户 + agent 的所有对话
+    # Dialogue history: real/simulated user + agent messages.
     messages: Annotated[list[BaseMessage], add_messages] = Field(default_factory=list)
 
-    # agent 决定的下一步决策
+    # Next decision chosen by the agent.
     next_decision: Optional[DecisionType] = Field(default=None,)
 
-    # 如果 next_decision == "execute"，这里是 1~40 的编号；否则就是null
+    # If next_decision == "execute", this is 1~40; otherwise None.
     action_id: Optional[int] = Field(default=None)
 
-    # 外部环境信息（sample 里的 env），现在用不用都行，先留着
+    # External environment info (sample env), kept for future use.
     env: dict[str, Any] = Field(default_factory=dict)
 
-    # 用户反馈（之后做 reflection 可以用，现在先不用）
+    # User feedback (may be used for reflection later).
     user_feedback: Optional[str] = Field(default=None)
 
-    # 这个 sample 的真实目标动作（label）
+    # Ground-truth target action for this sample (label).
     label_action_id: int = Field(default=None)
 
-    # 原始模糊 utterance（方便在 user_sim 里用）
+    # Original ambiguous utterance (for user_sim).
     original_utterance: str = Field(default="")
 
-    # 当前运行模式（clarify / reflect / reflect_k / cot / cot_reflect / direct）
+    # Current run mode (clarify / reflect / reflect_k / cot / cot_reflect / direct).
     mode: str = Field(
         default="clarify",
         description="当前样本使用的运行模式，例如 'clarify' / 'reflect' / 'reflect_k' / 'cot' / 'cot_reflect' / 'direct'",
     )
 
-    # 步数
+    # Step counter.
     step: int = Field(default=0, description="当前执行的 step 计数（从 0 开始）")
 
-    # 最大步数
+    # Maximum steps.
     max_steps: int = Field(default=1000,description="最大允许的 step 数，超过后应强制结束或执行")
 
-    # 每一个 trial 的轨迹
+    # Trace of each trial.
     trace: list[AgentStep] = Field(default_factory=list, description="agent 每一步的思考和决策轨迹")
 
-    # 是否在澄清后使用反思模块对用户回答进行整理
+    # Whether to run reflection after clarification to summarize user replies.
     enable_reflection: bool = Field(default=False)
 
-    # 预先整理好的用户场景文本，供澄清后的反思使用
+    # Preprocessed user context for post-clarification reflection.
     user_context: str = Field(default="")
 
-    # 澄清问题的额度（总数和剩余次数）；None 表示不限
+    # Clarification quota (total and remaining); None means unlimited.
     clarify_quota_total: Optional[int] = Field(
         default=None, description="本次 trial 允许澄清的最大次数（None 表示不限）"
     )
@@ -138,7 +138,7 @@ class AgentState(BaseModel):
         default=None, description="当前剩余的澄清次数（None 表示不限）"
     )
 
-    # Agent 选择 clarify 时生成的问题，会由 clarify 节点直接记录
+    # Clarification question generated when agent chooses clarify (recorded by clarify node).
     clarification_question: Optional[str] = Field(
         default=None, description="agent 选择 clarify 时生成的一句话澄清问题"
     )

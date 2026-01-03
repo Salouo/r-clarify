@@ -2,29 +2,29 @@ from .state import id_to_action
 
 
 def _actions_block() -> str:
-    """共用的 40 个动作文本块（保持日文描述不变）。"""
+    """Shared block of 40 action strings (keep Japanese text unchanged)."""
     lines = []
     for i in range(1, 41):
         lines.append(id_to_action[i])
     return "\n".join(lines)
 
 
-# agent 的 system prompt
+# Agent system prompt.
 def agent_system_prompt(
     mode: str,
     clarify_quota_total: int | None = None,
     clarify_quota_left: int | None = None,
 ) -> str:
     """
-    Agent ノード用の system prompt
+    System prompt for the agent node.
 
     mode:
-      - "clarify": clarify あり（reflection なし）
-      - "reflect":  clarify + reflection（現在のフル版）
-      - "reflect_k": clarify + reflection、過去の複数メモを参照
-      - "cot_reflect": CoT + reflection（clarify なし）
-      - "cot":      純 CoT（thinking は短く、1 回で行動を選ぶ）
-      - "direct":   まったく思考を展開せずに、すぐに行動を 1 つだけ選ぶ
+      - "clarify": clarify enabled (no reflection)
+      - "reflect": clarify + reflection (full version)
+      - "reflect_k": clarify + reflection with multiple prior memos
+      - "cot_reflect": CoT + reflection (no clarify)
+      - "cot": pure CoT (short thinking, single-step action)
+      - "direct": no reasoning, pick a single action immediately
     """
     actions_text = _actions_block()
 
@@ -79,7 +79,7 @@ def agent_system_prompt(
             "}\n"
         ).strip()
 
-    # CoT + Reflection（clarify なし）
+    # CoT + Reflection (no clarify)
     elif mode == "cot_reflect":
         return (
             "あなたは家庭内で動作するエージェントです。ユーザの状況に基づいて、\n"
@@ -108,7 +108,7 @@ def agent_system_prompt(
             "}\n"
         ).strip()
 
-    # clarify / reflect 系
+    # clarify / reflect modes
     elif mode in {"clarify", "reflect", "reflect_k"}:
         text = (
             "あなたは家庭内で動作するエージェントです。ユーザの状況に基づいて、\n"
@@ -125,7 +125,7 @@ def agent_system_prompt(
             "\n"
         )
 
-        # 反省メモの存在を明示（reflect 系のみ）
+        # Explicitly mention reflection memos (reflect modes only).
         if mode == "reflect":
             text += (
                 "【Reflection memo】\n"
@@ -143,7 +143,7 @@ def agent_system_prompt(
                 "\n"
             )
 
-        # thought の書き方
+        # How to write "thought"
         text += (
             "【thought の書き方】\n"
             " - まず「何が分かっていて、何が不明か」を短く整理する。\n"
@@ -175,7 +175,7 @@ def agent_system_prompt(
                 )
             return guidance
 
-        # 共通のゴールと clarify / execute の説明
+        # Common goal and clarify/execute instructions.
         text += (
             "あなたのゴールは、できるだけ少ないステップ数でユーザの潜在的な意図を特定し、"
             "正しい気が利く行動を実行することです。\n"
@@ -227,7 +227,7 @@ def user_sim_system_prompt(
     env: object,
 ) -> str:
     """
-    User simulator 用の system prompt。
+    System prompt for the user simulator.
     """
     return (
         "あなたは今から「本物のユーザ」を演じます。エージェントやシステムではありません。\n"
@@ -308,7 +308,7 @@ def user_sim_system_prompt(
 
 def trial_reflection_system_prompt(mode: str) -> str:
     """
-    trial 毎の反省メモ生成用 system prompt。
+    System prompt for generating per-trial reflection memos.
     """
     if mode == "cot_reflect":
         return (

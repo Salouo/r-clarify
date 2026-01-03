@@ -47,7 +47,7 @@ class HuggingFaceChatModel:
         temperature: float = 0.7,
         dtype: Any | None = torch.bfloat16,
     ) -> None:
-        """ 初始化参数 """
+        """Initialize parameters."""
         self.model_id = model_id
         self.max_new_tokens = max_new_tokens
         self.temperature = temperature

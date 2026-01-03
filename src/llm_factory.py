@@ -12,8 +12,8 @@ from .hf_llm import HuggingFaceChatModel
 from .gpt_llm import OpenAIChatModel
 
 
-# backend settings
-DEFAULT_BACKEND = "hf"  # 取值 "gpt" 或 "hf"
+# Backend settings.
+DEFAULT_BACKEND = "gpt"  # Allowed values: "gpt" or "hf".
 
 # OpenAI (GPT) settings
 GPT_MODEL_NAME = "gpt-5.2"
@@ -73,7 +73,7 @@ def get_primary_llm() -> Any:
             device_map=HF_DEVICE_MAP,
             max_new_tokens=HF_MAX_NEW_TOKENS,
             temperature=HF_TEMPERATURE,
-            dtype=torch.bfloat16, # 使用 BF16 降低显存占用
+            dtype=torch.bfloat16,  # Use BF16 to reduce VRAM usage.
         )
     if target == "gpt":
         return OpenAIChatModel(

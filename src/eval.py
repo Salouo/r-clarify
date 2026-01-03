@@ -23,8 +23,8 @@ def calculate_average_steps_of_successful_trial(
     data: dict, trial: int, k: int | None = None
 ) -> float:
     """
-    计算：如果最多只允许跑到第 `trial` 次 trial，
-    只统计成功样本在成功那一次的 step 平均值（失败样本不计入）。
+    If only up to `trial` trials are allowed, compute the average steps
+    of the successful trial for successful samples only.
     """
     results = data["results"]
     if k is not None:
@@ -55,9 +55,9 @@ def calculate_dpass_at_k(
 ) -> float:
     """
     DPass@k(alpha):
-    - 成功样本按成功那次 trial 的 step 数折扣计分
-    - 失败样本记 0
-    - 按全样本数归一化
+    - Successful samples are discounted by steps in the successful trial.
+    - Failed samples score 0.
+    - Normalize by total samples.
     """
     if not (0.0 < alpha < 1.0):
         raise ValueError("alpha must be in (0, 1).")
@@ -90,8 +90,8 @@ def calculate_reflection_token_usage_before_success(
     data: dict, trial: int, k: int | None = None
 ) -> dict:
     """
-    统计成功 trial 之前的反思 token 消耗平均值（prompt/completion/total）。
-    仅统计在 trial 次内成功的样本，失败样本不计入。
+    Average reflection token usage before success (prompt/completion/total).
+    Only samples that succeed within `trial` are counted.
     """
     results = data["results"]
     if k is not None:
@@ -150,9 +150,9 @@ def calculate_total_token_usage_before_success(
     data: dict, trial: int, k: int | None = None
 ) -> dict:
     """
-    统计成功 trial 之前（含成功轮）的总 token 消耗平均值（prompt/completion/total）。
-    包含 reflect + execute + clarify，并给出分项。
-    仅统计在 trial 次内成功的样本，失败样本不计入。
+    Average total token usage up to and including the success trial.
+    Includes reflect + execute + clarify with a breakdown.
+    Only samples that succeed within `trial` are counted.
     """
     results = data["results"]
     if k is not None:
@@ -185,7 +185,7 @@ def calculate_total_token_usage_before_success(
             continue
 
         steps_detail = res.get("steps_detail_per_trial", [])
-        # 包含成功轮：统计 0..num_trials-1
+        # Include the success trial: count 0..num_trials-1.
         for t in range(num_trials):
             if t >= len(steps_detail):
                 break
@@ -235,13 +235,13 @@ def calculate_total_token_usage_before_success(
 
 
 def main():
-    metrics_path = Path("outputs/Qwen3-Next-80B-A3B-Instruct/results/reflect.json")
+    metrics_path = Path("outputs/gpt-5.2/results/reflect.json")
     with metrics_path.open("r", encoding="utf-8") as f:
         data = json.load(f)
 
-    trial = 3   # up to n_trials
+    trial = 5   # up to n_trials
     k = None     # eval up to n_samples
-    alpha = 0.6
+    alpha = 0.8
     acc = calculate_accuracy_by_trial(data=data, trial=trial, k=k)
     avg_steps = calculate_average_steps_of_successful_trial(data=data, trial=trial, k=k)
     dpass = calculate_dpass_at_k(data=data, trial=trial, alpha=alpha, k=k)

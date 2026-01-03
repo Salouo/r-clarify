@@ -22,8 +22,8 @@ def _run_for_one_sample(
     memo_window: int,
 ) -> List[dict]:
     """
-    在一个 sample 上跑指定模式（clarify / reflect）。
-    返回：该 sample 的单条 trial 的 final_state 列表。
+    Run the specified mode on one sample (clarify / reflect).
+    Returns a list of final_state entries for each trial of that sample.
     """
     return run_trials_for_one_sample(
         sample,
@@ -45,13 +45,13 @@ def main(
     end: int | None = None,
 ) -> None:
     """
-    按照不同 mode 跑数据集
-    - mode = "clarify"  -> ReAct，无 reflection
-    - mode = "reflect"   -> ReAct + reflection
-    - mode = "cot"       -> 纯 CoT，一步到位（不走 clarify）
-    - mode = "cot_reflect" -> CoT + reflection（不走 clarify）
-    - mode = "direct"    -> 完全ダイレクト：thinking もほぼ書かず，即座に行動を選ぶ
-    - mode = "reflect_k" -> ReAct + reflection，多轮 trial，携带最近 k 轮 memo
+    Run the dataset in a given mode.
+    - mode = "clarify"    -> ReAct, no reflection
+    - mode = "reflect"    -> ReAct + reflection
+    - mode = "cot"        -> pure CoT, single-step (no clarify)
+    - mode = "cot_reflect" -> CoT + reflection (no clarify)
+    - mode = "direct"     -> fully direct: almost no thinking, pick action immediately
+    - mode = "reflect_k"  -> ReAct + reflection, multi-trial with last k memos
     """
     assert mode in {
         "clarify",
@@ -62,7 +62,7 @@ def main(
         "reflect_k",
     }, "mode 必须是 'clarify' / 'reflect' / 'cot' / 'cot_reflect' / 'direct' / 'reflect_k'"
 
-    # 按模式选择是否启用澄清后的反思整理
+    # Enable post-clarification reflection based on mode.
     if mode in {"cot", "direct"}:
         use_reflection = False
     elif mode == "clarify":
@@ -70,15 +70,15 @@ def main(
     elif mode in {"reflect", "reflect_k", "cot_reflect"}:
         use_reflection = True
 
-    # max_trials 必须外部指定（所有模式统一由参数决定）
+    # max_trials must be provided externally (applies to all modes).
     if max_trials is None:
         raise ValueError("max_trials must be provided via --max-trials.")
 
-    # 反思 memo 窗口（给下一轮看的最近 k 条 memo）
+    # Reflection memo window (last k memos passed to next trial).
     if memo_window is None:
         memo_window = 1 if mode in {"reflect", "cot_reflect"} else (3 if mode == "reflect_k" else 0)
 
-    # Load sample
+    # Load samples.
     data_path = Path("data/processed_data_expanded.json")
     with data_path.open("r", encoding="utf-8") as f:
         samples = json.load(f)["samples"]
@@ -88,7 +88,7 @@ def main(
         end_idx = len(samples) if end is None else end
         samples = [s for s in samples if start_idx <= s.get("index", -1) < end_idx]
 
-    # 结果日志文件（按模型 + mode 分开保存，便于断点续跑和单独做评估）
+    # Results file (split by model + mode for resume/eval).
     model_dir = get_primary_model_dirname()
     results_dir = Path("outputs") / model_dir / "results"
     results_dir.mkdir(parents=True, exist_ok=True)
@@ -97,7 +97,7 @@ def main(
         metrics_suffix = f"_{start_idx}_{end_idx}"
     metrics_path = results_dir / f"{mode}{metrics_suffix}.json"
 
-    # 读取已经完成的样本结果（如果有）
+    # Load completed samples if available.
     if metrics_path.exists():
         with metrics_path.open("r", encoding="utf-8") as f:
             data = json.load(f)
@@ -124,7 +124,7 @@ def main(
         f"{shard_text}"
     )
 
-    # 过滤掉已经完成的样本，只对剩余样本继续跑，而且还能补齐漏了的样本。
+    # Filter completed samples; run remaining and fill any missing ones.
     remaining_samples = [s for s in samples if s.get("index") not in done_indices]
 
     if not remaining_samples:
@@ -135,10 +135,10 @@ def main(
         f"[Progress] Number of sample to be processed: {len(remaining_samples)} "
     )
 
-    # 不使用时间戳/运行 ID，histories 直接落在 histories/<mode>
+    # Do not use timestamp/run ID; histories go to histories/<mode>.
     run_id = None
 
-    # 使用线程池并行处理不同的 sample；目前设置为 1 ，不并行
+    # Use a thread pool; currently max_workers=1 (no parallelism).
     with ThreadPoolExecutor(max_workers=1) as executor:
         future_to_sample = {
             executor.submit(
@@ -240,7 +240,7 @@ def main(
 
             processed += 1
 
-            # 每完成若干个样本（例如 10 个）就排序并写回一次，避免频繁写盘
+            # Periodically sort and write back to avoid frequent disk writes.
             if processed % 2 == 0:
                 records.sort(
                     key=lambda r: (
@@ -257,7 +257,7 @@ def main(
                 with metrics_path.open("w", encoding="utf-8") as f:
                     json.dump(payload, f, ensure_ascii=False, indent=2)
 
-    # 循环结束后再做一次最终排序和落盘，把剩余的的样本也保存
+    # Final sort and write after the loop to save remaining samples.
     records.sort(
         key=lambda r: (r.get("sample_index") is None, r.get("sample_index", -1))
     )

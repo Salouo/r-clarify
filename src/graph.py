@@ -13,10 +13,10 @@ from .gpt_llm import OpenAIChatModel
 
 load_dotenv(".env", override=True)
 
-# Main agent (决策/clarify/execute)
+# Main agent (decision/clarify/execute).
 llm = get_primary_llm()
 
-# User simulator（保持 OpenAI，确保回答稳定）
+# User simulator (use OpenAI for stable answers).
 user_llm = OpenAIChatModel(model="gpt-5.2")
 
 _FENCE_RE = re.compile(
@@ -28,7 +28,7 @@ _FENCE_RE = re.compile(
 def _trace_to_messages(trace: list[AgentStep]) -> list[SystemMessage]:
     """
     - Expose prior agent thinking/decisions to the next turn as system notes.
-    - 虽然和总体的system messages里面的内容有重复，但是为了不破坏整体结构，先保留。
+    - This may duplicate system messages, but is kept to preserve structure.
     """
     msgs: list[SystemMessage] = []
     for t in trace:
@@ -60,7 +60,7 @@ def _strip_code_fence(text: str) -> str:
     text = (text or "").strip()
     blocks = _FENCE_RE.findall(text)
     if blocks:
-        # 优先挑看起来像 JSON 的 block
+        # Prefer a block that looks like JSON.
         for b in blocks:
             b2 = b.strip()
             if "{" in b2 and "}" in b2:
@@ -71,18 +71,18 @@ def _strip_code_fence(text: str) -> str:
 
 def _sanitize_json_text(text: str) -> str:
     text = _strip_code_fence(text)
-    # 清理控制字符，避免 json.loads 报错
+    # Remove control chars to avoid json.loads errors.
     text = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]", " ", text)
-    # 模型有时在字符串里直接换行，JSON 不允许裸换行
+    # The model sometimes inserts raw newlines; JSON does not allow them.
     text = text.replace("\r", " ").replace("\n", " ")
-    # 模型有时会在字符串结束后多输出一个单引号再跟逗号，破坏 JSON
+    # The model may append an extra single quote before a comma, breaking JSON.
     text = text.replace("\"',", "\",")
     return text.strip()
 
 
 def _extract_first_json_object(text: str) -> str | None:
     """
-    找到第一个括号平衡的 {...}，并且忽略 JSON 字符串中的 { }。
+    Find the first balanced {...} and ignore braces inside JSON strings.
     """
     start = None
     depth = 0
@@ -123,14 +123,14 @@ def _safe_agent_output(message: AIMessage) -> AgentOutput:
 
     def _parse_json(text: str) -> dict:
         cleaned = _sanitize_json_text(text)
-        # 先直接解析
+        # Try direct parse first.
         try:
             return json.loads(cleaned)
         except Exception:
             try:
                 return json.loads(cleaned, strict=False)
             except Exception:
-                # 抽取第一个平衡的 {...}
+                # Extract the first balanced {...}.
                 snippet = _extract_first_json_object(cleaned)
                 if snippet:
                     return json.loads(snippet, strict=False)
@@ -139,7 +139,7 @@ def _safe_agent_output(message: AIMessage) -> AgentOutput:
     try:
         data = _parse_json(raw_text)
         if not isinstance(data, dict):
-            raise ValueError("Agent 输出必须是 JSON 对象。")
+            raise ValueError("Agent output must be a JSON object.")
         if "clarification_question" not in data and "question" in data:
             data["clarification_question"] = data.get("question")
         if isinstance(data.get("action_id"), str) and data["action_id"].strip().isdigit():
@@ -149,10 +149,10 @@ def _safe_agent_output(message: AIMessage) -> AgentOutput:
         return AgentOutput(**data)
     except (json.JSONDecodeError, ValidationError, ValueError) as exc:
         print(
-            #"[Agent] 解析模型输出失败，将回退到失败动作。"
-            #f"错误: {exc}\n原始输出: {raw_text}"
+            #"[Agent] Failed to parse model output; falling back to failure action."
+            #f"Error: {exc}\nRaw output: {raw_text}"
         )
-        # 关键：这里依赖 schema 允许 -1
+        # Key: relies on schema allowing -1.
         return AgentOutput(
             thought="解析失败。execute -1 にフォールバック。",
             next_decision="execute",
@@ -179,35 +179,35 @@ def agent(state: AgentState) -> AgentState:
             )]
         }
 
-    # 根据不同的 mode 选择不同的 prompt
+    # Choose a prompt based on the mode.
     system_prompt = agent_system_prompt(
         state.mode,
         clarify_quota_total=state.clarify_quota_total,
         clarify_quota_left=state.clarify_quota_left,
     )
 
-    # 让 agent 在同一 trial 内能看到自己历史的思考/决策
+    # Let the agent see its own prior thoughts/decisions within the trial.
     trace_messages = _trace_to_messages(state.trace)
 
     base_messages = list(state.messages)
 
-    # 检查当前是否在历史信息中已存在 system prompt（是否是第一次进入当前 trial）
+    # Check if the system prompt already exists for this trial.
     has_same_system: bool = (
         base_messages
         and isinstance(base_messages[0], SystemMessage)
         and base_messages[0].content == system_prompt
     )
-    # 如果不是第一次进入当前 trial，保持原有的系统 prompt，不重复；trace 插在其后
+    # If not the first entry, keep the existing system prompt and insert trace after it.
     if has_same_system:
         messages = [base_messages[0], *trace_messages, *base_messages[1:]]
-    # 如果是第一次进入当前 trial，加入 system prompt
+    # If the first entry, add the system prompt.
     else:
         messages = [SystemMessage(content=system_prompt), *trace_messages, *base_messages]
     
-    # 得到 agent 的原始输出
+    # Get the agent's raw output.
     raw_resp = llm.invoke(messages)
 
-    # 记录 token usage
+    # Record token usage.
     token_usage = {}
     try:
         token_usage = getattr(raw_resp, "additional_kwargs", {}).get("token_usage") or {}
@@ -217,27 +217,26 @@ def agent(state: AgentState) -> AgentState:
     # Parse agent's raw output and obtain clear agent's output.
     resp = _safe_agent_output(raw_resp)
 
-    # 得到当前 agent 的 decision (Clarify / Execute)
+    # Determine the agent's decision (Clarify / Execute).
     valid_decisions = {"clarify", "execute"}
     next_decision = (resp.next_decision or "").strip().lower()
     if next_decision not in valid_decisions:
         next_decision = "execute"
 
-    # 如果模型没有给出合法的 action_id（例如为 null 或不在 1〜40 范围内），
-    # 就回退到失败动作 -1，避免后续节点报错。
+    # If action_id is invalid (null or out of 1-40), fall back to -1 to avoid errors.
     if isinstance(resp.action_id, int) and 1 <= resp.action_id <= 40:
         action_id = resp.action_id
     else:
         action_id = -1
 
-    # 如果当前 agent 选择了 Clarify，则记录下澄清问题
+    # If the agent chose Clarify, record the question.
     clarification_question = (
         (resp.clarification_question or "").strip() if next_decision == "clarify" else None
     )
 
-    # 根据当前 mode 决定是否允许 clarify：
-    # - clarify / reflect / reflect_k: 使用模型预测的 clarify / execute
-    # - direct / cot / cot_reflect: 强制只执行 execute
+    # Decide whether clarify is allowed based on mode:
+    # - clarify / reflect / reflect_k: use model's clarify/execute
+    # - direct / cot / cot_reflect: force execute only
     allow_clarify = state.mode in {"clarify", "reflect", "reflect_k"}
     if allow_clarify and state.clarify_quota_left is not None:
         allow_clarify = state.clarify_quota_left > 0
@@ -246,28 +245,28 @@ def agent(state: AgentState) -> AgentState:
         next_decision = "execute"
         clarification_question = None
 
-    # 得到当前的 clarification quota；如果下一个决策是 Clarify，那么 quota - 1.
+    # Update clarification quota; decrement if next decision is Clarify.
     clarify_quota_left = state.clarify_quota_left
     if next_decision == "clarify":
         if clarify_quota_left is not None:
             clarify_quota_left = max(clarify_quota_left - 1, 0)
 
-    # 虽然当前没有追加新的 messages，但未来有可能追加，因此保留 new_messages
+    # Keep new_messages for future additions, even if none added now.
     new_messages = state.messages
 
     return {
         "next_decision": next_decision,
         "action_id": action_id,
-        "step": state.step,  # clarify/execute 节点才记步
+        "step": state.step,  # Step increments in clarify/execute nodes only.
         "clarify_quota_left": clarify_quota_left,
         "clarify_quota_total": state.clarify_quota_total,
         "messages": new_messages,
         "clarification_question": clarification_question,
-        # 记录下当前的 agent 的行动，并追加到 trace 中去；trace 还主要用于 当前 prompt 组成
+        # Record the agent's action and append to trace; trace is used to build prompts.
         "trace": state.trace
         + [
             AgentStep(
-                step=state.step + 1,  # 这里标注将要执行的动作序号
+                step=state.step + 1,  # Mark the upcoming action step number.
                 thought=resp.thought,
                 next_decision=next_decision,
                 action_id=action_id,
@@ -313,7 +312,7 @@ def user_sim_node(state: AgentState) -> AgentState:
     action_id = state.label_action_id
     action_desc = id_to_action.get(action_id, "不明な行動")
     if action_id not in id_to_action:
-        # ラベルが不明な場合は即座に失敗扱い
+        # If the label is unknown, fail immediately.
         fallback_msg = "ラベルが不明のため、失敗として扱います。"
         return {
             "messages": state.messages + [HumanMessage(content=fallback_msg)],
@@ -338,11 +337,11 @@ def user_sim_node(state: AgentState) -> AgentState:
     if last_ai_msg:
         question_text = last_ai_msg.content
     else:
-        # Agent が clarify を選んだのに質問が生成されていない場合は即座に失敗判定へ
+        # If agent chose clarify but no question was generated, fail immediately.
         question_text = "エージェントが明確化質問が生成されなかったため、失敗として扱います。"
         return {
             "messages": state.messages + [HumanMessage(content=question_text)],
-            "step": state.max_steps,       # 次の agent 呼び出しで強制終了させる
+            "step": state.max_steps,       # Force termination on next agent call.
             "next_decision": "execute",
             "action_id": -1,
         }
@@ -374,7 +373,7 @@ def user_sim_node(state: AgentState) -> AgentState:
 
 def execute_node(state: AgentState) -> AgentState:
 
-    # 如果 action_id 异常（None 等），回退到失败动作 -1
+    # If action_id is invalid (None, etc.), fall back to -1.
     action_id = state.action_id if state.action_id in id_to_action else -1
     desc = id_to_action[action_id]
     if action_id == -1:

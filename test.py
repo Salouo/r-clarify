@@ -15,6 +15,6 @@ for sample in samples:
         for item in clarify_turn:
             questions.append((item["question_words"], item["question"]))
 
-# 按 question_words 倒序打印长度和文本
+# Print length and text in descending question_words order.
 for qlen, qtext in sorted(questions, key=lambda x: x[0], reverse=True):
     print(f"{qlen}\t{qtext}")
