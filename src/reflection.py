@@ -3,7 +3,7 @@ from typing import List, Optional
 
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 
-from .state import AgentState, action_to_id
+from .state import AgentState, action_to_id, id_to_action
 from .utils import (
     make_system_prompt_from_one_sample,
     format_single_trial_episode,
@@ -50,6 +50,14 @@ def generate_trial_reflection_memo(
     Generate a reflection memo for the next trial without revealing the gold label,
     only indicating success or failure.
     """
+    if mode == "reflect_action_only":
+        pred_id = final_state.get("action_id")
+        if pred_id in id_to_action:
+            action_desc = id_to_action[pred_id]
+        else:
+            action_desc = f"Unknown action_id={pred_id}"
+        return f"前回の誤り行動: {action_desc}"
+
     episode_text = _format_episode_for_reflection(trial_index=trial_index, final_state=final_state)
     prior_memos_text = "\n".join(f"- {m}" for m in recent_memos) if recent_memos else "なし"
 
@@ -160,8 +168,8 @@ def run_trials_for_one_sample(
         if use_reflection and reflection_memos:
             prior_memos = reflection_memos[-memo_window:]   # Take the last k reflection memos.
             for idx, memo in enumerate(prior_memos, start=1):
-                # For reflect/cot_reflect, memo length is fixed at 1.
-                if mode in {"reflect", "cot_reflect"}:
+                # For reflect/cot_reflect/reflect_action_only, memo length is fixed at 1.
+                if mode in {"reflect", "cot_reflect", "reflect_action_only"}:
                     extra_messages.append(SystemMessage(content=f"【Reflection memo】\n{memo}"))
                 # For reflect_k, annotate each memo with its distance from the current trial.
                 else:

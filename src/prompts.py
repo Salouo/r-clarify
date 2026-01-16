@@ -22,6 +22,7 @@ def agent_system_prompt(
       - "clarify": clarify enabled (no reflection)
       - "reflect": clarify + reflection (full version)
       - "reflect_k": clarify + reflection with multiple prior memos
+      - "reflect_action_only": clarify + reflection (wrong actions only)
       - "cot_reflect": CoT + reflection (no clarify)
       - "cot": pure CoT (short thinking, single-step action)
       - "direct": no reasoning, pick a single action immediately
@@ -109,7 +110,7 @@ def agent_system_prompt(
         ).strip()
 
     # clarify / reflect modes
-    elif mode in {"clarify", "reflect", "reflect_k"}:
+    elif mode in {"clarify", "reflect", "reflect_k", "reflect_action_only"}:
         text = (
             "あなたは家庭内で動作するエージェントです。ユーザの状況に基づいて、\n"
             "ユーザの明示的な依頼があいまいでも、潜在的なニーズを満たす「気が利く行動」を実行することができます。\n"
@@ -140,6 +141,14 @@ def agent_system_prompt(
                 " - 対話履歴に「【Reflection memo（◯ trial前）】」で始まるメモが含まれることがあります。\n"
                 " - それらは直前までのトライアルから得た学びや失敗回避のポイントです（◯ は現在のトライアルから何個前の memo かを示します）。\n"
                 " - 必ず内容を踏まえ、今回のトライアルで同じ失敗を繰り返さないよう判断に活用してください。\n"
+                "\n"
+            )
+        elif mode == "reflect_action_only":
+            text += (
+                "【Reflection memo】\n"
+                " - 対話履歴に「【Reflection memo】」で始まるメモが含まれることがあります。\n"
+                " - それらは直前までのトライアルで選んだ誤り行動のみを記録したものです。\n"
+                " - 必ず内容を踏まえ、同じ行動を再度選ばないよう判断に活用してください。\n"
                 "\n"
             )
 
@@ -310,6 +319,17 @@ def trial_reflection_system_prompt(mode: str) -> str:
     """
     System prompt for generating per-trial reflection memos.
     """
+    if mode == "reflect_action_only":
+        return (
+            "あなたはエージェントの次のトライアルに向けて、"
+            "直前トライアルで選ばれた誤り行動のみを記録するサポート役です。\n"
+            "受け取る情報:\n"
+            "- ユーザコンテキストと最新トライアルのログ\n"
+            "- そのトライアルの成否（true/false）。正解ラベルは与えられません。\n"
+            "\n"
+            "次のトライアルで同じ行動を再実行しないために、"
+            "誤り行動を 1 行で簡潔に書いてください。反省や分析は不要です。\n"
+        )
     if mode == "cot_reflect":
         return (
             "あなたはエージェントの次のトライアルに向けて、"

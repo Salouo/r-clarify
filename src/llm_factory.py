@@ -13,7 +13,7 @@ from .gpt_llm import OpenAIChatModel
 
 
 # Backend settings.
-DEFAULT_BACKEND = "gpt"  # Allowed values: "gpt" or "hf".
+DEFAULT_BACKEND = "hf"  # Allowed values: "gpt" or "hf".
 
 # OpenAI (GPT) settings
 GPT_MODEL_NAME = "gpt-5.2"

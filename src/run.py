@@ -52,6 +52,7 @@ def main(
     - mode = "cot_reflect" -> CoT + reflection (no clarify)
     - mode = "direct"     -> fully direct: almost no thinking, pick action immediately
     - mode = "reflect_k"  -> ReAct + reflection, multi-trial with last k memos
+    - mode = "reflect_action_only" -> ReAct + reflection (wrong actions only)
     """
     assert mode in {
         "clarify",
@@ -60,14 +61,15 @@ def main(
         "cot_reflect",
         "direct",
         "reflect_k",
-    }, "mode 必须是 'clarify' / 'reflect' / 'cot' / 'cot_reflect' / 'direct' / 'reflect_k'"
+        "reflect_action_only",
+    }, "mode 必须是 'clarify' / 'reflect' / 'cot' / 'cot_reflect' / 'direct' / 'reflect_k' / 'reflect_action_only'"
 
     # Enable post-clarification reflection based on mode.
     if mode in {"cot", "direct"}:
         use_reflection = False
     elif mode == "clarify":
         use_reflection = False
-    elif mode in {"reflect", "reflect_k", "cot_reflect"}:
+    elif mode in {"reflect", "reflect_k", "cot_reflect", "reflect_action_only"}:
         use_reflection = True
 
     # max_trials must be provided externally (applies to all modes).
@@ -76,7 +78,7 @@ def main(
 
     # Reflection memo window (last k memos passed to next trial).
     if memo_window is None:
-        memo_window = 1 if mode in {"reflect", "cot_reflect"} else (3 if mode == "reflect_k" else 0)
+        memo_window = 1 if mode in {"reflect", "cot_reflect", "reflect_action_only"} else (3 if mode == "reflect_k" else 0)
 
     # Load samples.
     data_path = Path("data/processed_data_expanded.json")
@@ -275,7 +277,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run dataset in specified mode.")
     parser.add_argument(
         "--mode",
-        choices=["clarify", "reflect", "cot", "cot_reflect", "direct", "reflect_k"],
+        choices=["clarify", "reflect", "cot", "cot_reflect", "direct", "reflect_k", "reflect_action_only"],
         help="Select running mode.",
     )
     parser.add_argument(
@@ -294,7 +296,7 @@ if __name__ == "__main__":
         "--memo-window",
         type=int,
         default=None,
-        help="How many latest reflection memos to pass to the next trial (reflect/cot_reflect default 1, reflect_k default 3).",
+        help="How many latest reflection memos to pass to the next trial (reflect/cot_reflect/reflect_action_only default 1, reflect_k default 3).",
     )
     parser.add_argument(
         "--start",

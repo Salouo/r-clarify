@@ -1,14 +1,15 @@
 set -euo pipefail
 
 # Set defaults here or override via CLI args.
-gpu_id="${CUDA_VISIBLE_DEVICES:-3}"   # Example: "0,1,2,3" for multi-GPU
+gpu_id="${CUDA_VISIBLE_DEVICES:-0}"   # Example: "0,1,2,3" for multi-GPU
 max_trials=5
 memo_window=3      # only used for reflect_k unless overridden
 clarify_quota=2    # Default clarify count: 2
-start_idx="250"
-end_idx="300"
+start_idx="0"
+end_idx="20"
+mode_list="reflect_action_only"
 
-while getopts ":g:t:w:c:s:e:h" opt; do
+while getopts ":g:t:w:c:s:e:m:h" opt; do
   case "$opt" in
     g) gpu_id="$OPTARG" ;;
     t) max_trials="$OPTARG" ;;
@@ -16,8 +17,9 @@ while getopts ":g:t:w:c:s:e:h" opt; do
     c) clarify_quota="$OPTARG" ;;
     s) start_idx="$OPTARG" ;;
     e) end_idx="$OPTARG" ;;
+    m) mode_list="$OPTARG" ;;
     h)
-      echo "Usage: $0 [-g <gpu_id_list>] [-t <max_trials>] [-w <memo_window_for_reflect_k>] [-c <clarify_quota>] [-s <start_idx>] [-e <end_idx>]"
+      echo "Usage: $0 [-g <gpu_id_list>] [-t <max_trials>] [-w <memo_window_for_reflect_k>] [-c <clarify_quota>] [-s <start_idx>] [-e <end_idx>] [-m <mode_or_csv>]"
       exit 0
       ;;
     \?)
@@ -32,8 +34,8 @@ echo "Using GPU $CUDA_VISIBLE_DEVICES"
 
 runner_cmd=(uv run python)
 
-# modes setting (cot, cot_reflect, clarify, reflect, reflect_k)
-modes=(reflect)
+# modes setting (cot, cot_reflect, clarify, reflect, reflect_k, reflect_action_only)
+IFS=',' read -r -a modes <<< "$mode_list"
 
 for mode in "${modes[@]}"; do
   cmd=("${runner_cmd[@]}" -m src.run --mode "$mode" --max-trials "$max_trials")

@@ -109,10 +109,10 @@ class AgentState(BaseModel):
     # Original ambiguous utterance (for user_sim).
     original_utterance: str = Field(default="")
 
-    # Current run mode (clarify / reflect / reflect_k / cot / cot_reflect / direct).
+    # Current run mode (clarify / reflect / reflect_k / reflect_action_only / cot / cot_reflect / direct).
     mode: str = Field(
         default="clarify",
-        description="当前样本使用的运行模式，例如 'clarify' / 'reflect' / 'reflect_k' / 'cot' / 'cot_reflect' / 'direct'",
+        description="当前样本使用的运行模式，例如 'clarify' / 'reflect' / 'reflect_k' / 'reflect_action_only' / 'cot' / 'cot_reflect' / 'direct'",
     )
 
     # Step counter.
