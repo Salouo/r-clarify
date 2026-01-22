@@ -81,7 +81,7 @@ def generate_trial_reflection_memo(
             "既存メモを上書きせず、今回の学びを簡潔に追加するイメージで。"
         )
         
-    elif mode in {"reflect", "non_reflect", "cot_reflect"}:
+    elif mode in {"reflect", "non_thinking_reflect", "cot_reflect"}:
         memo_instruction = (
             "次のトライアルのために、直近メモを踏まえて必要なら修正しつつ、3〜6行の箇条書きでまとめてください。"
         )
@@ -184,7 +184,7 @@ def run_trials_for_one_sample(
             prior_memos = reflection_memos[-memo_window:]   # Take the last k reflection memos.
             for idx, memo in enumerate(prior_memos, start=1):
                 # For reflect/cot_reflect/reflect_action_only, memo length is fixed at 1.
-                if mode in {"reflect", "non_reflect", "cot_reflect", "reflect_action_only"}:
+                if mode in {"reflect", "non_thinking_reflect", "cot_reflect", "reflect_action_only"}:
                     extra_messages.append(SystemMessage(content=f"【Reflection memo】\n{memo}"))
                 # For reflect_k, annotate each memo with its distance from the current trial.
                 else:

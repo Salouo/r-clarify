@@ -24,7 +24,7 @@ def agent_system_prompt(
       - "reflect_k": clarify + reflection with multiple prior memos
       - "reflect_action_only": clarify + reflection (wrong actions only)
       - "non_thinking_clarify": clarify enabled, no thought output
-      - "non_reflect": clarify + reflection, no thought output
+      - "non_thinking_reflect": clarify + reflection, no thought output
       - "cot_reflect": CoT + reflection (no clarify)
       - "cot": pure CoT (short thinking, single-step action)
       - "direct": no reasoning, pick a single action immediately
@@ -174,7 +174,7 @@ def agent_system_prompt(
         ).strip()
 
     # non-thinking reflect (clarify + reflection, no thought output)
-    elif mode == "non_reflect":
+    elif mode == "non_thinking_reflect":
         text = (
             "あなたは家庭内で動作するエージェントです。ユーザの状況に基づいて、\n"
             "ユーザの明示的な依頼があいまいでも、潜在的なニーズを満たす「気が利く行動」を実行することができます。\n"

@@ -49,7 +49,7 @@ def main(
     - mode = "clarify"    -> ReAct, no reflection
     - mode = "reflect"    -> ReAct + reflection
     - mode = "non_thinking_clarify" -> ReAct, no reflection, no thought output
-    - mode = "non_reflect" -> ReAct + reflection, no thought output
+    - mode = "non_thinking_reflect" -> ReAct + reflection, no thought output
     - mode = "cot"        -> pure CoT, single-step (no clarify)
     - mode = "cot_reflect" -> CoT + reflection (no clarify)
     - mode = "direct"     -> fully direct: almost no thinking, pick action immediately
@@ -60,20 +60,20 @@ def main(
         "clarify",
         "reflect",
         "non_thinking_clarify",
-        "non_reflect",
+        "non_thinking_reflect",
         "cot",
         "cot_reflect",
         "direct",
         "reflect_k",
         "reflect_action_only",
-    }, "mode 必须是 'clarify' / 'reflect' / 'non_thinking_clarify' / 'non_reflect' / 'cot' / 'cot_reflect' / 'direct' / 'reflect_k' / 'reflect_action_only'"
+    }, "mode 必须是 'clarify' / 'reflect' / 'non_thinking_clarify' / 'non_thinking_reflect' / 'cot' / 'cot_reflect' / 'direct' / 'reflect_k' / 'reflect_action_only'"
 
     # Enable post-clarification reflection based on mode.
     if mode in {"cot", "direct"}:
         use_reflection = False
     elif mode in {"clarify", "non_thinking_clarify"}:
         use_reflection = False
-    elif mode in {"reflect", "non_reflect", "reflect_k", "cot_reflect", "reflect_action_only"}:
+    elif mode in {"reflect", "non_thinking_reflect", "reflect_k", "cot_reflect", "reflect_action_only"}:
         use_reflection = True
 
     # max_trials must be provided externally (applies to all modes).
@@ -82,7 +82,7 @@ def main(
 
     # Reflection memo window (last k memos passed to next trial).
     if memo_window is None:
-        memo_window = 1 if mode in {"reflect", "non_reflect", "cot_reflect", "reflect_action_only"} else (3 if mode == "reflect_k" else 0)
+        memo_window = 1 if mode in {"reflect", "non_thinking_reflect", "cot_reflect", "reflect_action_only"} else (3 if mode == "reflect_k" else 0)
 
     # Load samples.
     data_path = Path("data/processed_data_expanded.json")
@@ -285,7 +285,7 @@ if __name__ == "__main__":
             "clarify",
             "reflect",
             "non_thinking_clarify",
-            "non_reflect",
+            "non_thinking_reflect",
             "cot",
             "cot_reflect",
             "direct",

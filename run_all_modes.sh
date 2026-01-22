@@ -7,7 +7,9 @@ memo_window=3      # only used for reflect_k unless overridden
 clarify_quota=2    # Default clarify count: 2
 start_idx="0"
 end_idx="546"
-mode_list="reflect_action_only"
+mode_list="non_thinking_clarify"
+
+# modes setting (clarify, reflect, non_thinking_clarify, non_thinking_reflect, cot, cot_reflect, direct, reflect_k, reflect_action_only)
 
 while getopts ":g:t:w:c:s:e:m:h" opt; do
   case "$opt" in
@@ -34,7 +36,7 @@ echo "Using GPU $CUDA_VISIBLE_DEVICES"
 
 runner_cmd=(uv run python)
 
-# modes setting (cot, cot_reflect, clarify, reflect, reflect_k, reflect_action_only)
+# modes setting (clarify, reflect, non_thinking_clarify, non_thinking_reflect, cot, cot_reflect, direct, reflect_k, reflect_action_only)
 IFS=',' read -r -a modes <<< "$mode_list"
 
 for mode in "${modes[@]}"; do
