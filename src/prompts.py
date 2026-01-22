@@ -23,11 +23,34 @@ def agent_system_prompt(
       - "reflect": clarify + reflection (full version)
       - "reflect_k": clarify + reflection with multiple prior memos
       - "reflect_action_only": clarify + reflection (wrong actions only)
+      - "non_thinking_clarify": clarify enabled, no thought output
+      - "non_reflect": clarify + reflection, no thought output
       - "cot_reflect": CoT + reflection (no clarify)
       - "cot": pure CoT (short thinking, single-step action)
       - "direct": no reasoning, pick a single action immediately
     """
     actions_text = _actions_block()
+
+    def _clarify_quota_text() -> str:
+        if clarify_quota_total is None and clarify_quota_left is None:
+            return ""
+        total_txt = "制限なし" if clarify_quota_total is None else f"{clarify_quota_total} 回まで"
+        if clarify_quota_left is None:
+            guidance = (
+                f"clarify（明確化質問）の使用回数: 合計 {total_txt} / 現在の残り 不明。\n"
+                "- 残り回数は提示されていません。重要な分岐でのみ clarify を検討してください。\n"
+                "- 可能であれば少ない clarify で判断を固め、無駄遣いは避けること。\n"
+                "\n"
+            )
+        else:
+            guidance = (
+                f"clarify（明確化質問）の使用回数: 合計 {total_txt} / 現在の残り {clarify_quota_left} 回。\n"
+                "- 残り回数があり、まだ不確実な場合は clarify を優先してよい。\n"
+                "- 残り 0 のときは clarify は使えない。必ず execute を選ぶこと。\n"
+                "- 残り回数を無駄遣いせず、重要な分岐に使うこと。\n"
+                "\n"
+            )
+        return guidance
 
     # `direct` mode
     if mode == "direct":
@@ -109,6 +132,101 @@ def agent_system_prompt(
             "}\n"
         ).strip()
 
+    # non-thinking clarify
+    elif mode == "non_thinking_clarify":
+        return (
+            "あなたは家庭内で動作するエージェントです。ユーザの状況に基づいて、\n"
+            "ユーザの明示的な依頼があいまいでも、潜在的なニーズを満たす「気が利く行動」を実行することができます。\n"
+            "気が利く行動とは、ユーザが言葉にしていない本当の意図・ニーズを汲み取って実行する、有益な行動のことです。\n"
+            "「ある物が特定の場所に存在するかどうか」を確認する質問は不要です。対象はそこにある前提で進めてください。\n"
+            "一度実行した行動は誤りとみなし、同じ行動を再度選択・実行してはいけません。\n"
+            "\n"
+            "以下の40個の候補となる気が利く行動のうち、ちょうど1つだけが、ユーザの潜在的な意図を最もよく満たす正しい気が利く行動です。\n"
+            "よく考えて選んでください。\n"
+            "\n"
+            "このモードでは、思考プロセスや理由を一切出力せず、回答のみを返してください。\n"
+            "\n"
+            "あなたが選べる決定は 2 つです：\n"
+            "\n"
+            "1. \"clarify\"（明確化質問をする）:\n"
+            " - 現在の情報だけではどの気が利く行動を実行すべきか判断できず、そのまま実行すると間違う可能性が高いと感じた場合、1 つだけ明確化質問をしてください。\n"
+            " - 質問は 1 文だけ、自然な口語で。括弧や番号付きの案内文、UI 説明は入れない。\n"
+            " - 40 個の行動候補のどれを選ぶかを絞り込むために本質的な一点に絞った質問にする。\n"
+            f"{_clarify_quota_text()}"
+            "\n"
+            "2. \"execute\"（1〜40 のうち 1 つの気が利く行動を実行する）:\n"
+            "\n"
+            f"{actions_text}\n"
+            "\n"
+            "出力は、必ず次の形式の JSON オブジェクトのみとしてください。\n"
+            "JSON ブロックの前後に余分な文章や説明を一切書いてはいけません。\n"
+            "コードフェンス（```）も使用禁止です。必ず JSON のみを返答してください。\n"
+            "【厳守】\n"
+            " - thought は必ず null にすること（理由や説明は書かない）。\n"
+            " - clarify を選ぶ場合、clarification_question にはユーザへ投げる 1 文の明確化質問を必ず入れること。\n"
+            " - thought/next_decision/action_id/clarification_question 以外のキーを追加しないこと。\n"
+            "{\n"
+            '  "thought": null,\n'
+            '  "next_decision": "clarify" または "execute",\n'
+            '  "action_id": <next_decision が "execute" のときは 1〜40 の整数，それ以外は null>,\n'
+            '  "clarification_question": <next_decision が "clarify" のときはユーザに聞く 1 文の質問，それ以外は null>\n'
+            "}\n"
+        ).strip()
+
+    # non-thinking reflect (clarify + reflection, no thought output)
+    elif mode == "non_reflect":
+        text = (
+            "あなたは家庭内で動作するエージェントです。ユーザの状況に基づいて、\n"
+            "ユーザの明示的な依頼があいまいでも、潜在的なニーズを満たす「気が利く行動」を実行することができます。\n"
+            "気が利く行動とは、ユーザが言葉にしていない本当の意図・ニーズを汲み取って実行する、有益な行動のことです。\n"
+            "「ある物が特定の場所に存在するかどうか」を確認する質問は不要です。対象はそこにある前提で進めてください。\n"
+            "一度実行した行動は誤りとみなし、同じ行動を再度選択・実行してはいけません。\n"
+            "\n"
+            "以下の40個の候補となる気が利く行動のうち、ちょうど1つだけが、ユーザの潜在的な意図を最もよく満たす正しい気が利く行動です。\n"
+            "よく考えて選んでください。\n"
+            "\n"
+            "【Reflection memo】\n"
+            " - 対話履歴に「【Reflection memo】」で始まるメモが含まれることがあります。\n"
+            " - それらは直前までのトライアルから得た学びや失敗回避のポイントです。\n"
+            " - 必ず内容を踏まえ、今回のトライアルで同じ失敗を繰り返さないよう判断に活用してください。\n"
+            "\n"
+            "このモードでは、思考プロセスや理由を一切出力せず、回答のみを返してください。\n"
+            "\n"
+        )
+
+        text += (
+            "あなたのゴールは、できるだけ少ないステップ数でユーザの潜在的な意図を特定し、"
+            "正しい気が利く行動を実行することです。\n"
+            "\n"
+            "あなたが選べる決定は 2 つです：\n"
+            "\n"
+            "1. \"clarify\"（明確化質問をする）:\n"
+            " - 現在の情報だけではどの気が利く行動を実行すべきか判断できず、そのまま実行すると間違う可能性が高いと感じた場合、1 つだけ明確化質問をしてください。\n"
+            " - 質問は 1 文だけ、自然な口語で。括弧や番号付きの案内文、UI 説明は入れない。\n"
+            " - 40 個の行動候補のどれを選ぶかを絞り込むために本質的な一点に絞った質問にする。\n"
+            f"{_clarify_quota_text()}"
+            "\n"
+            "2. \"execute\"（1〜40 のうち 1 つの気が利く行動を実行する）:\n"
+            "\n"
+            f"{actions_text}\n"
+            "\n"
+            "出力は、必ず次の形式の JSON オブジェクトのみとしてください。\n"
+            "JSON ブロックの前後に余分な文章や説明を一切書いてはいけません。\n"
+            "コードフェンス（```）も使用禁止です。必ず JSON のみを返答してください。\n"
+            "【厳守】\n"
+            " - thought は必ず null にすること（理由や説明は書かない）。\n"
+            " - clarify を選ぶ場合、clarification_question にはユーザへ投げる 1 文の明確化質問を必ず入れること。\n"
+            " - thought/next_decision/action_id/clarification_question 以外のキーを追加しないこと。\n"
+            "{\n"
+            '  "thought": null,\n'
+            '  "next_decision": "clarify" または "execute",\n'
+            '  "action_id": <next_decision が "execute" のときは 1〜40 の整数，それ以外は null>,\n'
+            '  "clarification_question": <next_decision が "clarify" のときはユーザに聞く 1 文の質問，それ以外は null>\n'
+            "}\n"
+        )
+
+        return text.strip()
+
     # clarify / reflect modes
     elif mode in {"clarify", "reflect", "reflect_k", "reflect_action_only"}:
         text = (
@@ -162,27 +280,6 @@ def agent_system_prompt(
             " - Reflection memo があれば、そこで指摘された失敗を避けているか確認する。\n"
             "\n"
         )
-
-        def _clarify_quota_text() -> str:
-            if clarify_quota_total is None and clarify_quota_left is None:
-                return ""
-            total_txt = "制限なし" if clarify_quota_total is None else f"{clarify_quota_total} 回まで"
-            if clarify_quota_left is None:
-                guidance = (
-                    f"clarify（明確化質問）の使用回数: 合計 {total_txt} / 現在の残り 不明。\n"
-                    "- 残り回数は提示されていません。重要な分岐でのみ clarify を検討してください。\n"
-                    "- 可能であれば少ない clarify で判断を固め、無駄遣いは避けること。\n"
-                    "\n"
-                )
-            else:
-                guidance = (
-                    f"clarify（明確化質問）の使用回数: 合計 {total_txt} / 現在の残り {clarify_quota_left} 回。\n"
-                    "- 残り回数があり、まだ不確実な場合は clarify を優先してよい。\n"
-                    "- 残り 0 のときは clarify は使えない。必ず execute を選ぶこと。\n"
-                    "- 残り回数を無駄遣いせず、重要な分岐に使うこと。\n"
-                    "\n"
-                )
-            return guidance
 
         # Common goal and clarify/execute instructions.
         text += (
@@ -319,17 +416,6 @@ def trial_reflection_system_prompt(mode: str) -> str:
     """
     System prompt for generating per-trial reflection memos.
     """
-    if mode == "reflect_action_only":
-        return (
-            "あなたはエージェントの次のトライアルに向けて、"
-            "直前トライアルで選ばれた誤り行動のみを記録するサポート役です。\n"
-            "受け取る情報:\n"
-            "- ユーザコンテキストと最新トライアルのログ\n"
-            "- そのトライアルの成否（true/false）。正解ラベルは与えられません。\n"
-            "\n"
-            "次のトライアルで同じ行動を再実行しないために、"
-            "誤り行動を 1 行で簡潔に書いてください。反省や分析は不要です。\n"
-        )
     if mode == "cot_reflect":
         return (
             "あなたはエージェントの次のトライアルに向けて、"

@@ -1,12 +1,12 @@
 set -euo pipefail
 
 # Set defaults here or override via CLI args.
-gpu_id="${CUDA_VISIBLE_DEVICES:-0}"   # Example: "0,1,2,3" for multi-GPU
+gpu_id="${CUDA_VISIBLE_DEVICES:-0,1,2,3}"   # Example: "0,1,2,3" for multi-GPU
 max_trials=5
 memo_window=3      # only used for reflect_k unless overridden
 clarify_quota=2    # Default clarify count: 2
 start_idx="0"
-end_idx="20"
+end_idx="546"
 mode_list="reflect_action_only"
 
 while getopts ":g:t:w:c:s:e:m:h" opt; do

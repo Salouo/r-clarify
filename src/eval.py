@@ -235,7 +235,7 @@ def calculate_total_token_usage_before_success(
 
 
 def main():
-    metrics_path = Path("outputs/gpt-5.2/results/reflect.json")
+    metrics_path = Path("outputs/Qwen3-Next-80B-A3B-Instruct/results/reflect_action_only.json")
     with metrics_path.open("r", encoding="utf-8") as f:
         data = json.load(f)
 

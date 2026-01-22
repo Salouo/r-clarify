@@ -50,13 +50,27 @@ def generate_trial_reflection_memo(
     Generate a reflection memo for the next trial without revealing the gold label,
     only indicating success or failure.
     """
+    # 只将过往错误动作进行记录
     if mode == "reflect_action_only":
         pred_id = final_state.get("action_id")
         if pred_id in id_to_action:
             action_desc = id_to_action[pred_id]
         else:
             action_desc = f"Unknown action_id={pred_id}"
-        return f"前回の誤り行動: {action_desc}"
+        actions: List[str] = []
+        for memo in recent_memos:
+            memo_text = memo.strip()
+            if memo_text.startswith("過去の誤り行動:"):
+                tail = memo_text.replace("過去の誤り行動:", "", 1).strip()
+                if tail:
+                    actions.extend([a.strip() for a in tail.split(" / ") if a.strip()])
+            elif memo_text.startswith("前回の誤り行動:"):
+                tail = memo_text.replace("前回の誤り行動:", "", 1).strip()
+                if tail:
+                    actions.append(tail)
+        if action_desc not in actions:
+            actions.append(action_desc)
+        return f"過去の誤り行動: {' / '.join(actions)}"
 
     episode_text = _format_episode_for_reflection(trial_index=trial_index, final_state=final_state)
     prior_memos_text = "\n".join(f"- {m}" for m in recent_memos) if recent_memos else "なし"
@@ -66,7 +80,8 @@ def generate_trial_reflection_memo(
             "次のトライアルのために、このトライアルの失敗や学びを3〜6行の箇条書きで新規メモとしてまとめてください。"
             "既存メモを上書きせず、今回の学びを簡潔に追加するイメージで。"
         )
-    else:
+        
+    elif mode in {"reflect", "non_reflect", "cot_reflect"}:
         memo_instruction = (
             "次のトライアルのために、直近メモを踏まえて必要なら修正しつつ、3〜6行の箇条書きでまとめてください。"
         )
@@ -169,7 +184,7 @@ def run_trials_for_one_sample(
             prior_memos = reflection_memos[-memo_window:]   # Take the last k reflection memos.
             for idx, memo in enumerate(prior_memos, start=1):
                 # For reflect/cot_reflect/reflect_action_only, memo length is fixed at 1.
-                if mode in {"reflect", "cot_reflect", "reflect_action_only"}:
+                if mode in {"reflect", "non_reflect", "cot_reflect", "reflect_action_only"}:
                     extra_messages.append(SystemMessage(content=f"【Reflection memo】\n{memo}"))
                 # For reflect_k, annotate each memo with its distance from the current trial.
                 else:
