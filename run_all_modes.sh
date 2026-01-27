@@ -1,13 +1,13 @@
 set -euo pipefail
 
 # Set defaults here or override via CLI args.
-gpu_id="${CUDA_VISIBLE_DEVICES:-0,1,2,3}"   # Example: "0,1,2,3" for multi-GPU
+gpu_id="${CUDA_VISIBLE_DEVICES:-3}"   # Example: "0,1,2,3" for multi-GPU
 max_trials=5
 memo_window=3      # only used for reflect_k unless overridden
 clarify_quota=2    # Default clarify count: 2
-start_idx="0"
+start_idx="411"
 end_idx="546"
-mode_list="non_thinking_clarify"
+mode_list="non_thinking_reflect"
 
 # modes setting (clarify, reflect, non_thinking_clarify, non_thinking_reflect, cot, cot_reflect, direct, reflect_k, reflect_action_only)
 

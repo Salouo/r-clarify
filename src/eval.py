@@ -235,11 +235,11 @@ def calculate_total_token_usage_before_success(
 
 
 def main():
-    metrics_path = Path("outputs/Qwen3-Next-80B-A3B-Instruct/results/reflect_action_only.json")
+    metrics_path = Path("outputs/Qwen3-30B-A3B-Instruct-2507/results/non_thinking_reflect.json")
     with metrics_path.open("r", encoding="utf-8") as f:
         data = json.load(f)
 
-    trial = 5   # up to n_trials
+    trial = 3   # up to n_trials
     k = None     # eval up to n_samples
     alpha = 0.8
     acc = calculate_accuracy_by_trial(data=data, trial=trial, k=k)
