@@ -49,8 +49,8 @@ def merge_results(files: list[Path]) -> dict:
 
 def main() -> None:
     input_dir = Path("outputs/Qwen3-30B-A3B-Instruct-2507/results")
-    glob_pattern = "non_thinking_reflect_*.json"
-    output_path = Path("outputs//results/non_thinking_reflect.json")
+    glob_pattern = "r-clarify_non_cot_*.json"
+    output_path = Path("outputs//results/r-clarify_non_cot.json")
 
     files = sorted(input_dir.glob(glob_pattern))
     if not files:

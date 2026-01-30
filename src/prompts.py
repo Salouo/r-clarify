@@ -20,11 +20,12 @@ def agent_system_prompt(
 
     mode:
       - "clarify": clarify enabled (no reflection)
-      - "reflect": clarify + reflection (full version)
-      - "reflect_k": clarify + reflection with multiple prior memos
+      - "r-clarify": clarify + reflection (full version)
+      - "r-clarify_reflexion": clarify + reflection with multiple prior memos
+      - "reflect": reflection only (no clarify)
       - "reflect_action_only": clarify + reflection (wrong actions only)
       - "non_thinking_clarify": clarify enabled, no thought output
-      - "non_thinking_reflect": clarify + reflection, no thought output
+      - "r-clarify_non_cot": clarify + reflection, no thought output
       - "cot_reflect": CoT + reflection (no clarify)
       - "cot": pure CoT (short thinking, single-step action)
       - "direct": no reasoning, pick a single action immediately
@@ -103,8 +104,8 @@ def agent_system_prompt(
             "}\n"
         ).strip()
 
-    # CoT + Reflection (no clarify)
-    elif mode == "cot_reflect":
+    # Reflection (no clarify)
+    elif mode in {"cot_reflect", "reflect"}:
         return (
             "あなたは家庭内で動作するエージェントです。ユーザの状況に基づいて、\n"
             "ユーザの明示的な依頼があいまいでも、潜在的なニーズを満たす「気が利く行動」を実行することができます。\n"
@@ -173,8 +174,8 @@ def agent_system_prompt(
             "}\n"
         ).strip()
 
-    # non-thinking reflect (clarify + reflection, no thought output)
-    elif mode == "non_thinking_reflect":
+    # non-thinking r-clarify_non_cot (clarify + reflection, no thought output)
+    elif mode == "r-clarify_non_cot":
         text = (
             "あなたは家庭内で動作するエージェントです。ユーザの状況に基づいて、\n"
             "ユーザの明示的な依頼があいまいでも、潜在的なニーズを満たす「気が利く行動」を実行することができます。\n"
@@ -227,8 +228,8 @@ def agent_system_prompt(
 
         return text.strip()
 
-    # clarify / reflect modes
-    elif mode in {"clarify", "reflect", "reflect_k", "reflect_action_only"}:
+    # clarify / r-clarify modes
+    elif mode in {"clarify", "r-clarify", "r-clarify_reflexion", "reflect_action_only"}:
         text = (
             "あなたは家庭内で動作するエージェントです。ユーザの状況に基づいて、\n"
             "ユーザの明示的な依頼があいまいでも、潜在的なニーズを満たす「気が利く行動」を実行することができます。\n"
@@ -245,7 +246,7 @@ def agent_system_prompt(
         )
 
         # Explicitly mention reflection memos (reflect modes only).
-        if mode == "reflect":
+        if mode == "r-clarify":
             text += (
                 "【Reflection memo】\n"
                 " - 対話履歴に「【Reflection memo】」で始まるメモが含まれることがあります。\n"
@@ -253,7 +254,7 @@ def agent_system_prompt(
                 " - 必ず内容を踏まえ、今回のトライアルで同じ失敗を繰り返さないよう判断に活用してください。\n"
                 "\n"
             )
-        elif mode == "reflect_k":
+        elif mode == "r-clarify_reflexion":
             text += (
                 "【Reflection memo】\n"
                 " - 対話履歴に「【Reflection memo（◯ trial前）】」で始まるメモが含まれることがあります。\n"
@@ -416,7 +417,7 @@ def trial_reflection_system_prompt(mode: str) -> str:
     """
     System prompt for generating per-trial reflection memos.
     """
-    if mode == "cot_reflect":
+    if mode in {"cot_reflect", "reflect"}:
         return (
             "あなたはエージェントの次のトライアルに向けて、"
             "既存の反省メモを必要に応じて更新・修正するサポート役です。\n"

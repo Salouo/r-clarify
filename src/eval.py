@@ -50,6 +50,44 @@ def calculate_average_steps_of_successful_trial(
     return total_steps / total_success
 
 
+def calculate_average_turns_by_pass_k(
+    data: dict, max_trial: int, k: int | None = None
+) -> dict[int, float]:
+    """
+    Average number of turns (agent decisions) in the successful trial,
+    under different Pass@k settings.
+    """
+    averages: dict[int, float] = {}
+    for t in range(1, max_trial + 1):
+        averages[t] = calculate_average_steps_of_successful_trial(data=data, trial=t, k=k)
+    return averages
+
+
+def calculate_average_turns_per_trial(
+    data: dict, max_trial: int, k: int | None = None
+) -> dict[int, float]:
+    """
+    Average number of turns for each trial index (includes both success and failure trials).
+    Only samples that reached the given trial are counted.
+    """
+    results = data["results"]
+    if k is not None:
+        results = results[:k]
+
+    averages: dict[int, float] = {}
+    for t in range(1, max_trial + 1):
+        total_steps = 0
+        total_trials = 0
+        for res in results:
+            steps_per_trial = res.get("steps_per_trial", [])
+            if len(steps_per_trial) < t:
+                continue
+            total_steps += steps_per_trial[t - 1]
+            total_trials += 1
+        averages[t] = (total_steps / total_trials) if total_trials else 0.0
+    return averages
+
+
 def calculate_dpass_at_k(
     data: dict, trial: int, alpha: float, k: int | None = None
 ) -> float:
@@ -235,11 +273,11 @@ def calculate_total_token_usage_before_success(
 
 
 def main():
-    metrics_path = Path("outputs/Qwen3-Next-80B-A3B-Instruct/results/non_thinking_reflect.json")
+    metrics_path = Path("outputs/Qwen3-Next-80B-A3B-Instruct/results/r-clarify.json")
     with metrics_path.open("r", encoding="utf-8") as f:
         data = json.load(f)
 
-    trial = 3   # up to n_trials
+    trial = 5   # up to n_trials
     k = None     # eval up to n_samples
     alpha = 0.8
     acc = calculate_accuracy_by_trial(data=data, trial=trial, k=k)
@@ -247,6 +285,12 @@ def main():
     dpass = calculate_dpass_at_k(data=data, trial=trial, alpha=alpha, k=k)
     total_usage = calculate_total_token_usage_before_success(
         data=data, trial=trial, k=k
+    )
+    avg_turns_by_pass_k = calculate_average_turns_by_pass_k(
+        data=data, max_trial=trial, k=k
+    )
+    avg_turns_per_trial = calculate_average_turns_per_trial(
+        data=data, max_trial=trial, k=k
     )
 
     if k:  
@@ -269,6 +313,14 @@ def main():
     )
 
     print(f"Steps per successful trial: {avg_steps:.4f}")
+    print("Average turns per successful trial under Pass@k:")
+    for pass_k in range(1, trial + 1):
+        avg_turns = avg_turns_by_pass_k.get(pass_k, 0.0)
+        print(f"  Pass@{pass_k}: {avg_turns:.3f}")
+    print("Average turns per trial (success + failure):")
+    for trial_idx in range(1, trial + 1):
+        avg_turns = avg_turns_per_trial.get(trial_idx, 0.0)
+        print(f"  Trial {trial_idx}: {avg_turns:.3f}")
 
 
 if __name__ == "__main__":

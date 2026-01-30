@@ -75,13 +75,13 @@ def generate_trial_reflection_memo(
     episode_text = _format_episode_for_reflection(trial_index=trial_index, final_state=final_state)
     prior_memos_text = "\n".join(f"- {m}" for m in recent_memos) if recent_memos else "なし"
 
-    if mode == "reflect_k":
+    if mode == "r-clarify_reflexion":
         memo_instruction = (
             "次のトライアルのために、このトライアルの失敗や学びを3〜6行の箇条書きで新規メモとしてまとめてください。"
             "既存メモを上書きせず、今回の学びを簡潔に追加するイメージで。"
         )
         
-    elif mode in {"reflect", "non_thinking_reflect", "cot_reflect"}:
+    elif mode in {"r-clarify", "r-clarify_non_cot", "cot_reflect", "reflect"}:
         memo_instruction = (
             "次のトライアルのために、直近メモを踏まえて必要なら修正しつつ、3〜6行の箇条書きでまとめてください。"
         )
@@ -171,9 +171,9 @@ def run_trials_for_one_sample(
 
     reflection_usage = TokenUsageCollector()
 
-    # memo_window defaults to 3 only for reflect_k.
+    # memo_window defaults to 3 only for r-clarify_reflexion.
     if memo_window is None:
-        memo_window = 3 if mode == "reflect_k" else 1
+        memo_window = 3 if mode == "r-clarify_reflexion" else 1
 
     # Iterate over all trials.
     for trial_idx in range(max_trials):
@@ -183,10 +183,10 @@ def run_trials_for_one_sample(
         if use_reflection and reflection_memos:
             prior_memos = reflection_memos[-memo_window:]   # Take the last k reflection memos.
             for idx, memo in enumerate(prior_memos, start=1):
-                # For reflect/cot_reflect/reflect_action_only, memo length is fixed at 1.
-                if mode in {"reflect", "non_thinking_reflect", "cot_reflect", "reflect_action_only"}:
+                # For r-clarify/reflect/cot_reflect/reflect_action_only, memo length is fixed at 1.
+                if mode in {"r-clarify", "r-clarify_non_cot", "cot_reflect", "reflect", "reflect_action_only"}:
                     extra_messages.append(SystemMessage(content=f"【Reflection memo】\n{memo}"))
-                # For reflect_k, annotate each memo with its distance from the current trial.
+                # For r-clarify_reflexion, annotate each memo with its distance from the current trial.
                 else:
                     distance = len(prior_memos) - idx + 1
                     label = f"{distance} trial前"
@@ -203,7 +203,7 @@ def run_trials_for_one_sample(
         # Save the current trial result.
         all_states.append(final_state)
 
-        # Save reflection memos for reflect_k prompts.
+        # Save reflection memos for r-clarify_reflexion prompts.
         trial_contexts.append(
             {
                 "prior_memos": prior_memos if use_reflection else [],

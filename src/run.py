@@ -22,7 +22,7 @@ def _run_for_one_sample(
     memo_window: int,
 ) -> List[dict]:
     """
-    Run the specified mode on one sample (clarify / reflect).
+    Run the specified mode on one sample (clarify / r-clarify / reflect).
     Returns a list of final_state entries for each trial of that sample.
     """
     return run_trials_for_one_sample(
@@ -47,33 +47,35 @@ def main(
     """
     Run the dataset in a given mode.
     - mode = "clarify"    -> ReAct, no reflection
-    - mode = "reflect"    -> ReAct + reflection
+    - mode = "r-clarify"  -> ReAct + reflection
+    - mode = "reflect"    -> ReAct + reflection, execute-only (no clarify)
     - mode = "non_thinking_clarify" -> ReAct, no reflection, no thought output
-    - mode = "non_thinking_reflect" -> ReAct + reflection, no thought output
+    - mode = "r-clarify_non_cot" -> ReAct + reflection, no thought output
     - mode = "cot"        -> pure CoT, single-step (no clarify)
     - mode = "cot_reflect" -> CoT + reflection (no clarify)
     - mode = "direct"     -> fully direct: almost no thinking, pick action immediately
-    - mode = "reflect_k"  -> ReAct + reflection, multi-trial with last k memos
+    - mode = "r-clarify_reflexion"  -> ReAct + reflection, multi-trial with last k memos
     - mode = "reflect_action_only" -> ReAct + reflection (wrong actions only)
     """
     assert mode in {
         "clarify",
+        "r-clarify",
         "reflect",
         "non_thinking_clarify",
-        "non_thinking_reflect",
+        "r-clarify_non_cot",
         "cot",
         "cot_reflect",
         "direct",
-        "reflect_k",
+        "r-clarify_reflexion",
         "reflect_action_only",
-    }, "mode 必须是 'clarify' / 'reflect' / 'non_thinking_clarify' / 'non_thinking_reflect' / 'cot' / 'cot_reflect' / 'direct' / 'reflect_k' / 'reflect_action_only'"
+    }, "mode 必须是 'clarify' / 'r-clarify' / 'reflect' / 'non_thinking_clarify' / 'r-clarify_non_cot' / 'cot' / 'cot_reflect' / 'direct' / 'r-clarify_reflexion' / 'reflect_action_only'"
 
     # Enable post-clarification reflection based on mode.
     if mode in {"cot", "direct"}:
         use_reflection = False
     elif mode in {"clarify", "non_thinking_clarify"}:
         use_reflection = False
-    elif mode in {"reflect", "non_thinking_reflect", "reflect_k", "cot_reflect", "reflect_action_only"}:
+    elif mode in {"r-clarify", "r-clarify_non_cot", "r-clarify_reflexion", "cot_reflect", "reflect_action_only", "reflect"}:
         use_reflection = True
 
     # max_trials must be provided externally (applies to all modes).
@@ -82,7 +84,7 @@ def main(
 
     # Reflection memo window (last k memos passed to next trial).
     if memo_window is None:
-        memo_window = 1 if mode in {"reflect", "non_thinking_reflect", "cot_reflect", "reflect_action_only"} else (3 if mode == "reflect_k" else 0)
+        memo_window = 1 if mode in {"r-clarify", "r-clarify_non_cot", "cot_reflect", "reflect_action_only", "reflect"} else (3 if mode == "r-clarify_reflexion" else 0)
 
     # Load samples.
     data_path = Path("data/processed_data_expanded.json")
@@ -283,13 +285,14 @@ if __name__ == "__main__":
         "--mode",
         choices=[
             "clarify",
+            "r-clarify",
             "reflect",
             "non_thinking_clarify",
-            "non_thinking_reflect",
+            "r-clarify_non_cot",
             "cot",
             "cot_reflect",
             "direct",
-            "reflect_k",
+            "r-clarify_reflexion",
             "reflect_action_only",
         ],
         help="Select running mode.",
@@ -310,7 +313,7 @@ if __name__ == "__main__":
         "--memo-window",
         type=int,
         default=None,
-        help="How many latest reflection memos to pass to the next trial (reflect/cot_reflect/reflect_action_only default 1, reflect_k default 3).",
+        help="How many latest reflection memos to pass to the next trial (r-clarify/reflect/cot_reflect/reflect_action_only default 1, r-clarify_reflexion default 3).",
     )
     parser.add_argument(
         "--start",

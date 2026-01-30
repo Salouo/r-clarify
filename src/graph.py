@@ -235,15 +235,15 @@ def agent(state: AgentState) -> AgentState:
     )
 
     # Decide whether clarify is allowed based on mode:
-    # - clarify / reflect / reflect_k / reflect_action_only / non_thinking_clarify / non_thinking_reflect: use model's clarify/execute
-    # - direct / cot / cot_reflect: force execute only
+    # - clarify / r-clarify / r-clarify_reflexion / reflect_action_only / non_thinking_clarify / r-clarify_non_cot: use model's clarify/execute
+    # - direct / cot / cot_reflect / reflect: force execute only
     allow_clarify = state.mode in {
         "clarify",
-        "reflect",
-        "reflect_k",
+        "r-clarify",
+        "r-clarify_reflexion",
         "reflect_action_only",
         "non_thinking_clarify",
-        "non_thinking_reflect",
+        "r-clarify_non_cot",
     }
     if allow_clarify and state.clarify_quota_left is not None:
         allow_clarify = state.clarify_quota_left > 0
