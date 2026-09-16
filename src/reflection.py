@@ -53,6 +53,9 @@ def generate_trial_reflection_memo(
     only indicating success or failure.
     """
     # 只将过往错误动作进行记录
+    if mode in ACTION_ELIMINATION_MODES:
+        return None
+
     if mode == "reflect_action_only":
         pred_id = final_state.get("action_id")
         if pred_id in id_to_action:
@@ -197,7 +200,7 @@ def run_trials_for_one_sample(
 
     # memo_window defaults to 3 only for r-clarify_reflexion.
     if memo_window is None:
-        memo_window = 3 if mode == "r-clarify_reflexion" else 1
+        memo_window = 0 if mode in ACTION_ELIMINATION_MODES else (3 if mode == "r-clarify_reflexion" else 1)
 
     # Iterate over all trials.
     for trial_idx in range(max_trials):

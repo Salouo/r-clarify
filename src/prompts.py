@@ -233,7 +233,7 @@ def agent_system_prompt(
         return text.strip()
 
     # clarify / r-clarify modes
-    elif mode in {"clarify", "r-clarify", "r-clarify_reflexion", "reflect_action_only", "action_elimination"}:
+    elif mode in {"clarify", "r-clarify", "r-clarify_reflexion", "action_elimination"}:
         text = (
             "あなたは家庭内で動作するエージェントです。ユーザの状況に基づいて、\n"
             "ユーザの明示的な依頼があいまいでも、潜在的なニーズを満たす「気が利く行動」を実行することができます。\n"
