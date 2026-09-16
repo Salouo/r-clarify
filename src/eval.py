@@ -273,11 +273,11 @@ def calculate_total_token_usage_before_success(
 
 
 def main():
-    metrics_path = Path("outputs/Qwen3-Next-80B-A3B-Instruct/results/r-clarify.json")
+    metrics_path = Path("outputs\\gpt-5\\results\\r-clarify.json")
     with metrics_path.open("r", encoding="utf-8") as f:
         data = json.load(f)
 
-    trial = 5   # up to n_trials
+    trial = 3   # up to n_trials
     k = None     # eval up to n_samples
     alpha = 0.8
     acc = calculate_accuracy_by_trial(data=data, trial=trial, k=k)

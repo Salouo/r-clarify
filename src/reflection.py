@@ -17,6 +17,8 @@ from .token_usage import TokenUsageCollector, set_usage_collector, clear_usage_c
 reflection_llm = get_primary_llm()
 model_dirname = get_primary_model_dirname()
 
+ACTION_ELIMINATION_MODES = {"action_elimination", "reflect_action_only"}
+
 
 def _format_episode_for_reflection(
     *,
@@ -110,12 +112,32 @@ def generate_trial_reflection_memo(
     return resp.content if resp and resp.content else None
 
 
+def _format_failed_action_list_message(failed_action_ids: list[int]) -> str:
+    if failed_action_ids:
+        failed_actions_text = "\n".join(
+            f"- {action_id}: {id_to_action.get(action_id, f'Unknown action_id={action_id}')}"
+            for action_id in failed_action_ids
+        )
+    else:
+        failed_actions_text = "None"
+    return (
+        "[Failed Action List]\n"
+        "The following actions were executed in previous trials and were confirmed to be incorrect:\n"
+        f"{failed_actions_text}\n\n"
+        "- Do not execute any action in this list again.\n"
+        "- The failed action list is the only information carried over from previous trials.\n"
+        "- Do not assume or infer any previous clarification answers, reasoning, reflection, or user preferences beyond what is explicitly shown in this list.\n"
+        "- If the list is empty, no previous action has been ruled out."
+    )
+
+
 def run_one_trial(
     sample: dict,
     mode: str = "clarify",
     use_reflection: bool = True,
     clarify_quota: int | None = None,
     extra_system_messages: Optional[list] = None,
+    failed_action_ids: Optional[list[int]] = None,
 ) -> dict:
 
     # Build the system prompt: user context.
@@ -137,6 +159,7 @@ def run_one_trial(
         user_context=system_prompt,
         clarify_quota_total=clarify_quota,
         clarify_quota_left=clarify_quota,
+        failed_action_ids=list(failed_action_ids or []),
     )
 
     # Import `graph` to avoid circular dependencies.
@@ -166,6 +189,7 @@ def run_trials_for_one_sample(
 
     all_states: List[dict] = []
     reflection_memos: List[str] = []
+    failed_action_ids: List[int] = []
     trial_memos: List[dict] = []
     trial_contexts: List[dict] = []
 
@@ -178,13 +202,16 @@ def run_trials_for_one_sample(
     # Iterate over all trials.
     for trial_idx in range(max_trials):
         extra_messages: List[SystemMessage] = []
+        failed_action_ids_before_trial = list(failed_action_ids)
 
         prior_memos: List[str] = []
-        if use_reflection and reflection_memos:
+        if mode in ACTION_ELIMINATION_MODES:
+            extra_messages.append(SystemMessage(content=_format_failed_action_list_message(failed_action_ids_before_trial)))
+        elif use_reflection and reflection_memos:
             prior_memos = reflection_memos[-memo_window:]   # Take the last k reflection memos.
             for idx, memo in enumerate(prior_memos, start=1):
-                # For r-clarify/reflect/cot_reflect/reflect_action_only, memo length is fixed at 1.
-                if mode in {"r-clarify", "r-clarify_non_cot", "cot_reflect", "reflect", "reflect_action_only"}:
+                # For r-clarify/reflect/cot_reflect, memo length is fixed at 1.
+                if mode in {"r-clarify", "r-clarify_non_cot", "cot_reflect", "reflect"}:
                     extra_messages.append(SystemMessage(content=f"【Reflection memo】\n{memo}"))
                 # For r-clarify_reflexion, annotate each memo with its distance from the current trial.
                 else:
@@ -199,7 +226,14 @@ def run_trials_for_one_sample(
             use_reflection=use_reflection,
             clarify_quota=clarify_quota,
             extra_system_messages=extra_messages,
+            failed_action_ids=failed_action_ids_before_trial,
         )
+        final_state["trial_index"] = trial_idx + 1
+        final_state["failed_action_ids_before_trial"] = failed_action_ids_before_trial
+        final_state["failed_actions_before_trial"] = [
+            id_to_action.get(action_id, f"Unknown action_id={action_id}")
+            for action_id in failed_action_ids_before_trial
+        ]
         # Save the current trial result.
         all_states.append(final_state)
 
@@ -214,6 +248,17 @@ def run_trials_for_one_sample(
         pred = final_state.get("action_id")
         # Determine whether the prediction is correct.
         success = bool(label_action_id is not None and pred == label_action_id)
+        final_state["success"] = success
+
+        if (
+            mode in ACTION_ELIMINATION_MODES
+            and not success
+            and isinstance(pred, int)
+            and pred in id_to_action
+            and pred != -1
+            and pred not in failed_action_ids
+        ):
+            failed_action_ids.append(pred)
 
         is_last_trial = (trial_idx + 1) >= max_trials
 

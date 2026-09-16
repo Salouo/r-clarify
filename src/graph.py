@@ -235,13 +235,14 @@ def agent(state: AgentState) -> AgentState:
     )
 
     # Decide whether clarify is allowed based on mode:
-    # - clarify / r-clarify / r-clarify_reflexion / reflect_action_only / non_thinking_clarify / r-clarify_non_cot: use model's clarify/execute
+    # - clarify / r-clarify / r-clarify_reflexion / reflect_action_only / action_elimination / non_thinking_clarify / r-clarify_non_cot: use model's clarify/execute
     # - direct / cot / cot_reflect / reflect: force execute only
     allow_clarify = state.mode in {
         "clarify",
         "r-clarify",
         "r-clarify_reflexion",
         "reflect_action_only",
+        "action_elimination",
         "non_thinking_clarify",
         "r-clarify_non_cot",
     }
@@ -251,6 +252,17 @@ def agent(state: AgentState) -> AgentState:
     if not allow_clarify:
         next_decision = "execute"
         clarification_question = None
+
+    # Deterministic guard for Action-Elimination: never execute an action that
+    # has already failed in a previous trial for this instance.
+    blocked_repeated_action_id = None
+    if (
+        state.mode in {"action_elimination", "reflect_action_only"}
+        and next_decision == "execute"
+        and action_id in set(state.failed_action_ids or [])
+    ):
+        blocked_repeated_action_id = action_id
+        action_id = -1
 
     # Update clarification quota; decrement if next decision is Clarify.
     clarify_quota_left = state.clarify_quota_left
@@ -278,7 +290,10 @@ def agent(state: AgentState) -> AgentState:
                 next_decision=next_decision,
                 action_id=action_id,
                 clarification_question=clarification_question,
-                token_usage=token_usage or None,
+                token_usage={
+                    **(token_usage or {}),
+                    "blocked_repeated_action_id": blocked_repeated_action_id,
+                } if blocked_repeated_action_id is not None else (token_usage or None),
             )
         ],
     }

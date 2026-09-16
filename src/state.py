@@ -109,7 +109,7 @@ class AgentState(BaseModel):
     # Original ambiguous utterance (for user_sim).
     original_utterance: str = Field(default="")
 
-    # Current run mode (clarify / r-clarify / r-clarify_reflexion / reflect / reflect_action_only / non_thinking_clarify / r-clarify_non_cot / cot / cot_reflect / direct).
+    # Current run mode (clarify / r-clarify / r-clarify_reflexion / reflect / reflect_action_only / action_elimination / non_thinking_clarify / r-clarify_non_cot / cot / cot_reflect / direct).
     mode: str = Field(
         default="clarify",
         description="当前样本使用的运行模式，例如 'clarify' / 'r-clarify' / 'r-clarify_reflexion' / 'reflect' / 'reflect_action_only' / 'non_thinking_clarify' / 'r-clarify_non_cot' / 'cot' / 'cot_reflect' / 'direct'",
@@ -123,6 +123,9 @@ class AgentState(BaseModel):
 
     # Trace of each trial.
     trace: list[AgentStep] = Field(default_factory=list, description="agent 每一步的思考和决策轨迹")
+
+    # Action-Elimination baseline: action ids that failed in previous trials.
+    failed_action_ids: list[int] = Field(default_factory=list)
 
     # Whether to run reflection after clarification to summarize user replies.
     enable_reflection: bool = Field(default=False)

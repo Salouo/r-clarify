@@ -55,7 +55,8 @@ def main(
     - mode = "cot_reflect" -> CoT + reflection (no clarify)
     - mode = "direct"     -> fully direct: almost no thinking, pick action immediately
     - mode = "r-clarify_reflexion"  -> ReAct + reflection, multi-trial with last k memos
-    - mode = "reflect_action_only" -> ReAct + reflection (wrong actions only)
+    - mode = "reflect_action_only" -> legacy alias for action_elimination
+    - mode = "action_elimination" -> ReAct + deterministic failed-action blacklist
     """
     assert mode in {
         "clarify",
@@ -68,14 +69,15 @@ def main(
         "direct",
         "r-clarify_reflexion",
         "reflect_action_only",
-    }, "mode 必须是 'clarify' / 'r-clarify' / 'reflect' / 'non_thinking_clarify' / 'r-clarify_non_cot' / 'cot' / 'cot_reflect' / 'direct' / 'r-clarify_reflexion' / 'reflect_action_only'"
+        "action_elimination",
+    }, "mode 必须是 'clarify' / 'r-clarify' / 'reflect' / 'non_thinking_clarify' / 'r-clarify_non_cot' / 'cot' / 'cot_reflect' / 'direct' / 'r-clarify_reflexion' / 'reflect_action_only' / 'action_elimination'"
 
     # Enable post-clarification reflection based on mode.
     if mode in {"cot", "direct"}:
         use_reflection = False
-    elif mode in {"clarify", "non_thinking_clarify"}:
+    elif mode in {"clarify", "non_thinking_clarify", "action_elimination", "reflect_action_only"}:
         use_reflection = False
-    elif mode in {"r-clarify", "r-clarify_non_cot", "r-clarify_reflexion", "cot_reflect", "reflect_action_only", "reflect"}:
+    elif mode in {"r-clarify", "r-clarify_non_cot", "r-clarify_reflexion", "cot_reflect", "reflect"}:
         use_reflection = True
 
     # max_trials must be provided externally (applies to all modes).
@@ -84,7 +86,7 @@ def main(
 
     # Reflection memo window (last k memos passed to next trial).
     if memo_window is None:
-        memo_window = 1 if mode in {"r-clarify", "r-clarify_non_cot", "cot_reflect", "reflect_action_only", "reflect"} else (3 if mode == "r-clarify_reflexion" else 0)
+        memo_window = 1 if mode in {"r-clarify", "r-clarify_non_cot", "cot_reflect", "reflect"} else (3 if mode == "r-clarify_reflexion" else 0)
 
     # Load samples.
     data_path = Path("data/processed_data_expanded.json")
@@ -201,12 +203,14 @@ def main(
                 steps_per_trial: List[int] = []
                 steps_detail_per_trial: List[List[dict]] = []
                 clarifications_per_trial: List[List[dict]] = []
+                trial_outcomes: List[dict] = []
             else:
                 num_trials = len(states)
                 steps_per_trial = [st.get("step", 0) for st in states]
                 steps_total = sum(steps_per_trial)
                 steps_detail_per_trial = [extract_trial_steps(st) for st in states]
                 clarifications_per_trial = []
+                trial_outcomes = []
                 for detail in steps_detail_per_trial:
                     clarifications = [
                         {
@@ -221,6 +225,22 @@ def main(
                     ]
                     clarifications_per_trial.append(clarifications)
 
+                for trial_idx, st in enumerate(states, start=1):
+                    executed_action_id = st.get("action_id")
+                    trial_success = bool(label_action_id is not None and executed_action_id == label_action_id)
+                    failed_action_ids_before = st.get("failed_action_ids_before_trial") or []
+                    trial_outcomes.append(
+                        {
+                            "trial": trial_idx,
+                            "failed_action_ids_before_trial": failed_action_ids_before,
+                            "failed_actions_before_trial": st.get("failed_actions_before_trial") or [],
+                            "executed_action_id": executed_action_id,
+                            "executed_action": id_to_action.get(executed_action_id, f"Unknown action_id={executed_action_id}"),
+                            "success": trial_success,
+                            "contributes_to_pass": trial_success,
+                        }
+                    )
+
                 last_state = states[-1]
                 pred = last_state.get("action_id")
                 label_action_id = last_state.get("label_action_id") or label_action_id
@@ -231,6 +251,7 @@ def main(
             if not states:
                 steps_detail_per_trial = []
                 clarifications_per_trial = []
+                trial_outcomes = []
 
             records.append(
                 {
@@ -242,6 +263,7 @@ def main(
                     "steps_per_trial": steps_per_trial,
                     "steps_detail_per_trial": steps_detail_per_trial,
                     "clarify_turns_per_trial": clarifications_per_trial,
+                    "trial_outcomes": trial_outcomes,
                     "gold_action": gold_action_desc,
                 }
             )
@@ -294,6 +316,7 @@ if __name__ == "__main__":
             "direct",
             "r-clarify_reflexion",
             "reflect_action_only",
+            "action_elimination",
         ],
         help="Select running mode.",
     )
@@ -313,7 +336,7 @@ if __name__ == "__main__":
         "--memo-window",
         type=int,
         default=None,
-        help="How many latest reflection memos to pass to the next trial (r-clarify/reflect/cot_reflect/reflect_action_only default 1, r-clarify_reflexion default 3).",
+        help="How many latest reflection memos to pass to the next trial (r-clarify/reflect/cot_reflect default 1, r-clarify_reflexion default 3; action_elimination/reflect_action_only use 0).",
     )
     parser.add_argument(
         "--start",

@@ -13,10 +13,10 @@ from .gpt_llm import OpenAIChatModel
 
 
 # Backend settings.
-DEFAULT_BACKEND = "hf"  # Allowed values: "gpt" or "hf".
+DEFAULT_BACKEND = "gpt"  # Allowed values: "gpt" or "hf".
 
 # OpenAI (GPT) settings
-GPT_MODEL_NAME = "gpt-5.2"
+GPT_MODEL_NAME = "gpt-5"
 GPT_TEMPERATURE: float | None = None
 
 # Hugging Face model settings

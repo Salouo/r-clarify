@@ -93,6 +93,13 @@ def format_single_trial_episode(
             lines.append(f"[{memo_idx}] {memo_text}")
         lines.append("")
 
+    failed_actions = final_state.get("failed_actions_before_trial") or []
+    if failed_actions:
+        lines.append("[Failed actions given to this trial]")
+        for action_text in failed_actions:
+            lines.append(f"- {action_text}")
+        lines.append("")
+
     # Walk through each agent step.
     for t in trace:
         lines.append(f"【Step {t.step}】")

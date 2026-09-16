@@ -1,0 +1,3 @@
+record_id,source,instance_id,original_condition,trial,clarification_step,original_utterance,clarification_question,response,gold_action,label,brief_reason,raw_agreement
+46795cfe9117671f084a894b,simulator,143,r-clarify,3,1,いいシーンだな,このまま静かに見てるでいい？それとも何か持ってこようか？,このまま静かに見てたいかな。できればキッチンのテーブルの上にある水筒だけ、ついでに片付けといてくれると助かる。,[40]水筒を棚にしまう,DIRECT_TARGET_LEAKAGE,They explicitly asked the agent to put away the water bottle beyond the question’s scope.,1.0
+a2b2d30d531b8c746be1e4da,simulator,380,r-clarify,3,2,あれってレモンだっけ？　ライムだっけ？,今回は見分けだけで大丈夫？それとも必要ならレモンを持ってこようか？,見分けだけで大丈夫だよ。今はちょっと手が離せないから、できればスマホが近くにあると助かる。,[8]スマホを持ってくる,DIRECT_TARGET_LEAKAGE,"The user explicitly requests having the smartphone nearby, which was not asked by the question.",1.0

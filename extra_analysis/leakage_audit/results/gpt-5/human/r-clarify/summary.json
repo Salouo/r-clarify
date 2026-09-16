@@ -1,0 +1,61 @@
+{
+  "bootstrap_samples": 10000,
+  "seed": 42,
+  "sources": {
+    "human": {
+      "explicit_robot_command": {
+        "count": 0,
+        "percentage": 0.0
+      },
+      "labels": {
+        "DIRECT_TARGET_LEAKAGE": {
+          "bootstrap_ci_95": [
+            0.0,
+            0.014925373134328358
+          ],
+          "count": 2,
+          "percentage": 0.005698005698005698
+        },
+        "LEGITIMATE_INTENT_SIGNAL": {
+          "bootstrap_ci_95": [
+            0.5726990286337468,
+            0.6951261739071682
+          ],
+          "count": 222,
+          "percentage": 0.6324786324786325
+        },
+        "NEAR_DIRECT_TARGET_EXPOSURE": {
+          "bootstrap_ci_95": [
+            0.0,
+            0.0196078431372549
+          ],
+          "count": 3,
+          "percentage": 0.008547008547008548
+        },
+        "NO_TARGET_SIGNAL": {
+          "bootstrap_ci_95": [
+            0.2866656050955414,
+            0.41542307010939367
+          ],
+          "count": 124,
+          "percentage": 0.35327635327635326
+        }
+      },
+      "mean_raw_agreement": 1.0,
+      "n": 351,
+      "potential_leakage_rate": {
+        "bootstrap_ci_95": [
+          0.002898550724637681,
+          0.02813389287129425
+        ],
+        "count": 5,
+        "percentage": 0.014245014245014245
+      },
+      "target_object_mention": {
+        "count": 18,
+        "percentage": 0.05128205128205128
+      }
+    }
+  },
+  "total_clarification_responses": 351
+}

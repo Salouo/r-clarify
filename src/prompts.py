@@ -23,13 +23,17 @@ def agent_system_prompt(
       - "r-clarify": clarify + reflection (full version)
       - "r-clarify_reflexion": clarify + reflection with multiple prior memos
       - "reflect": reflection only (no clarify)
-      - "reflect_action_only": clarify + reflection (wrong actions only)
+      - "reflect_action_only": legacy alias for action_elimination
+      - "action_elimination": clarify enabled, no reflection, failed actions only
       - "non_thinking_clarify": clarify enabled, no thought output
       - "r-clarify_non_cot": clarify + reflection, no thought output
       - "cot_reflect": CoT + reflection (no clarify)
       - "cot": pure CoT (short thinking, single-step action)
       - "direct": no reasoning, pick a single action immediately
     """
+    if mode == "reflect_action_only":
+        mode = "action_elimination"
+
     actions_text = _actions_block()
 
     def _clarify_quota_text() -> str:
@@ -229,7 +233,7 @@ def agent_system_prompt(
         return text.strip()
 
     # clarify / r-clarify modes
-    elif mode in {"clarify", "r-clarify", "r-clarify_reflexion", "reflect_action_only"}:
+    elif mode in {"clarify", "r-clarify", "r-clarify_reflexion", "reflect_action_only", "action_elimination"}:
         text = (
             "あなたは家庭内で動作するエージェントです。ユーザの状況に基づいて、\n"
             "ユーザの明示的な依頼があいまいでも、潜在的なニーズを満たす「気が利く行動」を実行することができます。\n"
@@ -268,6 +272,18 @@ def agent_system_prompt(
                 " - 対話履歴に「【Reflection memo】」で始まるメモが含まれることがあります。\n"
                 " - それらは直前までのトライアルで選んだ誤り行動のみを記録したものです。\n"
                 " - 必ず内容を踏まえ、同じ行動を再度選ばないよう判断に活用してください。\n"
+                "\n"
+            )
+
+        elif mode == "action_elimination":
+            text += (
+                "[Failed Action List]\n"
+                "The following actions were executed in previous trials and were confirmed to be incorrect.\n"
+                "A separate system message provides <FAILED_ACTIONS_TEXT> for the current trial.\n"
+                "- Do not execute any action in this list again.\n"
+                "- The failed action list is the only information carried over from previous trials.\n"
+                "- Do not assume or infer any previous clarification answers, reasoning, reflection, or user preferences beyond what is explicitly shown in this list.\n"
+                "- If the list is empty, no previous action has been ruled out.\n"
                 "\n"
             )
 
@@ -323,6 +339,8 @@ def agent_system_prompt(
             "}\n"
         )
 
+        if mode == "action_elimination":
+            text = text.replace("Reflection memo", "Failed action list")
         return text.strip()
     else:
         raise ValueError(f"Unknown mode: {mode}")

@@ -1,0 +1,3 @@
+record_id,source,instance_id,original_condition,trial,clarification_step,original_utterance,clarification_question,response,gold_action,label,brief_reason,raw_agreement
+8ae09c55ac7644ea9012cd2f,human,26,r-clarify,3,2,今日は忙しい,キッチンのペットボトルは冷蔵庫にしまう、それとも処分する？,片付けて欲しいな,[15]ペットボトルを片付ける,DIRECT_TARGET_LEAKAGE,The user directly requests the cleanup action matching the gold action.,1.0
+cb8c91fdd4e58eb0e000e204,human,172,r-clarify,1,1,飲み干したよ,おかわり持ってこようか？,ありがとう。おかわりはいいから、もう持ってって。,[12]コップを片付ける,DIRECT_TARGET_LEAKAGE,"The user refuses a refill and directly requests taking it away, which is the target action.",1.0
