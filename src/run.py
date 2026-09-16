@@ -55,7 +55,6 @@ def main(
     - mode = "cot_reflect" -> CoT + reflection (no clarify)
     - mode = "direct"     -> fully direct: almost no thinking, pick action immediately
     - mode = "r-clarify_reflexion"  -> ReAct + reflection, multi-trial with last k memos
-    - mode = "reflect_action_only" -> legacy alias for action_elimination
     - mode = "action_elimination" -> ReAct + deterministic failed-action blacklist
     """
     assert mode in {
@@ -68,14 +67,13 @@ def main(
         "cot_reflect",
         "direct",
         "r-clarify_reflexion",
-        "reflect_action_only",
         "action_elimination",
-    }, "mode 必须是 'clarify' / 'r-clarify' / 'reflect' / 'non_thinking_clarify' / 'r-clarify_non_cot' / 'cot' / 'cot_reflect' / 'direct' / 'r-clarify_reflexion' / 'reflect_action_only' / 'action_elimination'"
+    }, "mode 必须是 'clarify' / 'r-clarify' / 'reflect' / 'non_thinking_clarify' / 'r-clarify_non_cot' / 'cot' / 'cot_reflect' / 'direct' / 'r-clarify_reflexion' / 'action_elimination'"
 
     # Enable post-clarification reflection based on mode.
     if mode in {"cot", "direct"}:
         use_reflection = False
-    elif mode in {"clarify", "non_thinking_clarify", "action_elimination", "reflect_action_only"}:
+    elif mode in {"clarify", "non_thinking_clarify", "action_elimination"}:
         use_reflection = False
     elif mode in {"r-clarify", "r-clarify_non_cot", "r-clarify_reflexion", "cot_reflect", "reflect"}:
         use_reflection = True
@@ -315,7 +313,6 @@ if __name__ == "__main__":
             "cot_reflect",
             "direct",
             "r-clarify_reflexion",
-            "reflect_action_only",
             "action_elimination",
         ],
         help="Select running mode.",
@@ -336,7 +333,7 @@ if __name__ == "__main__":
         "--memo-window",
         type=int,
         default=None,
-        help="How many latest reflection memos to pass to the next trial (r-clarify/reflect/cot_reflect default 1, r-clarify_reflexion default 3; action_elimination/reflect_action_only use 0).",
+        help="How many latest reflection memos to pass to the next trial (r-clarify/reflect/cot_reflect default 1, r-clarify_reflexion default 3; action_elimination uses 0).",
     )
     parser.add_argument(
         "--start",

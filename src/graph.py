@@ -235,13 +235,12 @@ def agent(state: AgentState) -> AgentState:
     )
 
     # Decide whether clarify is allowed based on mode:
-    # - clarify / r-clarify / r-clarify_reflexion / reflect_action_only / action_elimination / non_thinking_clarify / r-clarify_non_cot: use model's clarify/execute
+    # - clarify / r-clarify / r-clarify_reflexion / action_elimination / non_thinking_clarify / r-clarify_non_cot: use model's clarify/execute
     # - direct / cot / cot_reflect / reflect: force execute only
     allow_clarify = state.mode in {
         "clarify",
         "r-clarify",
         "r-clarify_reflexion",
-        "reflect_action_only",
         "action_elimination",
         "non_thinking_clarify",
         "r-clarify_non_cot",
@@ -257,7 +256,7 @@ def agent(state: AgentState) -> AgentState:
     # has already failed in a previous trial for this instance.
     blocked_repeated_action_id = None
     if (
-        state.mode in {"action_elimination", "reflect_action_only"}
+        state.mode == "action_elimination"
         and next_decision == "execute"
         and action_id in set(state.failed_action_ids or [])
     ):

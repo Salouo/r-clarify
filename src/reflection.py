@@ -17,7 +17,7 @@ from .token_usage import TokenUsageCollector, set_usage_collector, clear_usage_c
 reflection_llm = get_primary_llm()
 model_dirname = get_primary_model_dirname()
 
-ACTION_ELIMINATION_MODES = {"action_elimination", "reflect_action_only"}
+ACTION_ELIMINATION_MODES = {"action_elimination"}
 
 
 def _format_episode_for_reflection(
@@ -56,7 +56,7 @@ def generate_trial_reflection_memo(
     if mode in ACTION_ELIMINATION_MODES:
         return None
 
-    if mode == "reflect_action_only":
+    if False:
         pred_id = final_state.get("action_id")
         if pred_id in id_to_action:
             action_desc = id_to_action[pred_id]

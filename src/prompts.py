@@ -23,7 +23,6 @@ def agent_system_prompt(
       - "r-clarify": clarify + reflection (full version)
       - "r-clarify_reflexion": clarify + reflection with multiple prior memos
       - "reflect": reflection only (no clarify)
-      - "reflect_action_only": legacy alias for action_elimination
       - "action_elimination": clarify enabled, no reflection, failed actions only
       - "non_thinking_clarify": clarify enabled, no thought output
       - "r-clarify_non_cot": clarify + reflection, no thought output
@@ -31,9 +30,6 @@ def agent_system_prompt(
       - "cot": pure CoT (short thinking, single-step action)
       - "direct": no reasoning, pick a single action immediately
     """
-    if mode == "reflect_action_only":
-        mode = "action_elimination"
-
     actions_text = _actions_block()
 
     def _clarify_quota_text() -> str:
@@ -266,7 +262,7 @@ def agent_system_prompt(
                 " - 必ず内容を踏まえ、今回のトライアルで同じ失敗を繰り返さないよう判断に活用してください。\n"
                 "\n"
             )
-        elif mode == "reflect_action_only":
+        elif False:
             text += (
                 "【Reflection memo】\n"
                 " - 対話履歴に「【Reflection memo】」で始まるメモが含まれることがあります。\n"
