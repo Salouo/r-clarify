@@ -1,192 +1,88 @@
-# Clarification for Reflective Action
+# R-Clarify
 
-A research-style benchmark pipeline for **ambiguous household utterance understanding**.  
-The agent must choose exactly one “reflective action” from a fixed 40-action space, optionally ask clarification questions, and improve across trials using reflection memos.
+R-Clarify studies how a household assistant can infer what a user wants from an ambiguous utterance and a description of the room. The agent chooses from 40 household actions. It can ask a simulated user a clarification question before acting. After an unsuccessful trial, it can use a reflection memo to guide its next attempt.
 
-## What This Project Does
+## Dataset
 
-- Models the task as a LangGraph state machine:
-  - `agent` decides `clarify` or `execute`
-  - `clarify` asks one question
-  - `user_sim` answers as a simulated user
-  - `execute` commits to one action ID (`1..40`)
-- Supports multiple decision styles:
-  - clarify-first, reflection-augmented, CoT-like, direct, and no-thought variants
-- Runs multi-trial inference per sample, with optional reflection memo carryover.
-- Logs rich artifacts for analysis:
-  - per-trial steps
-  - clarification turns and word counts
-  - token usage (agent + reflection)
-  - full per-sample episode transcripts
+The experiments use the extended **Do-I-Demand** annotations described by Yamasaki et al. (SIGDIAL 2025). A household scene can have several acceptable actions. In the R-Clarify evaluation, each scene–action pair is a separate sample with one target action. The simulated user receives that target, and a trial succeeds when the agent selects it. [Dataset paper](https://aclanthology.org/2025.sigdial-1.45/) · [Upstream repository](https://github.com/riken-grp/dataloader_reflective_stretch)
 
-## Task and Data
+| File                                                         | Contents                                                     |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| [raw_data.json](data/raw_data.json)                          | 355 scenes with at least one accepted action, comprising 547 action labels in the `reflective_actions` field. |
+| [processed_data.json](data/processed_data.json)              | The same 355 scenes with structured scene annotations and 545 action labels. The action lists differ from the raw file at zero-based indices 2 and 112. |
+| [processed_data_expanded.json](data/processed_data_expanded.json) | The 545 single-target samples used by the experiment runner, indexed from 0 to 544. |
+| [processed_data_expanded_en.json](data/processed_data_expanded_en.json) | Contains the same JSON data as the expanded file, including the Japanese utterances and action labels. |
+| [options.txt](data/options.txt)                              | The 40 candidate household actions.                          |
 
-The task is to infer a latent user need from:
+## Run an experiment
 
-- user utterance
-- user position and held items
-- nearby items and item placement in the room
-
-Then execute one action from `data/options.txt` (40 candidate actions).
-
-### Data Files
-
-- `data/raw_data.json`: original paired data with `reflective_actions` (possibly multiple labels per utterance)
-- `data/processed_data.json`: normalized structure with `annotations` + multi-label `reflective_actions`
-- `data/processed_data_expanded.json`: expanded to single-label samples (`reflective_action`), used by `src.run`
-- `data/processed_data_expanded_en.json`: same size/structure variant
-
-Current dataset sizes in this repo:
-
-- base samples: `355`
-- expanded single-label samples: `545`
-
-## Modes
-
-Supported `--mode` values in `src/run.py`:
-
-- `clarify`: clarify-enabled, no reflection
-- `r-clarify`: clarify + reflection memo (window default `1`)
-- `r-clarify_reflexion`: clarify + multi-memo reflection (window default `3`)
-- `r-clarify_non_cot`: clarify + reflection, but `thought` output disabled
-- `reflect`: reflection-enabled execute-only (no clarify)
-- `reflect_action_only`: reflection stores wrong actions only
-- `non_thinking_clarify`: clarify-enabled, `thought` forced to `null`
-- `cot`: single-step execute with thought (no clarify)
-- `cot_reflect`: `cot` + reflection memo
-- `direct`: single-step execute, no thought
-
-## Project Structure
-
-```text
-src/
-  run.py            # dataset runner, resume logic, result writing
-  reflection.py     # multi-trial loop + memo generation + episode export
-  graph.py          # LangGraph nodes and transitions
-  prompts.py        # agent/user-sim/reflection prompts
-  state.py          # action table + Pydantic state models
-  llm_factory.py    # backend/model selection (HF or OpenAI)
-  hf_llm.py         # local Hugging Face chat wrapper
-  gpt_llm.py        # OpenAI chat wrapper
-  token_usage.py    # context-local token collector
-  utils.py          # prompt formatting + step extraction
-  eval.py           # evaluation metrics on results JSON
-```
-
-## Environment Setup
-
-### 1) Python
-
-- Python `>=3.11` (as defined in `pyproject.toml`)
-
-### 2) Install Dependencies
+From the repository root, install the locked dependencies with `uv`. The project requires Python 3.11 or later and pins Python 3.11 in `.python-version`.
 
 ```bash
-uv sync
+uv sync --locked
 ```
 
-Note: this project currently depends on `causal-conv1d` and `flash-linear-attention`.  
-For local HF setup, this may require CUDA toolchain/NVCC-compatible environment.
+Create a `.env` file in the repository root with your OpenAI API key.
 
-### 3) API Key
-
-Create `.env` in the project root:
-
-```bash
+```dotenv
 OPENAI_API_KEY=your_key_here
 ```
 
-Important: `src/graph.py` instantiates a user simulator with `gpt-5.2`, so OpenAI credentials are required by the current implementation.
+The default agent and reflection model is `gpt-5`. To use a local Hugging Face model, set `DEFAULT_BACKEND = "hf"` and choose `HF_MODEL_ID` in [llm_factory.py](src/llm_factory.py). The user simulator uses OpenAI `gpt-5.2` with either agent backend, and the current runner initializes an OpenAI client at startup. [User simulator implementation](src/graph.py)
 
-### 4) Choose LLM Backend
-
-Edit `src/llm_factory.py`:
-
-- `DEFAULT_BACKEND = "hf"` or `"gpt"`
-- adjust `HF_MODEL_ID` / `GPT_MODEL_NAME` as needed
-
-## Running Experiments
-
-### Single Run
+To run one sample with up to five trials and two clarification questions per trial:
 
 ```bash
-uv run python -m src.run \
-  --mode r-clarify_non_cot \
-  --max-trials 5 \
-  --clarify-quota 2 \
-  --memo-window 1 \
-  --start 0 \
-  --end 545
+uv run python -m src.run --mode r-clarify --max-trials 5 --clarify-quota 2 --start 0 --end 1
 ```
 
-Key arguments:
-
-- `--mode`: one of the modes above
-- `--max-trials` (required): max trials per sample
-- `--clarify-quota`: max clarification turns per trial (`None` => unlimited)
-- `--memo-window`: number of latest memos passed into next trial
-- `--start`, `--end`: sample index range `[start, end)`
-
-### Batch Script
-
-Use `run_all_modes.sh` to run one or multiple modes:
+To run the same experiment on all 545 samples:
 
 ```bash
-bash run_all_modes.sh -g 0,1,2,3 -t 5 -c 2 -s 0 -e 546 -m r-clarify_non_cot
+uv run python -m src.run --mode r-clarify --max-trials 5 --clarify-quota 2
 ```
 
-`-m` accepts CSV, e.g. `-m clarify,r-clarify,reflect`.
+Trials stop at the first correct action or at `--max-trials`. Sample ranges include `--start` and exclude `--end`. Omit `--clarify-quota` for unlimited clarification turns per trial. Use `--memo-window` to set how many recent reflection memos the next trial receives.
 
-## Outputs
+### Experiment modes
 
-Outputs are grouped by model directory name:
+| `--mode`                 | Can ask questions | Information carried into the next trial                      |
+| ------------------------ | ----------------- | ------------------------------------------------------------ |
+| `r-clarify`              | Yes               | Most recent reflection memo by default.                      |
+| `r-clarify_reflexion`    | Yes               | Three most recent reflection memos by default.               |
+| `r-clarify_non_cot`      | Yes               | Most recent reflection memo by default. The prompt omits the reasoning output. |
+| `clarify`                | Yes               | None.                                                        |
+| `non_thinking_clarify`   | Yes               | None. The prompt omits the reasoning output.                 |
+| `action_elimination`     | Yes               | IDs of previously failed actions. Repeating a blocked action counts as a failed execution. |
+| `reflect`, `cot_reflect` | No                | Most recent reflection memo by default. Both use the same execute-only reasoning prompt. |
+| `cot`                    | No                | None. The prompt requests reasoning before action selection. |
+| `direct`                 | No                | None. The prompt requests a direct action choice.            |
 
-- Results JSON:
-  - `outputs/<model_dir>/results/<mode>.json`
-  - or sharded: `outputs/<model_dir>/results/<mode>_<start>_<end>.json`
-- Episode transcripts:
-  - `outputs/<model_dir>/episodes/<mode>/sample<index>.txt`
+## Results and evaluation
 
-### Result Record Fields (per sample)
+With the default agent, the full-dataset command writes results to `outputs/gpt-5/results/r-clarify.json`. The one-sample command writes `outputs/gpt-5/results/r-clarify_0_1.json`. Per-sample dialogue transcripts are saved to `outputs/gpt-5/episodes/r-clarify/sample<index>.txt`.
 
-Each entry in `results` includes:
+Each result records the target action, trial outcomes, step counts, clarification exchanges, and agent and reflection token usage. Rerunning a command skips indices already present in its result file. The filenames depend on the model, mode, and sample range. Before changing the trial limit, clarification quota, or memo window for the same range, move the previous results and transcripts to a separate directory.
 
-- `sample_index`
-- `num_trials`
-- `correct`
-- `steps_total`
-- `steps_per_trial`
-- `steps_detail_per_trial` (serialized step logs, token usage included)
-- `clarify_turns_per_trial`
-- `gold_action`
-
-## Evaluation
-
-`src/eval.py` provides:
-
-- `Pass@k`-style accuracy by allowed trial count
-- average steps for successful trials
-- `DPass@k(alpha)` (step-discounted success score)
-- token usage breakdown before success (`reflect` / `execute` / `clarify`)
-
-Run:
+To compute DPass and TDPass for the full-dataset example at trial budgets of three and five with a step discount of 0.8, run:
 
 ```bash
-uv run python -m src.eval
+uv run python -m extra_analysis.alpha_sensitivity.run --input outputs/gpt-5/results/r-clarify.json --trials 3 5 --alphas 0.8
 ```
 
-Before running, update `metrics_path` inside `src/eval.py` to your target result file.
+- **Pass@k** is the fraction of evaluated samples that succeed within the first *k* trials.
+- **DPass@k** assigns a successful sample a score of `alpha ** (steps - 1)`, using the steps in its successful trial. Samples that do not succeed within *k* trials score zero. The reported metric averages over all evaluated samples.
+- **TDPass@k** uses the same discount with the cumulative step count across all trials up to and including success.
 
-## Utility Scripts
+For Pass@k, mean trial lengths, and token usage through success, set `metrics_path` in [eval.py](src/eval.py) to the result file you want to evaluate, then run `uv run python -m src.eval`.
 
-- `merge_results.py`: merge multiple sharded result files into one
-- `process_dataset.py`: expand `reflective_actions` list into single-label samples
-- `test.py`: compute clarify usage ratio among successful trials
+## Additional analyses and utilities
 
-Note: some script paths are hardcoded; adjust paths before use.
-
-## Current Limitations
-
-- Prompts and action descriptions are primarily Japanese.
-- Thread pool in `src/run.py` is currently `max_workers=1` (sequential sample processing).
-- User simulator model is fixed to OpenAI `gpt-5.2` in current code.
+| Resource                                                     | Purpose                                                      |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| [Alpha sensitivity analysis](extra_analysis/alpha_sensitivity/README.md) | Recompute discounted scores from saved results across trial budgets and discount factors. |
+| [Leakage audit](extra_analysis/leakage_audit/README.md)      | Inspect whether clarification replies reveal the target action. Includes simulator and human comparisons. |
+| [Human paired statistics](extra_analysis/human_paired_statistics.py) | Compare conditions on matched participant–sample pairs. Pass the two sets of human results with `--r-clarify` and `--wo-tur`. [Summary tables](extra_analysis/human_paired_statistics/results) |
+| [merge_results.py](merge_results.py)                         | Merge result shards by sample index. Set the input directory, filename pattern, and output path in `main()`. |
+| [process_dataset.py](process_dataset.py)                     | Rebuild single-target samples. Set the input path in `main()` to `data/processed_data.json` and choose an output path before running. |
+| [test.py](test.py)                                           | Compute clarification usage among successful trials in an existing results file. Set the result path and trial limit in `main()`. |
