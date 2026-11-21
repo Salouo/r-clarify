@@ -3,49 +3,16 @@
 from __future__ import annotations
 
 import os
-from typing import Iterable, List
+from typing import List
 
 from dotenv import load_dotenv
-from langchain_core.messages import (
-    AIMessage,
-    BaseMessage,
-    HumanMessage,
-    SystemMessage,
-)
+from langchain_core.messages import AIMessage, BaseMessage
 from openai import BadRequestError, OpenAI
 
+from .chat_messages import convert_chat_messages
 from .token_usage import get_usage_collector
 
 load_dotenv(".env", override=False)
-
-
-def _content_to_text(content: object) -> str:
-    if isinstance(content, str):
-        return content
-    if isinstance(content, list):
-        parts: list[str] = []
-        for block in content:
-            if isinstance(block, dict) and block.get("type") == "text":
-                parts.append(block.get("text", ""))
-            elif isinstance(block, str):
-                parts.append(block)
-        return "\n".join(parts)
-    return str(content)
-
-
-def _convert_messages(messages: Iterable[BaseMessage]) -> list[dict[str, str]]:
-    payload: list[dict[str, str]] = []
-    for message in messages:
-        if isinstance(message, SystemMessage):
-            role = "system"
-        elif isinstance(message, HumanMessage):
-            role = "user"
-        elif isinstance(message, AIMessage):
-            role = "assistant"
-        else:
-            role = "user"
-        payload.append({"role": role, "content": _content_to_text(message.content)})
-    return payload
 
 
 class OpenAIChatModel:
@@ -73,7 +40,7 @@ class OpenAIChatModel:
         return OpenAIChatModel._client
 
     def invoke(self, messages: List[BaseMessage]):
-        payload = _convert_messages(messages)
+        payload = convert_chat_messages(messages)
         request_kwargs = {
             "model": self.model,
             "messages": payload,

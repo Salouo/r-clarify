@@ -21,7 +21,7 @@ def has_clarify_in_success_trial(res: dict, max_trial: int | None) -> bool:
         if any((step or {}).get("action") == "clarify" for step in trial_steps):
             return True
 
-    # Fallback: some outputs may include per-trial clarify counts.
+    # Older result files may only record per-trial clarification counts.
     clarify_turns = res.get("clarify_turns_per_trial") or []
     if trial_idx < len(clarify_turns):
         try:
@@ -51,9 +51,8 @@ def has_any_clarify(res: dict) -> bool:
 
 
 def main() -> int:
-    # Set these values directly.
     results_path = "outputs/Qwen3-Next-80B-A3B-Instruct/results/clarify.json"
-    max_trial = 1  # e.g., 3; use None to disable
+    max_trial = 1  # Use None to include all trials.
 
     path = Path(results_path)
     if not path.exists():

@@ -9,7 +9,7 @@ import contextvars
 
 @dataclass
 class TokenUsageCollector:
-    """Accumulates prompt/completion tokens across a run."""
+    """Token counts accumulated across model calls in a run."""
 
     prompt_tokens: int = 0
     completion_tokens: int = 0
@@ -29,7 +29,7 @@ class TokenUsageCollector:
 
     @staticmethod
     def diff(newer: dict, older: dict) -> dict:
-        """Compute token delta between two snapshots."""
+        """Return the token counts added between two snapshots."""
         return {
             "prompt_tokens": (newer.get("prompt_tokens", 0) - older.get("prompt_tokens", 0)),
             "completion_tokens": (newer.get("completion_tokens", 0) - older.get("completion_tokens", 0)),
@@ -48,10 +48,10 @@ def set_usage_collector(collector: TokenUsageCollector) -> contextvars.Token:
 
 
 def clear_usage_collector(token: contextvars.Token) -> None:
-    """Restore prior collector (typically after a run completes)."""
+    """Restore the previous collector when the current context ends."""
     _collector_var.reset(token)
 
 
 def get_usage_collector() -> Optional[TokenUsageCollector]:
-    """Return current collector, if any."""
+    """Return the active collector, if any."""
     return _collector_var.get()

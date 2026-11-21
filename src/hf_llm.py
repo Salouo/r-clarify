@@ -1,42 +1,15 @@
 from __future__ import annotations
-from typing import Any, Iterable, List
+from typing import Any, List
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
-from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
+from langchain_core.messages import AIMessage, BaseMessage
 
+from .chat_messages import convert_chat_messages
 from .token_usage import get_usage_collector
-
-def _message_content_to_text(content: Any) -> str:
-    if isinstance(content, str):
-        return content
-    if isinstance(content, list):
-        parts: List[str] = []
-        for block in content:
-            if isinstance(block, dict) and block.get("type") == "text":
-                parts.append(block.get("text", ""))
-            elif isinstance(block, str):
-                parts.append(block)
-        return "\n".join(parts)
-    return str(content)
-
-
-def _convert_messages(messages: Iterable[BaseMessage]) -> list[dict[str, str]]:
-    payload: list[dict[str, str]] = []
-    for message in messages:
-        if isinstance(message, SystemMessage):
-            role = "system"
-        elif isinstance(message, HumanMessage):
-            role = "user"
-        elif isinstance(message, AIMessage):
-            role = "assistant"
-        else:
-            role = "user"
-        payload.append({"role": role, "content": _message_content_to_text(message.content)})
-    return payload
 
 
 class HuggingFaceChatModel:
-    """Minimal chat wrapper using transformers for local HF models."""
+    """Chat model backed by a local Hugging Face Transformers model."""
 
     def __init__(
         self,
@@ -47,7 +20,7 @@ class HuggingFaceChatModel:
         temperature: float = 0.7,
         dtype: Any | None = torch.bfloat16,
     ) -> None:
-        """Initialize parameters."""
+        """Load the tokenizer and model with the requested generation settings."""
         self.model_id = model_id
         self.max_new_tokens = max_new_tokens
         self.temperature = temperature
@@ -61,7 +34,7 @@ class HuggingFaceChatModel:
             model_kwargs["dtype"] = dtype
 
         self._model = AutoModelForCausalLM.from_pretrained(model_id, **model_kwargs)
-        # Ensure pad token is set to avoid generation warnings
+        # Use the end-of-sequence token as a fallback for padding.
         pad_id = self._tokenizer.pad_token_id or self._tokenizer.eos_token_id
         if pad_id is None and self._tokenizer.eos_token_id is not None:
             pad_id = self._tokenizer.eos_token_id
@@ -69,7 +42,7 @@ class HuggingFaceChatModel:
             self._tokenizer.pad_token_id = pad_id
             self._tokenizer.pad_token = self._tokenizer.eos_token
             self._model.config.pad_token_id = pad_id
-            # Some HF versions read from generation_config instead of config
+            # Some Transformers versions read the padding ID from the generation config.
             if hasattr(self._model, "generation_config"):
                 self._model.generation_config.pad_token_id = pad_id
 
@@ -77,7 +50,7 @@ class HuggingFaceChatModel:
         tokenizer = self._tokenizer
         model = self._model
 
-        messages = _convert_messages(messages)
+        messages = convert_chat_messages(messages)
 
         inputs = tokenizer.apply_chat_template(
             messages,

@@ -13,10 +13,9 @@ from .gpt_llm import OpenAIChatModel
 
 load_dotenv(".env", override=True)
 
-# Main agent (decision/clarify/execute).
 llm = get_primary_llm()
 
-# User simulator (use OpenAI for stable answers).
+# The user simulator uses a fixed model across agent backends.
 user_llm = OpenAIChatModel(model="gpt-5.2")
 
 _FENCE_RE = re.compile(
@@ -26,10 +25,7 @@ _FENCE_RE = re.compile(
 
 
 def _trace_to_messages(trace: list[AgentStep]) -> list[SystemMessage]:
-    """
-    - Expose prior agent thinking/decisions to the next turn as system notes.
-    - This may duplicate system messages, but is kept to preserve structure.
-    """
+    """Format earlier decisions in the current trial as system messages."""
     msgs: list[SystemMessage] = []
     for t in trace:
         thought = t.thought or "（thought なし）"
@@ -60,7 +56,7 @@ def _strip_code_fence(text: str) -> str:
     text = (text or "").strip()
     blocks = _FENCE_RE.findall(text)
     if blocks:
-        # Prefer a block that looks like JSON.
+        # Model replies can include more than one fenced block.
         for b in blocks:
             b2 = b.strip()
             if "{" in b2 and "}" in b2:
@@ -71,19 +67,17 @@ def _strip_code_fence(text: str) -> str:
 
 def _sanitize_json_text(text: str) -> str:
     text = _strip_code_fence(text)
-    # Remove control chars to avoid json.loads errors.
+    # Strip control characters that are invalid in JSON strings.
     text = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]", " ", text)
-    # The model sometimes inserts raw newlines; JSON does not allow them.
+    # Model replies can contain unescaped line breaks inside JSON strings.
     text = text.replace("\r", " ").replace("\n", " ")
-    # The model may append an extra single quote before a comma, breaking JSON.
+    # Some replies add a stray single quote after a JSON string.
     text = text.replace("\"',", "\",")
     return text.strip()
 
 
 def _extract_first_json_object(text: str) -> str | None:
-    """
-    Find the first balanced {...} and ignore braces inside JSON strings.
-    """
+    """Return the first balanced JSON object, ignoring braces inside strings."""
     start = None
     depth = 0
     in_str = False
@@ -100,7 +94,6 @@ def _extract_first_json_object(text: str) -> str | None:
                 in_str = False
             continue
 
-        # not in string
         if ch == '"':
             in_str = True
             continue
@@ -123,14 +116,13 @@ def _safe_agent_output(message: AIMessage) -> AgentOutput:
 
     def _parse_json(text: str) -> dict:
         cleaned = _sanitize_json_text(text)
-        # Try direct parse first.
         try:
             return json.loads(cleaned)
         except Exception:
             try:
                 return json.loads(cleaned, strict=False)
             except Exception:
-                # Extract the first balanced {...}.
+                # Recover an object embedded in surrounding prose.
                 snippet = _extract_first_json_object(cleaned)
                 if snippet:
                     return json.loads(snippet, strict=False)
@@ -147,12 +139,8 @@ def _safe_agent_output(message: AIMessage) -> AgentOutput:
         if isinstance(data.get("clarification_question"), str):
             data["clarification_question"] = data["clarification_question"].strip()
         return AgentOutput(**data)
-    except (json.JSONDecodeError, ValidationError, ValueError) as exc:
-        print(
-            #"[Agent] Failed to parse model output; falling back to failure action."
-            #f"Error: {exc}\nRaw output: {raw_text}"
-        )
-        # Key: relies on schema allowing -1.
+    except (json.JSONDecodeError, ValidationError, ValueError):
+        # A failed parse is recorded as action -1.
         return AgentOutput(
             thought="解析失败。execute -1 にフォールバック。",
             next_decision="execute",
@@ -160,11 +148,8 @@ def _safe_agent_output(message: AIMessage) -> AgentOutput:
         )
 
 
-# ========== Agent Node ==========
-
 def agent(state: AgentState) -> AgentState:
-
-    # Simple step limit: if max_steps exceeded, force execute failure action -1
+    """Choose the next action within the trial limits."""
     if state.step >= state.max_steps:
         return {
             "next_decision": "execute",
@@ -179,64 +164,50 @@ def agent(state: AgentState) -> AgentState:
             )]
         }
 
-    # Choose a prompt based on the mode.
     system_prompt = agent_system_prompt(
         state.mode,
         clarify_quota_total=state.clarify_quota_total,
         clarify_quota_left=state.clarify_quota_left,
     )
 
-    # Let the agent see its own prior thoughts/decisions within the trial.
     trace_messages = _trace_to_messages(state.trace)
 
     base_messages = list(state.messages)
 
-    # Check if the system prompt already exists for this trial.
     has_same_system: bool = (
         base_messages
         and isinstance(base_messages[0], SystemMessage)
         and base_messages[0].content == system_prompt
     )
-    # If not the first entry, keep the existing system prompt and insert trace after it.
+    # Place the trial trace immediately after the system prompt.
     if has_same_system:
         messages = [base_messages[0], *trace_messages, *base_messages[1:]]
-    # If the first entry, add the system prompt.
     else:
         messages = [SystemMessage(content=system_prompt), *trace_messages, *base_messages]
     
-    # Get the agent's raw output.
     raw_resp = llm.invoke(messages)
 
-    # Record token usage.
-    token_usage = {}
     try:
         token_usage = getattr(raw_resp, "additional_kwargs", {}).get("token_usage") or {}
     except Exception:
         token_usage = {}
     
-    # Parse agent's raw output and obtain clear agent's output.
     resp = _safe_agent_output(raw_resp)
 
-    # Determine the agent's decision (Clarify / Execute).
     valid_decisions = {"clarify", "execute"}
     next_decision = (resp.next_decision or "").strip().lower()
     if next_decision not in valid_decisions:
         next_decision = "execute"
 
-    # If action_id is invalid (null or out of 1-40), fall back to -1 to avoid errors.
     if isinstance(resp.action_id, int) and 1 <= resp.action_id <= 40:
         action_id = resp.action_id
     else:
         action_id = -1
 
-    # If the agent chose Clarify, record the question.
     clarification_question = (
         (resp.clarification_question or "").strip() if next_decision == "clarify" else None
     )
 
-    # Decide whether clarify is allowed based on mode:
-    # - clarify / r-clarify / r-clarify_reflexion / action_elimination / non_thinking_clarify / r-clarify_non_cot: use model's clarify/execute
-    # - direct / cot / cot_reflect / reflect: force execute only
     allow_clarify = state.mode in {
         "clarify",
         "r-clarify",
@@ -252,8 +223,7 @@ def agent(state: AgentState) -> AgentState:
         next_decision = "execute"
         clarification_question = None
 
-    # Deterministic guard for Action-Elimination: never execute an action that
-    # has already failed in a previous trial for this instance.
+    # Action elimination rules out actions that failed in earlier trials.
     blocked_repeated_action_id = None
     if (
         state.mode == "action_elimination"
@@ -263,28 +233,22 @@ def agent(state: AgentState) -> AgentState:
         blocked_repeated_action_id = action_id
         action_id = -1
 
-    # Update clarification quota; decrement if next decision is Clarify.
     clarify_quota_left = state.clarify_quota_left
-    if next_decision == "clarify":
-        if clarify_quota_left is not None:
-            clarify_quota_left = max(clarify_quota_left - 1, 0)
-
-    # Keep new_messages for future additions, even if none added now.
-    new_messages = state.messages
+    if next_decision == "clarify" and clarify_quota_left is not None:
+        clarify_quota_left = max(clarify_quota_left - 1, 0)
 
     return {
         "next_decision": next_decision,
         "action_id": action_id,
-        "step": state.step,  # Step increments in clarify/execute nodes only.
+        "step": state.step,  # Clarification and execution advance the step counter.
         "clarify_quota_left": clarify_quota_left,
         "clarify_quota_total": state.clarify_quota_total,
-        "messages": new_messages,
+        "messages": state.messages,
         "clarification_question": clarification_question,
-        # Record the agent's action and append to trace; trace is used to build prompts.
         "trace": state.trace
         + [
             AgentStep(
-                step=state.step + 1,  # Mark the upcoming action step number.
+                step=state.step + 1,
                 thought=resp.thought,
                 next_decision=next_decision,
                 action_id=action_id,
@@ -298,10 +262,8 @@ def agent(state: AgentState) -> AgentState:
     }
 
 
-# ========== Clarify Node ==========
-
 def clarify_node(state: AgentState) -> AgentState:
-
+    """Append the clarification question to the dialogue."""
     question_text = (state.clarification_question or "").strip()
 
     new_messages = list(state.messages)
@@ -326,14 +288,11 @@ def clarify_node(state: AgentState) -> AgentState:
     }
 
 
-# ========== User Simulation Node ==========
-
 def user_sim_node(state: AgentState) -> AgentState:
-
+    """Generate the simulated user reply and attach it to the trial trace."""
     action_id = state.label_action_id
     action_desc = id_to_action.get(action_id, "不明な行動")
     if action_id not in id_to_action:
-        # If the label is unknown, fail immediately.
         fallback_msg = "ラベルが不明のため、失敗として扱います。"
         return {
             "messages": state.messages + [HumanMessage(content=fallback_msg)],
@@ -342,7 +301,7 @@ def user_sim_node(state: AgentState) -> AgentState:
             "action_id": -1,
         }
 
-    # Find the last AIMessage as the "clarification question"
+    # The latest agent message contains the clarification question.
     last_ai_msg = None
     for msg in reversed(state.messages):
         if isinstance(msg, AIMessage):
@@ -358,11 +317,10 @@ def user_sim_node(state: AgentState) -> AgentState:
     if last_ai_msg:
         question_text = last_ai_msg.content
     else:
-        # If agent chose clarify but no question was generated, fail immediately.
         question_text = "エージェントが明確化質問が生成されなかったため、失敗として扱います。"
         return {
             "messages": state.messages + [HumanMessage(content=question_text)],
-            "step": state.max_steps,       # Force termination on next agent call.
+            "step": state.max_steps,  # End the trial on the next agent step.
             "next_decision": "execute",
             "action_id": -1,
         }
@@ -390,11 +348,8 @@ def user_sim_node(state: AgentState) -> AgentState:
     }
 
 
-# ========== Execute Node (END) ==========
-
 def execute_node(state: AgentState) -> AgentState:
-
-    # If action_id is invalid (None, etc.), fall back to -1.
+    """Record the selected action and advance the trial by one step."""
     action_id = state.action_id if state.action_id in id_to_action else -1
     desc = id_to_action[action_id]
     if action_id == -1:
@@ -407,8 +362,6 @@ def execute_node(state: AgentState) -> AgentState:
         "step": state.step + 1,
     }
 
-
-# ========== Build Graph ==========
 
 builder = StateGraph(AgentState)
 

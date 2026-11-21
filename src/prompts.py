@@ -2,34 +2,19 @@ from .state import id_to_action
 
 
 def _actions_block() -> str:
-    """Shared block of 40 action strings (keep Japanese text unchanged)."""
+    """Format the 40 Japanese action labels in dataset order."""
     lines = []
     for i in range(1, 41):
         lines.append(id_to_action[i])
     return "\n".join(lines)
 
 
-# Agent system prompt.
 def agent_system_prompt(
     mode: str,
     clarify_quota_total: int | None = None,
     clarify_quota_left: int | None = None,
 ) -> str:
-    """
-    System prompt for the agent node.
-
-    mode:
-      - "clarify": clarify enabled (no reflection)
-      - "r-clarify": clarify + reflection (full version)
-      - "r-clarify_reflexion": clarify + reflection with multiple prior memos
-      - "reflect": reflection only (no clarify)
-      - "action_elimination": clarify enabled, no reflection, failed actions only
-      - "non_thinking_clarify": clarify enabled, no thought output
-      - "r-clarify_non_cot": clarify + reflection, no thought output
-      - "cot_reflect": CoT + reflection (no clarify)
-      - "cot": pure CoT (short thinking, single-step action)
-      - "direct": no reasoning, pick a single action immediately
-    """
+    """Build the agent prompt for the selected mode and clarification budget."""
     actions_text = _actions_block()
 
     def _clarify_quota_text() -> str:
@@ -53,7 +38,6 @@ def agent_system_prompt(
             )
         return guidance
 
-    # `direct` mode
     if mode == "direct":
         return (
             "あなたは家庭内で動作するエージェントです。ユーザの状況に基づいて、\n"
@@ -80,7 +64,6 @@ def agent_system_prompt(
             "}\n"
         ).strip()
 
-    # `cot` mode
     elif mode == "cot":
         return (
             "あなたは家庭内で動作するエージェントです。ユーザの状況に基づいて、\n"
@@ -104,7 +87,6 @@ def agent_system_prompt(
             "}\n"
         ).strip()
 
-    # Reflection (no clarify)
     elif mode in {"cot_reflect", "reflect"}:
         return (
             "あなたは家庭内で動作するエージェントです。ユーザの状況に基づいて、\n"
@@ -133,7 +115,6 @@ def agent_system_prompt(
             "}\n"
         ).strip()
 
-    # non-thinking clarify
     elif mode == "non_thinking_clarify":
         return (
             "あなたは家庭内で動作するエージェントです。ユーザの状況に基づいて、\n"
@@ -174,7 +155,6 @@ def agent_system_prompt(
             "}\n"
         ).strip()
 
-    # non-thinking r-clarify_non_cot (clarify + reflection, no thought output)
     elif mode == "r-clarify_non_cot":
         text = (
             "あなたは家庭内で動作するエージェントです。ユーザの状況に基づいて、\n"
@@ -228,7 +208,6 @@ def agent_system_prompt(
 
         return text.strip()
 
-    # clarify / r-clarify modes
     elif mode in {"clarify", "r-clarify", "r-clarify_reflexion", "action_elimination"}:
         text = (
             "あなたは家庭内で動作するエージェントです。ユーザの状況に基づいて、\n"
@@ -245,7 +224,7 @@ def agent_system_prompt(
             "\n"
         )
 
-        # Explicitly mention reflection memos (reflect modes only).
+        # Describe the evidence carried over from earlier trials in each mode.
         if mode == "r-clarify":
             text += (
                 "【Reflection memo】\n"
@@ -262,15 +241,6 @@ def agent_system_prompt(
                 " - 必ず内容を踏まえ、今回のトライアルで同じ失敗を繰り返さないよう判断に活用してください。\n"
                 "\n"
             )
-        elif False:
-            text += (
-                "【Reflection memo】\n"
-                " - 対話履歴に「【Reflection memo】」で始まるメモが含まれることがあります。\n"
-                " - それらは直前までのトライアルで選んだ誤り行動のみを記録したものです。\n"
-                " - 必ず内容を踏まえ、同じ行動を再度選ばないよう判断に活用してください。\n"
-                "\n"
-            )
-
         elif mode == "action_elimination":
             text += (
                 "[Failed Action List]\n"
@@ -283,7 +253,7 @@ def agent_system_prompt(
                 "\n"
             )
 
-        # How to write "thought"
+        # Explain what the model should include in its reasoning.
         text += (
             "【thought の書き方】\n"
             " - まず「何が分かっていて、何が不明か」を短く整理する。\n"
@@ -294,7 +264,7 @@ def agent_system_prompt(
             "\n"
         )
 
-        # Common goal and clarify/execute instructions.
+        # The decision rules below apply to all modes in this branch.
         text += (
             "あなたのゴールは、できるだけ少ないステップ数でユーザの潜在的な意図を特定し、"
             "正しい気が利く行動を実行することです。\n"
@@ -347,9 +317,7 @@ def user_sim_system_prompt(
     utterance: str,
     env: object,
 ) -> str:
-    """
-    System prompt for the user simulator.
-    """
+    """Build the user simulator prompt from the target action, utterance, and scene."""
     return (
         "あなたは今から「本物のユーザ」を演じます。エージェントやシステムではありません。\n"
         "\n"
@@ -428,9 +396,7 @@ def user_sim_system_prompt(
 
 
 def trial_reflection_system_prompt(mode: str) -> str:
-    """
-    System prompt for generating per-trial reflection memos.
-    """
+    """Build the prompt for reflecting on a completed trial."""
     if mode in {"cot_reflect", "reflect"}:
         return (
             "あなたはエージェントの次のトライアルに向けて、"

@@ -22,10 +22,7 @@ def calculate_accuracy_by_trial(data: dict, trial: int, k: int | None = None) ->
 def calculate_average_steps_of_successful_trial(
     data: dict, trial: int, k: int | None = None
 ) -> float:
-    """
-    If only up to `trial` trials are allowed, compute the average steps
-    of the successful trial for successful samples only.
-    """
+    """Average the final trial's steps over samples that succeed within the trial limit."""
     results = data["results"]
     if k is not None:
         results = results[:k]
@@ -53,10 +50,7 @@ def calculate_average_steps_of_successful_trial(
 def calculate_average_turns_by_pass_k(
     data: dict, max_trial: int, k: int | None = None
 ) -> dict[int, float]:
-    """
-    Average number of turns (agent decisions) in the successful trial,
-    under different Pass@k settings.
-    """
+    """Return the mean steps in the successful trial for each trial limit."""
     averages: dict[int, float] = {}
     for t in range(1, max_trial + 1):
         averages[t] = calculate_average_steps_of_successful_trial(data=data, trial=t, k=k)
@@ -66,10 +60,7 @@ def calculate_average_turns_by_pass_k(
 def calculate_average_turns_per_trial(
     data: dict, max_trial: int, k: int | None = None
 ) -> dict[int, float]:
-    """
-    Average number of turns for each trial index (includes both success and failure trials).
-    Only samples that reached the given trial are counted.
-    """
+    """Average the steps at each trial index over all samples that reached it."""
     results = data["results"]
     if k is not None:
         results = results[:k]
@@ -91,11 +82,10 @@ def calculate_average_turns_per_trial(
 def calculate_dpass_at_k(
     data: dict, trial: int, alpha: float, k: int | None = None
 ) -> float:
-    """
-    DPass@k(alpha):
-    - Successful samples are discounted by steps in the successful trial.
-    - Failed samples score 0.
-    - Normalize by total samples.
+    """Compute DPass@k over all evaluated samples.
+
+    A success within the trial limit contributes alpha ** (steps - 1), using
+    only the successful trial's steps. All other samples contribute zero.
     """
     if not (0.0 < alpha < 1.0):
         raise ValueError("alpha must be in (0, 1).")
@@ -127,10 +117,7 @@ def calculate_dpass_at_k(
 def calculate_reflection_token_usage_before_success(
     data: dict, trial: int, k: int | None = None
 ) -> dict:
-    """
-    Average reflection token usage before success (prompt/completion/total).
-    Only samples that succeed within `trial` are counted.
-    """
+    """Average reflection token counts from trials preceding a success within the limit."""
     results = data["results"]
     if k is not None:
         results = results[:k]
@@ -187,10 +174,9 @@ def calculate_reflection_token_usage_before_success(
 def calculate_total_token_usage_before_success(
     data: dict, trial: int, k: int | None = None
 ) -> dict:
-    """
-    Average total token usage up to and including the success trial.
-    Includes reflect + execute + clarify with a breakdown.
-    Only samples that succeed within `trial` are counted.
+    """Average token usage through the successful trial for samples that succeed within the limit.
+
+    Report overall counts and separate counts for clarification, execution, and reflection.
     """
     results = data["results"]
     if k is not None:
@@ -223,7 +209,6 @@ def calculate_total_token_usage_before_success(
             continue
 
         steps_detail = res.get("steps_detail_per_trial", [])
-        # Include the success trial: count 0..num_trials-1.
         for t in range(num_trials):
             if t >= len(steps_detail):
                 break
@@ -277,8 +262,8 @@ def main():
     with metrics_path.open("r", encoding="utf-8") as f:
         data = json.load(f)
 
-    trial = 3   # up to n_trials
-    k = None     # eval up to n_samples
+    trial = 3  # Maximum number of trials per sample.
+    k = None  # Use None to evaluate all samples.
     alpha = 0.8
     acc = calculate_accuracy_by_trial(data=data, trial=trial, k=k)
     avg_steps = calculate_average_steps_of_successful_trial(data=data, trial=trial, k=k)

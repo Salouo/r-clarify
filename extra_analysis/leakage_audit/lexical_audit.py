@@ -93,7 +93,7 @@ def extract_target_terms(gold_action: str) -> set[str]:
         if len(token) > 2 and token not in STOPWORDS and token not in ACTION_VERBS
     }
 
-    # Common Japanese action strings often put the object before particle "wo".
+    # Japanese action labels often place the target before a case particle.
     raw = strip_action_id(gold_action)
     for particle in ("\u3092", "\u306b", "\u3078"):
         if particle in raw:

@@ -122,10 +122,10 @@ def analyze_file(
 
 
 def calculate_tdpass_at_k(data: dict[str, Any], trial: int, alpha: float) -> float:
-    """
-    TDPass@k(alpha), matching DPass instance-level semantics:
-    successful instances contribute alpha^(cumulative_steps_to_success - 1),
-    failed instances contribute 0, and the score is averaged over all samples.
+    """Compute TDPass@k over all evaluated samples.
+
+    A success within the trial limit contributes alpha ** (steps - 1), using
+    cumulative steps through success. All other samples contribute zero.
     """
     if not (0.0 < alpha < 1.0):
         raise ValueError("alpha must be in (0, 1).")

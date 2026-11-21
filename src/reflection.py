@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import List, Optional
 
-from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
+from langchain_core.messages import SystemMessage, HumanMessage
 
 from .state import AgentState, action_to_id, id_to_action
 from .utils import (
@@ -13,7 +13,7 @@ from .prompts import trial_reflection_system_prompt
 from .token_usage import TokenUsageCollector, set_usage_collector, clear_usage_collector
 
 
-# LLM for reflection; agent and reflection share the same LLM.
+# Reflection uses the same model instance as the agent.
 reflection_llm = get_primary_llm()
 model_dirname = get_primary_model_dirname()
 
@@ -25,10 +25,7 @@ def _format_episode_for_reflection(
     trial_index: int,
     final_state: dict,
 ) -> str:
-    """
-    Format the latest trial into the same episode format
-    (user context + step logs).
-    """
+    """Format the user context and trial log for the reflection model."""
     user_ctx = final_state.get("user_context") or ""
     trial_body = format_single_trial_episode(final_state)
     return (
@@ -48,34 +45,10 @@ def generate_trial_reflection_memo(
     mode: str,
     usage_collector: TokenUsageCollector | None = None,
 ) -> Optional[str]:
-    """
-    Generate a reflection memo for the next trial without revealing the gold label,
-    only indicating success or failure.
-    """
-    # 只将过往错误动作进行记录
+    """Generate a memo for the next trial using the outcome and prior memos."""
+    # Action elimination carries forward only the IDs of failed actions.
     if mode in ACTION_ELIMINATION_MODES:
         return None
-
-    if False:
-        pred_id = final_state.get("action_id")
-        if pred_id in id_to_action:
-            action_desc = id_to_action[pred_id]
-        else:
-            action_desc = f"Unknown action_id={pred_id}"
-        actions: List[str] = []
-        for memo in recent_memos:
-            memo_text = memo.strip()
-            if memo_text.startswith("過去の誤り行動:"):
-                tail = memo_text.replace("過去の誤り行動:", "", 1).strip()
-                if tail:
-                    actions.extend([a.strip() for a in tail.split(" / ") if a.strip()])
-            elif memo_text.startswith("前回の誤り行動:"):
-                tail = memo_text.replace("前回の誤り行動:", "", 1).strip()
-                if tail:
-                    actions.append(tail)
-        if action_desc not in actions:
-            actions.append(action_desc)
-        return f"過去の誤り行動: {' / '.join(actions)}"
 
     episode_text = _format_episode_for_reflection(trial_index=trial_index, final_state=final_state)
     prior_memos_text = "\n".join(f"- {m}" for m in recent_memos) if recent_memos else "なし"
@@ -105,9 +78,9 @@ def generate_trial_reflection_memo(
     token = None
 
     if usage_collector is not None:
-        token = set_usage_collector(usage_collector)    # Capture token usage here.
+        token = set_usage_collector(usage_collector)
     try:
-        resp = reflection_llm.invoke([system_msg, HumanMessage(content=human_prompt)])  # Call the LLM
+        resp = reflection_llm.invoke([system_msg, HumanMessage(content=human_prompt)])
     finally:
         if token is not None:
             clear_usage_collector(token)
@@ -142,11 +115,9 @@ def run_one_trial(
     extra_system_messages: Optional[list] = None,
     failed_action_ids: Optional[list[int]] = None,
 ) -> dict:
-
-    # Build the system prompt: user context.
+    """Run one trial with the sample context and any evidence from earlier trials."""
     system_prompt = make_system_prompt_from_one_sample(sample)
 
-    # initial_state: first message is SystemMessage.
     new_system_messages = [SystemMessage(content=system_prompt)] + (extra_system_messages or [])
 
     initial_state = AgentState(
@@ -165,18 +136,15 @@ def run_one_trial(
         failed_action_ids=list(failed_action_ids or []),
     )
 
-    # Import `graph` to avoid circular dependencies.
+    # Import the graph here to defer its initialization until a trial starts.
     from .graph import graph
 
-    # Run a single trial.
-    final_state = graph.invoke(
+    return graph.invoke(
         initial_state,
-        config={"recursion_limit": 1000},   # Allow up to 1000 steps in the graph.
+        config={"recursion_limit": 1000},
     )
-    return final_state
 
 
-# Important: entrance of the main process.
 def run_trials_for_one_sample(
     sample: dict,
     use_reflection: bool = True,
@@ -186,7 +154,7 @@ def run_trials_for_one_sample(
     max_trials: int = 1,
     memo_window: int | None = None,
 ) -> List[dict]:
-
+    """Run trials until success or the trial limit and write the episode log."""
     reflective_action = sample.get("reflective_action")
     label_action_id = action_to_id.get(reflective_action) if reflective_action else None
 
@@ -198,11 +166,9 @@ def run_trials_for_one_sample(
 
     reflection_usage = TokenUsageCollector()
 
-    # memo_window defaults to 3 only for r-clarify_reflexion.
     if memo_window is None:
         memo_window = 0 if mode in ACTION_ELIMINATION_MODES else (3 if mode == "r-clarify_reflexion" else 1)
 
-    # Iterate over all trials.
     for trial_idx in range(max_trials):
         extra_messages: List[SystemMessage] = []
         failed_action_ids_before_trial = list(failed_action_ids)
@@ -211,18 +177,16 @@ def run_trials_for_one_sample(
         if mode in ACTION_ELIMINATION_MODES:
             extra_messages.append(SystemMessage(content=_format_failed_action_list_message(failed_action_ids_before_trial)))
         elif use_reflection and reflection_memos:
-            prior_memos = reflection_memos[-memo_window:]   # Take the last k reflection memos.
+            prior_memos = reflection_memos[-memo_window:]
             for idx, memo in enumerate(prior_memos, start=1):
-                # For r-clarify/reflect/cot_reflect, memo length is fixed at 1.
                 if mode in {"r-clarify", "r-clarify_non_cot", "cot_reflect", "reflect"}:
                     extra_messages.append(SystemMessage(content=f"【Reflection memo】\n{memo}"))
-                # For r-clarify_reflexion, annotate each memo with its distance from the current trial.
+                # Label each memo with its distance from the current trial.
                 else:
                     distance = len(prior_memos) - idx + 1
                     label = f"{distance} trial前"
                     extra_messages.append(SystemMessage(content=f"【Reflection memo（{label}）】\n{memo}"))
 
-        # Get the final_state for this trial.
         final_state = run_one_trial(
             sample,
             mode=mode,
@@ -237,19 +201,16 @@ def run_trials_for_one_sample(
             id_to_action.get(action_id, f"Unknown action_id={action_id}")
             for action_id in failed_action_ids_before_trial
         ]
-        # Save the current trial result.
         all_states.append(final_state)
 
-        # Save reflection memos for r-clarify_reflexion prompts.
+        # Keep the memos each trial actually received for the episode log.
         trial_contexts.append(
             {
                 "prior_memos": prior_memos if use_reflection else [],
             }
         )
 
-        # Get the reflective action id from the last Execute.
         pred = final_state.get("action_id")
-        # Determine whether the prediction is correct.
         success = bool(label_action_id is not None and pred == label_action_id)
         final_state["success"] = success
 
@@ -268,7 +229,6 @@ def run_trials_for_one_sample(
         if use_reflection and (not success) and (not is_last_trial):
             usage_before = reflection_usage.snapshot()
 
-            # Generate a reflection memo from the current trial outcome.
             memo = generate_trial_reflection_memo(
                 trial_index=trial_idx + 1,
                 final_state=final_state,
@@ -289,18 +249,14 @@ def run_trials_for_one_sample(
                 )
                 if len(reflection_memos) > memo_window:
                     reflection_memos = reflection_memos[-memo_window:]
-                # Attach reflection token usage to the final state.
                 try:
                     all_states[-1]["reflection_token_usage"] = delta
                 except Exception:
                     pass
 
-        # Exit early on success; otherwise continue until max_trials.
         if success:
             break
 
-    # Record episodes.
-    # episodes dir: <model>/histories/<mode> or <model>/histories/<mode>_<run_id>
     episodes_base = Path("outputs") / model_dirname
     if run_id:
         episodes_dir = episodes_base / "episodes" / f"{mode}_{run_id}"
@@ -308,7 +264,6 @@ def run_trials_for_one_sample(
         episodes_dir = episodes_base / "episodes" / mode
     episodes_dir.mkdir(parents=True, exist_ok=True)
 
-    # Generate the episode file.
     episode_name = f"sample{sample['index']}.txt"
     episode_lines = [
         "================ 📖 User Context ================\n",
@@ -316,7 +271,6 @@ def run_trials_for_one_sample(
         "",
     ]
 
-    # Record all trial results.
     for idx, state in enumerate(all_states, start=1):
         context = trial_contexts[idx - 1] if idx - 1 < len(trial_contexts) else {}
         prior_memos = context.get("prior_memos") or []
@@ -343,7 +297,7 @@ def run_trials_for_one_sample(
             )
         episode_lines.append("")
 
-    # Save the gold action only when finalizing the episode.
+    # Append the gold action after all trial logs have been assembled.
     episode_lines.append(f"Gold action: {sample.get('reflective_action')}")
 
     episode_str = "\n".join(episode_lines)

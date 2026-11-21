@@ -5,7 +5,7 @@ from langchain_core.messages import BaseMessage
 from pydantic import BaseModel, Field
 
 
-# Action table shared by graph / utils / main.
+# Action IDs match the dataset labels. The sentinel -1 denotes a failed action.
 id_to_action: dict[int, str] = {
     -1: "動作を特定できない",
     1: "[1]バナナを持ってくる",
@@ -52,96 +52,83 @@ id_to_action: dict[int, str] = {
 
 action_to_id: dict[str, int] = {v: k for k, v in id_to_action.items()}
 
-# All available decisions.
 DecisionType = Literal["clarify", "execute"]
 
-# Agent output for each step.
+
 class AgentStep(BaseModel):
-    step: int                       # Step number.
-    thought: Optional[str] = None   # LLM thinking; may be None in direct mode.
-    next_decision: DecisionType     # clarify / execute
-    action_id: Optional[int] = None # Action chosen when executing.
-    clarification_question: Optional[str] = None  # Question text generated in clarify.
-    user_reply: Optional[str] = None    # User reply text in clarify.
-    token_usage: Optional[dict] = None  # Token usage for this agent call (prompt/completion/total).
+    """One agent decision and its associated dialogue and token usage."""
+
+    step: int
+    thought: Optional[str] = None  # Direct mode may omit the reasoning.
+    next_decision: DecisionType
+    action_id: Optional[int] = None
+    clarification_question: Optional[str] = None
+    user_reply: Optional[str] = None
+    token_usage: Optional[dict] = None
 
 
 class AgentOutput(BaseModel):
     thought: Optional[str] = Field(
         default=None,
-        description="你对于当前局面，以及对于接下来应该如何决策的思考；direct 模式下可以为 null"
+        description="Reasoning behind the next decision. Direct mode may omit this field."
     )
     next_decision: DecisionType = Field(
-        description="你接下来要执行的决策，只能是 clarify / execute 之一"
+        description="The next decision, either clarify or execute."
     )
     action_id: Optional[int] = Field(
         default=None,
-        description="当你选择 next_decision 为 execute 时，必须是 1 到 40 的整数; clarify 时为 None",
+        description="Action ID from 1 to 40 for execution, or None for clarification.",
     )
     clarification_question: Optional[str] = Field(
         default=None,
-        description="当你选择 next_decision 为 clarify 时，必须填写 1 条澄清问题; execute 时为 null",
+        description="One question when requesting clarification, or None when executing.",
     )
 
-
-# ========== Graph State ==========
 
 class AgentState(BaseModel):
+    """Dialogue, limits, and decision history for the current trial."""
 
-    # Dialogue history: real/simulated user + agent messages.
     messages: Annotated[list[BaseMessage], add_messages] = Field(default_factory=list)
 
-    # Next decision chosen by the agent.
     next_decision: Optional[DecisionType] = Field(default=None,)
 
-    # If next_decision == "execute", this is 1~40; otherwise None.
+    # Action IDs 1 through 40 select a candidate. The sentinel -1 records failure.
     action_id: Optional[int] = Field(default=None)
 
-    # External environment info (sample env), kept for future use.
+    # Scene annotations from the current sample.
     env: dict[str, Any] = Field(default_factory=dict)
 
-    # User feedback (may be used for reflection later).
     user_feedback: Optional[str] = Field(default=None)
 
-    # Ground-truth target action for this sample (label).
     label_action_id: int = Field(default=None)
 
-    # Original ambiguous utterance (for user_sim).
     original_utterance: str = Field(default="")
 
-    # Current run mode (clarify / r-clarify / r-clarify_reflexion / reflect / action_elimination / non_thinking_clarify / r-clarify_non_cot / cot / cot_reflect / direct).
     mode: str = Field(
         default="clarify",
-        description="当前样本使用的运行模式，例如 'clarify' / 'r-clarify' / 'r-clarify_reflexion' / 'reflect' / 'action_elimination' / 'non_thinking_clarify' / 'r-clarify_non_cot' / 'cot' / 'cot_reflect' / 'direct'",
+        description="Experiment mode for the current sample.",
     )
 
-    # Step counter.
-    step: int = Field(default=0, description="当前执行的 step 计数（从 0 开始）")
+    step: int = Field(default=0, description="Number of steps completed in this trial, starting at zero.")
 
-    # Maximum steps.
-    max_steps: int = Field(default=1000,description="最大允许的 step 数，超过后应强制结束或执行")
+    max_steps: int = Field(default=1000, description="Step limit at which the agent must end the trial.")
 
-    # Trace of each trial.
-    trace: list[AgentStep] = Field(default_factory=list, description="agent 每一步的思考和决策轨迹")
+    trace: list[AgentStep] = Field(default_factory=list, description="Agent reasoning and decisions recorded at each step.")
 
-    # Action-Elimination baseline: action ids that failed in previous trials.
+    # Action elimination excludes these IDs in subsequent trials.
     failed_action_ids: list[int] = Field(default_factory=list)
 
-    # Whether to run reflection after clarification to summarize user replies.
     enable_reflection: bool = Field(default=False)
 
-    # Preprocessed user context for post-clarification reflection.
     user_context: str = Field(default="")
 
-    # Clarification quota (total and remaining); None means unlimited.
     clarify_quota_total: Optional[int] = Field(
-        default=None, description="本次 trial 允许澄清的最大次数（None 表示不限）"
+        default=None, description="Maximum clarification turns allowed in this trial. None means unlimited."
     )
     clarify_quota_left: Optional[int] = Field(
-        default=None, description="当前剩余的澄清次数（None 表示不限）"
+        default=None, description="Clarification turns remaining in this trial. None means unlimited."
     )
 
-    # Clarification question generated when agent chooses clarify (recorded by clarify node).
     clarification_question: Optional[str] = Field(
-        default=None, description="agent 选择 clarify 时生成的一句话澄清问题"
+        default=None, description="Question generated when the agent requests clarification."
     )

@@ -12,28 +12,20 @@ from .utils import extract_trial_steps
 from .llm_factory import get_primary_model_dirname, get_primary_model_name
 
 
-def _run_for_one_sample(
-    sample: dict,
-    use_reflection: bool,
-    mode: str,
-    run_id: str | None,
-    clarify_quota: int | None,
-    max_trials: int,
-    memo_window: int,
-) -> List[dict]:
-    """
-    Run the specified mode on one sample (clarify / r-clarify / reflect).
-    Returns a list of final_state entries for each trial of that sample.
-    """
-    return run_trials_for_one_sample(
-        sample,
-        use_reflection=use_reflection,
-        mode=mode,
-        run_id=run_id,
-        clarify_quota=clarify_quota,
-        max_trials=max_trials,
-        memo_window=memo_window,
+def _save_results(
+    metrics_path: Path, records: list[dict], clarify_quota: int | None, memo_window: int
+) -> None:
+    records.sort(
+        key=lambda r: (r.get("sample_index") is None, r.get("sample_index", -1))
     )
+    payload = {
+        "n_processed": len(records),
+        "clarify_quota": clarify_quota,
+        "memo_window": memo_window,
+        "results": records,
+    }
+    with metrics_path.open("w", encoding="utf-8") as f:
+        json.dump(payload, f, ensure_ascii=False, indent=2)
 
 
 def main(
@@ -44,19 +36,7 @@ def main(
     start: int | None = None,
     end: int | None = None,
 ) -> None:
-    """
-    Run the dataset in a given mode.
-    - mode = "clarify"    -> ReAct, no reflection
-    - mode = "r-clarify"  -> ReAct + reflection
-    - mode = "reflect"    -> ReAct + reflection, execute-only (no clarify)
-    - mode = "non_thinking_clarify" -> ReAct, no reflection, no thought output
-    - mode = "r-clarify_non_cot" -> ReAct + reflection, no thought output
-    - mode = "cot"        -> pure CoT, single-step (no clarify)
-    - mode = "cot_reflect" -> CoT + reflection (no clarify)
-    - mode = "direct"     -> fully direct: almost no thinking, pick action immediately
-    - mode = "r-clarify_reflexion"  -> ReAct + reflection, multi-trial with last k memos
-    - mode = "action_elimination" -> ReAct + deterministic failed-action blacklist
-    """
+    """Run the selected mode on the requested sample range and save results."""
     assert mode in {
         "clarify",
         "r-clarify",
@@ -70,23 +50,17 @@ def main(
         "action_elimination",
     }, "mode 必须是 'clarify' / 'r-clarify' / 'reflect' / 'non_thinking_clarify' / 'r-clarify_non_cot' / 'cot' / 'cot_reflect' / 'direct' / 'r-clarify_reflexion' / 'action_elimination'"
 
-    # Enable post-clarification reflection based on mode.
-    if mode in {"cot", "direct"}:
-        use_reflection = False
-    elif mode in {"clarify", "non_thinking_clarify", "action_elimination"}:
-        use_reflection = False
-    elif mode in {"r-clarify", "r-clarify_non_cot", "r-clarify_reflexion", "cot_reflect", "reflect"}:
-        use_reflection = True
+    use_reflection = mode in {
+        "r-clarify", "r-clarify_non_cot", "r-clarify_reflexion", "cot_reflect", "reflect",
+    }
 
-    # max_trials must be provided externally (applies to all modes).
     if max_trials is None:
         raise ValueError("max_trials must be provided via --max-trials.")
 
-    # Reflection memo window (last k memos passed to next trial).
+    # Reflexion carries three memos by default. Other reflection modes carry one.
     if memo_window is None:
-        memo_window = 1 if mode in {"r-clarify", "r-clarify_non_cot", "cot_reflect", "reflect"} else (3 if mode == "r-clarify_reflexion" else 0)
+        memo_window = 3 if mode == "r-clarify_reflexion" else int(use_reflection)
 
-    # Load samples.
     data_path = Path("data/processed_data_expanded.json")
     with data_path.open("r", encoding="utf-8") as f:
         samples = json.load(f)["samples"]
@@ -96,7 +70,7 @@ def main(
         end_idx = len(samples) if end is None else end
         samples = [s for s in samples if start_idx <= s.get("index", -1) < end_idx]
 
-    # Results file (split by model + mode for resume/eval).
+    # Each model, mode, and sample range has its own resumable result file.
     model_dir = get_primary_model_dirname()
     results_dir = Path("outputs") / model_dir / "results"
     results_dir.mkdir(parents=True, exist_ok=True)
@@ -105,7 +79,6 @@ def main(
         metrics_suffix = f"_{start_idx}_{end_idx}"
     metrics_path = results_dir / f"{mode}{metrics_suffix}.json"
 
-    # Load completed samples if available.
     if metrics_path.exists():
         with metrics_path.open("r", encoding="utf-8") as f:
             data = json.load(f)
@@ -132,7 +105,6 @@ def main(
         f"{shard_text}"
     )
 
-    # Filter completed samples; run remaining and fill any missing ones.
     remaining_samples = [s for s in samples if s.get("index") not in done_indices]
 
     if not remaining_samples:
@@ -143,21 +115,20 @@ def main(
         f"[Progress] Number of sample to be processed: {len(remaining_samples)} "
     )
 
-    # Do not use timestamp/run ID; histories go to histories/<mode>.
+    # Use a stable episode directory when resuming the run.
     run_id = None
 
-    # Use a thread pool; currently max_workers=1 (no parallelism).
     with ThreadPoolExecutor(max_workers=1) as executor:
         future_to_sample = {
             executor.submit(
-                _run_for_one_sample,
+                run_trials_for_one_sample,
                 sample,
-                use_reflection,
-                mode,
-                run_id,
-                clarify_quota,
-                max_trials,
-                memo_window,
+                use_reflection=use_reflection,
+                mode=mode,
+                run_id=run_id,
+                clarify_quota=clarify_quota,
+                max_trials=max_trials,
+                memo_window=memo_window,
             ): sample
             for sample in remaining_samples
         }
@@ -246,10 +217,6 @@ def main(
 
             if not gold_action_desc and label_action_id is not None:
                 gold_action_desc = id_to_action.get(label_action_id)
-            if not states:
-                steps_detail_per_trial = []
-                clarifications_per_trial = []
-                trial_outcomes = []
 
             records.append(
                 {
@@ -268,35 +235,11 @@ def main(
 
             processed += 1
 
-            # Periodically sort and write back to avoid frequent disk writes.
+            # Save every two samples so interrupted runs can resume.
             if processed % 2 == 0:
-                records.sort(
-                    key=lambda r: (
-                        r.get("sample_index") is None,
-                        r.get("sample_index", -1),
-                    )
-                )
-                payload = {
-                    "n_processed": len(records),
-                    "clarify_quota": clarify_quota,
-                    "memo_window": memo_window,
-                    "results": records,
-                }
-                with metrics_path.open("w", encoding="utf-8") as f:
-                    json.dump(payload, f, ensure_ascii=False, indent=2)
+                _save_results(metrics_path, records, clarify_quota, memo_window)
 
-    # Final sort and write after the loop to save remaining samples.
-    records.sort(
-        key=lambda r: (r.get("sample_index") is None, r.get("sample_index", -1))
-    )
-    payload = {
-        "n_processed": len(records),
-        "clarify_quota": clarify_quota,
-        "memo_window": memo_window,
-        "results": records,
-    }
-    with metrics_path.open("w", encoding="utf-8") as f:
-        json.dump(payload, f, ensure_ascii=False, indent=2)
+    _save_results(metrics_path, records, clarify_quota, memo_window)
 
 
 if __name__ == "__main__":
